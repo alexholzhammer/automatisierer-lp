@@ -197,8 +197,17 @@
       max-width: 580px;
       font-size: 1.1rem;
       line-height: 1.7;
-      margin-bottom: 44px;
+      margin-bottom: 32px;
     }
+
+    /* ─── Hero Layout (side by side) ───────────────────────── */
+    .hero__layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .hero__copy { display: flex; flex-direction: column; }
 
     /* ─── Signup Form ──────────────────────────────────────── */
     .signup-box {
@@ -207,7 +216,6 @@
       backdrop-filter: blur(12px);
       border-radius: var(--radius-lg);
       padding: 32px;
-      max-width: 520px;
     }
     .signup-box__title {
       color: #fff;
@@ -398,13 +406,16 @@
 
     .free-module__cta {
       text-align: center;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(14,165,233,.08);
+      border: 1px solid rgba(14,165,233,.35);
+      border-top: 3px solid var(--clr-accent);
       border-radius: var(--radius-lg);
-      padding: 40px 32px;
+      padding: 52px 40px;
+      box-shadow: 0 0 60px rgba(14,165,233,.12), 0 8px 32px rgba(0,0,0,.25);
+      position: relative;
     }
-    .free-module__cta h3 { color: #fff; font-size: 1.3rem; margin-bottom: 8px; }
-    .free-module__cta p { color: var(--clr-text-light); margin-bottom: 24px; font-size: .975rem; }
+    .free-module__cta h3 { color: #fff; font-size: 1.5rem; margin-bottom: 10px; }
+    .free-module__cta > p { color: var(--clr-text-light); margin-bottom: 28px; font-size: 1rem; }
 
     /* Inline form (light on dark) */
     .inline-form {
@@ -616,7 +627,6 @@
       flex-direction: column;
       gap: 10px;
     }
-    .final-signup input[type="text"],
     .final-signup input[type="email"] {
       padding: 14px 18px;
       border-radius: var(--radius);
@@ -667,6 +677,7 @@
     @media (max-width: 768px) {
       .section { padding-block: 56px; }
       .nav__cta { display: none; }
+      .hero__layout { grid-template-columns: 1fr; gap: 40px; }
       .pain__grid { grid-template-columns: 1fr; }
       .promise__grid { grid-template-columns: 1fr; }
       .module-topics { grid-template-columns: 1fr 1fr; }
@@ -697,53 +708,58 @@
 
   <!-- ─── HERO ─────────────────────────────────────────────── -->
   <section class="hero" id="hero">
-    <div class="container">
-      <div class="hero__badge">Kurs live · sofortiger Zugang</div>
+    <div class="container container--wide">
+      <div class="hero__layout">
+        <div class="hero__copy">
+          <div class="hero__badge">Kurs live · sofortiger Zugang</div>
 
-      <h1>
-        Du weißt, dass KI dein Marketing<br />
-        verändern wird. Du weißt nur<br />
-        noch nicht, <em>wie du anfängst.</em>
-      </h1>
+          <h1>
+            Du weißt, dass KI dein Marketing<br />
+            verändern wird. Du weißt nur<br />
+            noch nicht, <em>wie du anfängst.</em>
+          </h1>
 
-      <p class="hero__sub">
-        KI im Klartext ist der Praxis-Kurs für Online-Marketer und Selbstständige,
-        die KI endlich sinnvoll einsetzen wollen — ohne Hype, ohne technisches
-        Vorwissen, ohne endloses Ausprobieren.
-      </p>
+          <p class="hero__sub">
+            KI im Klartext ist der Praxis-Kurs für Online-Marketer und Selbstständige,
+            die KI endlich sinnvoll einsetzen wollen — ohne Hype, ohne technisches
+            Vorwissen, ohne endloses Ausprobieren.
+          </p>
 
-      <div class="signup-box" id="hero-signup">
-        <div class="form-fields">
-          <p class="signup-box__title">Jetzt das Prompting-Modul gratis sichern</p>
-          <p class="signup-box__sub"><strong>Sofortiger Zugang</strong> nach Eintragung — kein Passwort, kein Warten.</p>
-          <form class="form-row" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
-            <input type="text" name="name" placeholder="Dein Vorname" autocomplete="given-name" />
-            <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
-            <button type="submit" class="btn btn--primary btn--full btn--lg">
-              Prompting-Modul gratis anfordern →
-            </button>
-          </form>
-          <p class="form-note">Kein Spam. Nur dein Modul + gelegentliche Updates. Abmeldung jederzeit.</p>
+          <div class="hero__trust">
+            <div class="trust-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              13 praxisnahe Module
+            </div>
+            <div class="trust-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              Sofortiger Zugang
+            </div>
+            <div class="trust-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Speziell für den deutschen Markt
+            </div>
+          </div>
         </div>
-        <div class="form-success" id="success-hero">
-          <div class="form-success__icon">✓</div>
-          <p class="form-success__title">Auf dem Weg zu dir!</p>
-          <p class="form-success__sub">Schau gleich in dein Postfach — du bekommst sofortigen Zugang zum Prompting-Modul.</p>
-        </div>
-      </div>
 
-      <div class="hero__trust">
-        <div class="trust-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          13 praxisnahe Module
-        </div>
-        <div class="trust-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          Sofortiger Zugang
-        </div>
-        <div class="trust-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          Speziell für den deutschen Markt
+        <div class="hero__form">
+          <div class="signup-box" id="hero-signup">
+            <div class="form-fields">
+              <p class="signup-box__title">Jetzt das Prompting-Modul gratis sichern</p>
+              <p class="signup-box__sub"><strong>Sofortiger Zugang</strong> nach Eintragung — kein Passwort, kein Warten.</p>
+              <form class="form-row" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
+                <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
+                <button type="submit" class="btn btn--primary btn--full btn--lg">
+                  Prompting-Modul gratis anfordern →
+                </button>
+              </form>
+              <p class="form-note">Kein Spam. Nur dein Modul + gelegentliche Updates. Abmeldung jederzeit.</p>
+            </div>
+            <div class="form-success" id="success-hero">
+              <div class="form-success__icon">✓</div>
+              <p class="form-success__title">Auf dem Weg zu dir!</p>
+              <p class="form-success__sub">Schau gleich in dein Postfach — du bekommst sofortigen Zugang zum Prompting-Modul.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1081,7 +1097,6 @@
 
       <div class="reveal">
         <form class="final-signup" id="form-final" onsubmit="handleSignup(event, 'form-final')">
-          <input type="text" name="name" placeholder="Dein Vorname" autocomplete="given-name" />
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
           <button type="submit" class="btn btn--primary btn--full btn--lg">
             Jetzt Prompting-Modul gratis sichern →
