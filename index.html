@@ -458,7 +458,7 @@
       padding: 18px 20px;
       display: flex;
       gap: 14px;
-      align-items: flex-start;
+      align-items: center;
       transition: box-shadow .2s;
     }
     .module-card:hover { box-shadow: var(--shadow-sm); }
@@ -475,7 +475,6 @@
       padding: 3px 8px;
       white-space: nowrap;
       flex-shrink: 0;
-      margin-top: 2px;
     }
     .module-card--highlight .module-card__num {
       background: var(--clr-accent);
@@ -487,6 +486,17 @@
       color: var(--clr-text);
     }
     .module-card--highlight h3 { color: var(--clr-accent-dk); }
+    .module-card__sub {
+      font-size: .75rem;
+      font-weight: 400;
+      margin-top: 2px;
+      color: var(--clr-text-muted);
+    }
+    .module-card__sub a {
+      color: inherit;
+      text-decoration: underline;
+    }
+    .module-card__sub a:hover { color: var(--clr-accent); }
 
     .course__price-box {
       background: var(--clr-bg-dark);
@@ -898,16 +908,15 @@
       <p class="lead reveal" style="margin-top: 12px; max-width: 620px;">Von den Grundlagen bis zu Automatisierung und rechtlichen Fragen — der Kurs begleitet dich vom ersten Prompt bis zum fertigen KI-Workflow.</p>
 
       <div class="modules-grid reveal" style="margin-top: 36px;">
-        <div class="module-card module-card--highlight">
+        <div class="module-card">
           <span class="module-card__num">01</span>
-          <div>
-            <h3>Basiswissen</h3>
-          </div>
+          <h3>Basiswissen</h3>
         </div>
         <div class="module-card module-card--highlight">
           <span class="module-card__num">02</span>
           <div>
-            <h3>Prompting ✦ Gratis</h3>
+            <h3>Prompting</h3>
+            <p class="module-card__sub"><a href="#free-module">Jetzt gratis erhalten</a></p>
           </div>
         </div>
         <div class="module-card">
