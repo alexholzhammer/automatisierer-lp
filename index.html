@@ -1136,7 +1136,9 @@
       }
     }
 
-    // ── Form Submission (MailerLite) ─────────────────────────────
+    // ── Form Submission (MailerLite via JSONP) ───────────────────
+    var _mlCallbackCounter = 0;
+
     function handleSignup(event, formId) {
       event.preventDefault();
 
@@ -1151,46 +1153,70 @@
       btn.textContent = 'Wird gesendet…';
       btn.disabled = true;
 
-      // Build MailerLite form data
-      const formData = new FormData();
-      formData.append('fields[email]', email);
-      formData.append('ml-submit', '1');
-      formData.append('anticsrf', 'true');
+      // JSONP callback for real response from MailerLite
+      const cbName = '_mlCb' + (++_mlCallbackCounter);
+      const timeout = setTimeout(function() {
+        cleanup();
+        showError(form, btn, originalText);
+      }, 10000);
 
-      fetch('https://assets.mailerlite.com/jsonp/2201397/forms/182231958003123737/subscribe', {
-        method: 'POST',
-        body: formData,
-        mode: 'no-cors'
-      })
-      .then(() => {
-        showSuccess(form, successEl);
-      })
-      .catch(() => {
-        // Even on network issues with no-cors, show success
-        // as the request was likely sent
-        showSuccess(form, successEl);
-      });
-
-      function showSuccess(form, successEl) {
-        const fieldsEl = form.closest('.signup-box')
-          ? form.closest('.signup-box').querySelector('.form-fields')
-          : null;
-
-        if (fieldsEl) {
-          fieldsEl.style.display = 'none';
+      window[cbName] = function(response) {
+        cleanup();
+        if (response && response.success) {
+          showSuccess(form, successEl);
         } else {
-          form.style.display = 'none';
+          showError(form, btn, originalText);
         }
+      };
 
-        if (successEl) {
-          successEl.style.display = 'block';
-          successEl.style.opacity = '0';
-          successEl.style.transition = 'opacity .4s ease';
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => { successEl.style.opacity = '1'; });
-          });
-        }
+      function cleanup() {
+        clearTimeout(timeout);
+        delete window[cbName];
+        var s = document.getElementById(cbName);
+        if (s) s.remove();
       }
+
+      // Build JSONP URL
+      var params = 'fields[email]=' + encodeURIComponent(email)
+        + '&ml-submit=1&anticsrf=true&ajax=1&callback=' + cbName;
+      var script = document.createElement('script');
+      script.id = cbName;
+      script.src = 'https://assets.mailerlite.com/jsonp/2201397/forms/182231958003123737/subscribe?' + params;
+      document.body.appendChild(script);
+    }
+
+    function showSuccess(form, successEl) {
+      var fieldsEl = form.closest('.signup-box')
+        ? form.closest('.signup-box').querySelector('.form-fields')
+        : null;
+
+      if (fieldsEl) {
+        fieldsEl.style.display = 'none';
+      } else {
+        form.style.display = 'none';
+      }
+
+      if (successEl) {
+        successEl.style.display = 'block';
+        successEl.style.opacity = '0';
+        successEl.style.transition = 'opacity .4s ease';
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() { successEl.style.opacity = '1'; });
+        });
+      }
+    }
+
+    function showError(form, btn, originalText) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      var errEl = form.querySelector('.ml-error-msg');
+      if (!errEl) {
+        errEl = document.createElement('p');
+        errEl.className = 'ml-error-msg';
+        errEl.style.cssText = 'color:#e74c3c;font-size:14px;margin:10px 0 0;';
+        form.appendChild(errEl);
+      }
+      errEl.textContent = 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.';
     }
 
     // ── Smooth nav CTA ─────────────────────────────────────────
