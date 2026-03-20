@@ -1136,9 +1136,7 @@
       }
     }
 
-    // ── Form Submission (MailerLite via JSONP) ───────────────────
-    var _mlCallbackCounter = 0;
-
+    // ── Form Submission (MailerLite via fetch) ───────────────────
     function handleSignup(event, formId) {
       event.preventDefault();
 
@@ -1153,36 +1151,23 @@
       btn.textContent = 'Wird gesendet…';
       btn.disabled = true;
 
-      // JSONP callback for real response from MailerLite
-      const cbName = '_mlCb' + (++_mlCallbackCounter);
-      const timeout = setTimeout(function() {
-        cleanup();
-        showError(form, btn, originalText);
-      }, 10000);
-
-      window[cbName] = function(response) {
-        cleanup();
-        if (response && response.success) {
-          showSuccess(form, successEl);
-        } else {
-          showError(form, btn, originalText);
-        }
-      };
-
-      function cleanup() {
-        clearTimeout(timeout);
-        delete window[cbName];
-        var s = document.getElementById(cbName);
-        if (s) s.remove();
-      }
-
-      // Build JSONP URL
       var params = 'fields[email]=' + encodeURIComponent(email)
-        + '&ml-submit=1&anticsrf=true&ajax=1&callback=' + cbName;
-      var script = document.createElement('script');
-      script.id = cbName;
-      script.src = 'https://assets.mailerlite.com/jsonp/2201397/forms/182231958003123737/subscribe?' + params;
-      document.body.appendChild(script);
+        + '&ml-submit=1&anticsrf=true&ajax=1';
+
+      fetch('https://assets.mailerlite.com/jsonp/2201397/forms/182231958003123737/subscribe?' + params, {
+        method: 'GET'
+      })
+        .then(function(res) { return res.json(); })
+        .then(function(response) {
+          if (response && response.success) {
+            showSuccess(form, successEl);
+          } else {
+            showError(form, btn, originalText);
+          }
+        })
+        .catch(function() {
+          showError(form, btn, originalText);
+        });
     }
 
     function showSuccess(form, successEl) {
