@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul 5: Testing & Optimierung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════
+   P-O-E-T WALKTHROUGH
+════════════════════════════════════ */
+.poet-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.poet-steps-bar { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.poet-step-tab { padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; border-right: 1px solid var(--border); position: relative; }
+.poet-step-tab:last-child { border-right: none; }
+.poet-step-tab.active { background: var(--accent); color: white; }
+.poet-step-tab.done { background: var(--accent-2-light); }
+.poet-step-letter { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 500; display: block; }
+.poet-step-name { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-top: 2px; color: var(--text-subtle); }
+.poet-step-tab.active .poet-step-name { color: rgba(255,255,255,0.7); }
+.poet-step-tab.done .poet-step-letter { color: var(--green); }
+.poet-step-tab.done .poet-step-name { color: var(--accent-2); }
+.poet-content { padding: 20px; }
+.poet-panel { display: none; }
+.poet-panel.active { display: block; }
+.poet-scenario-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); margin-bottom: 6px; }
+.poet-scenario-select { width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
+.poet-gold-box { background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; color: #C9D1D9; margin: 10px 0; }
+.poet-gold-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); margin-bottom: 6px; }
+.poet-output-bad { color: #F85149; }
+.poet-output-good { color: #3FB950; }
+.poet-output-neutral { color: #C9D1D9; }
+.poet-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
+.poet-nav-btn { padding: 8px 20px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.poet-nav-btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
+.poet-nav-btn.primary:hover { background: var(--accent-hover); }
+.poet-nav-btn:disabled { opacity: 0.4; cursor: default; }
+.poet-step-indicator { font-size: 12px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.care-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.care-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+.care-letter { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; color: var(--accent); margin-bottom: 4px; }
+.care-label { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.care-status { font-size: 11px; padding: 2px 8px; border-radius: var(--radius); font-family: 'JetBrains Mono', monospace; display: inline-block; margin-top: 4px; }
+.care-ok { background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1; }
+.care-fail { background: var(--red-light); color: var(--red); border: 1px solid #FFBDAD; }
+.care-warn { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+.tune-option { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 10px; }
+.tune-option:hover { border-color: var(--accent); background: var(--accent-light); }
+.tune-option.selected { border-color: var(--accent-2); background: var(--accent-2-light); }
+.tune-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border-strong); flex-shrink: 0; margin-top: 2px; transition: all 0.15s; }
+.tune-option.selected .tune-radio { border-color: var(--accent-2); background: var(--accent-2); }
+.tune-label { font-size: 13px; font-weight: 500; }
+.tune-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.poet-result { background: var(--accent-2-light); border: 1px solid #ABF5D1; border-radius: var(--radius); padding: 14px 16px; text-align: center; margin-top: 12px; }
+.poet-result-icon { font-size: 28px; margin-bottom: 6px; }
+.poet-result-title { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 4px; }
+.poet-result-sub { font-size: 12px; color: var(--text-muted); }
+
+/* ════════════════════════════════════
+   A/B PROMPT TESTER
+════════════════════════════════════ */
+.ab-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.ab-toolbar { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ab-toolbar-label { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.ab-scenario-btn { padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.ab-scenario-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.ab-run-btn { margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--accent-light); color: var(--accent); cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s; }
+.ab-run-btn:hover { background: var(--accent); color: white; }
+.ab-cols { display: grid; grid-template-columns: 1fr 1fr; }
+.ab-col { padding: 14px; }
+.ab-col + .ab-col { border-left: 1px solid var(--border); }
+.ab-col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ab-badge { font-size: 10px; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: var(--radius); }
+.badge-v1 { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-v2 { background: var(--accent-light); color: var(--accent); border: 1px solid #C0D9FF; }
+.ab-prompt-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; color: var(--text-muted); margin-bottom: 10px; }
+.ab-prompt-box .ab-delta { background: #FFFBEB; color: #92400E; border-radius: 2px; padding: 0 2px; font-weight: 500; }
+.ab-output { background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.75; color: #C9D1D9; min-height: 100px; position: relative; overflow: hidden; }
+.ab-output.loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(88,166,255,0.05) 50%, transparent 100%); animation: shimmer 1.2s infinite; }
+.ab-output .ab-improved { color: #3FB950; }
+.ab-verdict { padding: 10px 14px; background: var(--surface-2); border-top: 1px solid var(--border); display: none; font-size: 13px; }
+.ab-verdict strong { color: var(--accent-2); }
+
+/* ════════════════════════════════════
+   DIAGNOSE TOOL
+════════════════════════════════════ */
+.diag-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.diag-problems { padding: 14px; display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.diag-problem-label { width: 100%; font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); margin-bottom: 4px; }
+.diag-tag { padding: 6px 14px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.diag-tag:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.diag-tag.active { background: var(--accent); border-color: var(--accent); color: white; }
+.diag-result { padding: 16px; display: none; }
+.diag-result.visible { display: block; }
+.diag-result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.diag-module-badge { font-size: 10px; font-weight: 500; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; border-radius: var(--radius); background: var(--purple-light); color: var(--purple); border: 1px solid #C0B8F0; }
+.diag-fix-title { font-size: 14px; font-weight: 600; }
+.diag-fix-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.55; }
+.diag-example { background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.75; color: #C9D1D9; }
+.diag-example .ex-before { color: #F85149; }
+.diag-example .ex-after { color: #3FB950; }
+.diag-example .ex-label { color: #8C939E; font-size: 10px; }
+
+/* ════════════════════════════════════
+   PROMPT LIBRARY BUILDER
+════════════════════════════════════ */
+.lib-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.lib-toolbar { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+.lib-toolbar-title { font-size: 13px; font-weight: 600; flex: 1; }
+.lib-add-btn { padding: 6px 14px; font-size: 12px; font-weight: 600; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--accent); color: white; cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.lib-add-btn:hover { background: var(--accent-hover); }
+.lib-count { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-subtle); }
+.lib-table-wrap { overflow-x: auto; }
+.lib-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.lib-table th { background: var(--surface-2); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 12px; text-align: left; font-weight: 500; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.lib-table td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: top; font-size: 12px; }
+.lib-table tr:hover td { background: #FAFBFC; }
+.lib-cat-tag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius); font-family: 'JetBrains Mono', monospace; }
+.cat-seo { background: var(--accent-light); color: var(--accent); border: 1px solid #C0D9FF; }
+.cat-social { background: var(--purple-light); color: var(--purple); border: 1px solid #C0B8F0; }
+.cat-strategie { background: var(--orange-light); color: var(--orange); border: 1px solid #FFC58B; }
+.cat-support { background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1; }
+.lib-score { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-2); font-weight: 500; }
+.lib-version { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-subtle); background: var(--surface-2); border: 1px solid var(--border); padding: 1px 6px; border-radius: var(--radius); }
+.lib-delete-btn { font-size: 11px; color: var(--text-subtle); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: var(--radius); transition: all 0.15s; }
+.lib-delete-btn:hover { color: var(--red); background: var(--red-light); }
+.lib-empty { padding: 32px; text-align: center; color: var(--text-subtle); font-size: 13px; border-top: 1px solid var(--border); }
+.lib-empty-icon { font-size: 28px; margin-bottom: 8px; }
+
+/* ─── ADD MODAL ─── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 500; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); margin: 20px; }
+.modal-title { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
+.modal-grid { display: grid; gap: 12px; }
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: grid; gap: 5px; }
+.form-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); }
+.form-input { padding: 8px 10px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius); outline: none; color: var(--text); background: var(--surface); transition: border-color 0.15s; width: 100%; }
+.form-input:focus { border-color: var(--accent); }
+.form-select { padding: 8px 10px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius); outline: none; color: var(--text); background: var(--surface); width: 100%; }
+.form-textarea { min-height: 70px; resize: vertical; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.modal-cancel-btn { padding: 8px 18px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
+.modal-save-btn { padding: 8px 18px; font-size: 13px; font-weight: 500; border: none; border-radius: var(--radius); background: var(--accent); color: white; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s; }
+.modal-save-btn:hover { background: var(--accent-hover); }
+
+@media(max-width:600px) {
+  .ab-cols { grid-template-columns: 1fr; }
+  .ab-col + .ab-col { border-left: none; border-top: 1px solid var(--border); }
+  .care-grid { grid-template-columns: 1fr; }
+  .modal-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Add Prompt Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">Prompt zur Bibliothek hinzufügen</div>
+    <div class="modal-grid">
+      <div class="modal-row">
+        <div class="form-group">
+          <div class="form-label">Name</div>
+          <input class="form-input" id="f-name" placeholder="z.B. LinkedIn-Post-Generator">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Kategorie</div>
+          <select class="form-select" id="f-cat">
+            <option value="SEO">SEO</option>
+            <option value="Social">Social Media</option>
+            <option value="Strategie">Strategie</option>
+            <option value="Support">Support</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Prompt-Text</div>
+        <textarea class="form-input form-textarea" id="f-prompt" placeholder="Agiere als [ROLLE]. Schreibe [AUFGABE] für [ZIELGRUPPE]..."></textarea>
+      </div>
+      <div class="modal-row">
+        <div class="form-group">
+          <div class="form-label">Version</div>
+          <input class="form-input" id="f-version" placeholder="z.B. V2" value="V1">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Erfolgsquote</div>
+          <input class="form-input" id="f-score" placeholder="z.B. 9/10">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Notiz (optional)</div>
+        <input class="form-input" id="f-note" placeholder="z.B. AIDA-Struktur hinzugefügt – verbessert Klickrate">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" onclick="closeModal()">Abbrechen</button>
+      <button class="modal-save-btn" onclick="savePrompt()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div id="progress-bar-wrap">
+  <a href="topic-prompting.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">2.5 / 2.5</span>
+  <a href="topic-prompting.html" class="mod-nav-next">Fertig ✓</a>
+</div>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Modul 6 · Prompting</div>
+    <h1>Testing & Optimierung</h1>
+    <p>Schluss mit Bauchgefühl. Systematisch testen, messen und Prompts zu Assets machen, die reproduzierbar funktionieren.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~10 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>4 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- CALLOUTS -->
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Viele Marketer verändern ihre Prompts nach reinem Bauchgefühl. Das ist mühsam und führt selten zu dauerhaft guten Ergebnissen. Du lernst, die statistische Natur der KI zu nutzen, um systematisch Exzellenz zu erreichen.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du kannst KI-Ergebnisse über Prompt-Testing gezielt steuern, objektive Kriterien festlegen und die Qualität deiner Marketing-Outputs messbar machen.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 1: VOM PROMPTING ZUM OPTIMIZING
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div><h2>Vom Prompting zum Optimizing</h2><p>Warum Herumprobieren keine Strategie ist</p></div>
+    </div>
+    <div class="section-body">
+      <p>Im Marketing testen wir alles: Betreffzeilen, Ad-Creatives, Landingpages. Doch bei der KI neigen viele dazu, beim ersten mittelmäßigen Ergebnis frustriert aufzugeben oder planlos Wörter zu ändern.</p>
+      <p>Echte Profis nutzen den <span class="tooltip-word">Optimierungs-Loop<span class="tooltip-popup">Ein strukturierter Prozess, bei dem ein Prompt systematisch verbessert wird — nicht durch Intuition, sondern durch isolierte Tests und messbare Kriterien.</span></span>: Ein Prompt ist nie "fertig", sondern er ist eine Version, die kontinuierlich verbessert wird.</p>
+      <div class="callout green">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-text">
+          <strong>Das Ziel: Robustheit</strong>
+          <p>Ein Prompt ist erst dann gut, wenn er bei 10 verschiedenen Versuchen 10-mal ein exzellentes Ergebnis liefert. Nicht einmal zufällig — reproduzierbar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2: P-O-E-T FRAMEWORK
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div><h2>Das P-O-E-T Framework</h2><p>Prepare → Output → Evaluate → Tune</p></div>
+    </div>
+    <div class="section-body">
+      <p>Um systematisch vorzugehen, folgen wir vier Schritten: <strong>Prepare – Output – Evaluate – Tune</strong>. Jeder Schritt hat eine klare Aufgabe und verhindert, dass du Maßnahmen mit Ergebnissen verwechselst.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">P</div>
+        <div class="chain-content"><strong>Prepare — Der Benchmark</strong><p>Definiere zuerst, was "gut" bedeutet. Nimm deinen bisher besten Text als Gold-Standard. Ohne Referenz weißt du nicht, ob du dich verbesserst.</p></div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">O</div>
+        <div class="chain-content"><strong>Output — Die Nullmessung</strong><p>Lass die KI mit deinem aktuellen Prompt (V1) das Ergebnis generieren. Keine Anpassungen, noch keine Eingriffe.</p></div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">E</div>
+        <div class="chain-content"><strong>Evaluate — Die Fehler-Diagnose</strong><p>Vergleiche den Output mit deinem Gold-Standard. Wo genau weicht die KI ab? Nutze das C-A-R-E Audit (Consistency, Accuracy, Relevance, Engagement).</p></div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">T</div>
+        <div class="chain-content"><strong>Tune — Die gezielte Reparatur</strong><p>Ändere immer nur <strong>eine einzige Variable</strong> im Prompt. So weißt du, welche Änderung die Verbesserung gebracht hat.</p></div>
+      </div>
+
+      <h3>P-O-E-T Walkthrough — Schritt für Schritt</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Arbeite dich durch alle vier Schritte anhand eines konkreten Marketing-Szenarios.</p>
+
+      <div class="poet-wrap">
+        <div class="poet-steps-bar">
+          <div class="poet-step-tab active" id="poet-tab-0" onclick="setPoetStep(0)"><span class="poet-step-letter">P</span><span class="poet-step-name">Prepare</span></div>
+          <div class="poet-step-tab" id="poet-tab-1" onclick="setPoetStep(1)"><span class="poet-step-letter">O</span><span class="poet-step-name">Output</span></div>
+          <div class="poet-step-tab" id="poet-tab-2" onclick="setPoetStep(2)"><span class="poet-step-letter">E</span><span class="poet-step-name">Evaluate</span></div>
+          <div class="poet-step-tab" id="poet-tab-3" onclick="setPoetStep(3)"><span class="poet-step-letter">T</span><span class="poet-step-name">Tune</span></div>
+        </div>
+        <div class="poet-content">
+
+          <!-- P -->
+          <div class="poet-panel active" id="poet-panel-0">
+            <div class="poet-scenario-label">Szenario wählen</div>
+            <select class="poet-scenario-select" id="poet-scenario" onchange="updatePoetScenario()">
+              <option value="0">Newsletter-Betreffzeile</option>
+              <option value="1">LinkedIn-Post</option>
+              <option value="2">Produktbeschreibung</option>
+            </select>
+            <p style="font-size:13px;color:var(--text-muted);">Bevor du testest, musst du wissen, was "gut" überhaupt bedeutet. Definiere einen <strong>Gold-Standard</strong> — dein Zielwert.</p>
+            <div class="poet-gold-label">Gold-Standard (dein bestes bisheriges Ergebnis)</div>
+            <div class="poet-gold-box" id="poet-gold"></div>
+            <div class="poet-nav">
+              <button class="poet-nav-btn" disabled>← Zurück</button>
+              <span class="poet-step-indicator" id="poet-step-indicator">Schritt 1 von 4</span>
+              <button class="poet-nav-btn primary" onclick="setPoetStep(1)">Weiter: Output →</button>
+            </div>
+          </div>
+
+          <!-- O -->
+          <div class="poet-panel" id="poet-panel-1">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Das ist der aktuelle V1-Prompt — so wie du ihn heute verwenden würdest, ohne Optimierung.</p>
+            <div class="poet-gold-label">V1 Prompt</div>
+            <div class="poet-gold-box" id="poet-v1-prompt"></div>
+            <div class="poet-gold-label" style="margin-top:12px;">KI-Output (V1)</div>
+            <div class="poet-gold-box" id="poet-v1-output"></div>
+            <div class="poet-nav">
+              <button class="poet-nav-btn" onclick="setPoetStep(0)">← Zurück</button>
+              <span class="poet-step-indicator">Schritt 2 von 4</span>
+              <button class="poet-nav-btn primary" onclick="setPoetStep(2)">Weiter: Evaluate →</button>
+            </div>
+          </div>
+
+          <!-- E -->
+          <div class="poet-panel" id="poet-panel-2">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Vergleiche den V1-Output mit deinem Gold-Standard. Das C-A-R-E Audit zeigt genau, wo die Lücken sind.</p>
+            <div class="care-grid" id="poet-care-grid"></div>
+            <div class="poet-gold-label" style="margin-top:4px;">Diagnose</div>
+            <div class="poet-gold-box" id="poet-diagnosis" style="color:#F85149;"></div>
+            <div class="poet-nav">
+              <button class="poet-nav-btn" onclick="setPoetStep(1)">← Zurück</button>
+              <span class="poet-step-indicator">Schritt 3 von 4</span>
+              <button class="poet-nav-btn primary" onclick="setPoetStep(3)">Weiter: Tune →</button>
+            </div>
+          </div>
+
+          <!-- T -->
+          <div class="poet-panel" id="poet-panel-3">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle <strong>eine</strong> gezielte Änderung basierend auf der Diagnose. Nur eine — damit du weißt, was geholfen hat.</p>
+            <div id="poet-tune-options"></div>
+            <div id="poet-result" style="display:none;">
+              <div class="poet-gold-label" style="margin-top:12px;">V2-Output nach Tuning</div>
+              <div class="poet-gold-box" id="poet-v2-output" style="color:#3FB950;"></div>
+              <div class="poet-result">
+                <div class="poet-result-icon">✅</div>
+                <div class="poet-result-title">Loop abgeschlossen!</div>
+                <div class="poet-result-sub">V2 ist messbar besser als V1. Speichere diesen Prompt in deiner Bibliothek.</div>
+              </div>
+            </div>
+            <div class="poet-nav">
+              <button class="poet-nav-btn" onclick="setPoetStep(2)">← Zurück</button>
+              <span class="poet-step-indicator">Schritt 4 von 4</span>
+              <button class="poet-nav-btn primary" id="poet-tune-btn" onclick="applyTune()">Tune anwenden</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3: ISOLIERTE TESTS
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div><h2>Isolierte Tests: Die Variablen-Methode</h2><p>Immer nur eine Variable ändern</p></div>
+    </div>
+    <div class="section-body">
+      <p>Wenn dir ein Ergebnis nicht gefällt, schreibe nicht den ganzen Prompt um. Das ist so, als würdest du bei einem Auto Motor, Reifen und Lenkrad gleichzeitig tauschen — am Ende weißt du nicht, warum es wieder fährt.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Die goldene Regel</strong>
+          <p>Ändere immer nur <strong>eine</strong> einzige Variable pro Testlauf. So baust du echtes Wissen über deine Prompts auf statt zufällige Treffer zu landen.</p>
+        </div>
+      </div>
+
+      <h3>A/B Prompt Tester</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle ein Szenario. Der Tester zeigt V1 und V2 nebeneinander — mit der einen Änderung hervorgehoben und dem Ergebnis-Delta.</p>
+
+      <div class="ab-wrap">
+        <div class="ab-toolbar">
+          <span class="ab-toolbar-label">Szenario:</span>
+          <button class="ab-scenario-btn active" onclick="selectAb(0,this)">Newsletter</button>
+          <button class="ab-scenario-btn" onclick="selectAb(1,this)">Ad-Copy</button>
+          <button class="ab-scenario-btn" onclick="selectAb(2,this)">SEO-Text</button>
+          <button class="ab-run-btn" onclick="runAb()">▶ Testen</button>
+        </div>
+        <div class="ab-cols">
+          <div class="ab-col">
+            <div class="ab-col-header"><span class="ab-badge badge-v1">V1 — Basis</span></div>
+            <div class="ab-prompt-box" id="ab-prompt-v1"></div>
+            <div class="ab-output" id="ab-out-v1"><span style="color:rgba(201,209,217,0.3)">Testen starten...</span></div>
+          </div>
+          <div class="ab-col">
+            <div class="ab-col-header"><span class="ab-badge badge-v2">V2 — Eine Änderung</span></div>
+            <div class="ab-prompt-box" id="ab-prompt-v2"></div>
+            <div class="ab-output" id="ab-out-v2"><span style="color:rgba(201,209,217,0.3)">Testen starten...</span></div>
+          </div>
+        </div>
+        <div class="ab-verdict" id="ab-verdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4: DIAGNOSE-LISTE
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div><h2>Prompt-Diagnose-Tool</h2><p>Problem identifizieren, gezielten Fix anwenden</p></div>
+    </div>
+    <div class="section-body">
+      <p>Wenn dein Testlauf Schwächen zeigt, nutze diese Hebel für das Tuning. Jedes Problem hat einen spezifischen Fix — und der kommt aus den Techniken, die du in den vorherigen Modulen gelernt hast.</p>
+
+      <div class="diag-wrap">
+        <div class="diag-problems">
+          <div class="diag-problem-label">Welches Problem hast du mit deinem Output?</div>
+          <button class="diag-tag" onclick="showDiag('generic', this)">Zu generisch</button>
+          <button class="diag-tag" onclick="showDiag('structure', this)">Verliert roten Faden</button>
+          <button class="diag-tag" onclick="showDiag('logic', this)">Logik-Fehler</button>
+          <button class="diag-tag" onclick="showDiag('tone', this)">Falscher Tonfall</button>
+          <button class="diag-tag" onclick="showDiag('long', this)">Zu lang / ausschweifend</button>
+          <button class="diag-tag" onclick="showDiag('hallucination', this)">Halluzinationen</button>
+        </div>
+        <div class="diag-result" id="diag-result"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Problem</th><th>Hebel (Tuning)</th><th>Aus Modul</th></tr></thead>
+          <tbody>
+            <tr><td>Zu generisch</td><td>Few-Shot: 2–3 konkrete Beispiele geben</td><td>Modul 2</td></tr>
+            <tr><td>Verliert roten Faden</td><td>XML-Tags wie <span class="inline-code">&lt;ziel&gt;</span> oder <span class="inline-code">&lt;fokus&gt;</span></td><td>Modul 2</td></tr>
+            <tr><td>Logik-Fehler</td><td>Chain-of-Thought: "Denke Schritt für Schritt"</td><td>Modul 3</td></tr>
+            <tr><td>Falscher Tonfall</td><td>Negative Constraints + Beispiel-Satz</td><td>Modul 2</td></tr>
+            <tr><td>Zu lang</td><td>Positive Instruktion: "Max. 80 Wörter, ein Satz pro Punkt"</td><td>Modul 2</td></tr>
+            <tr><td>Halluzinationen</td><td>RAG: Eigenes Dokument hochladen + "Nur aus diesem Dokument antworten"</td><td>Modul 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5: PROMPT-BIBLIOTHEK
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div><h2>Prompt-Bibliothek</h2><p>Dein skalierbarer Wissensspeicher</p></div>
+    </div>
+    <div class="section-body">
+      <p>Die wertvollsten Erkenntnisse aus deinem Testing nützen nichts, wenn sie in alten Chat-Verläufen verschwinden. Ein optimierter Prompt ist ein <strong>Asset</strong> deines Unternehmens — behandle ihn auch so.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:4px;">
+          <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;font-weight:500;">Versionierung</div>
+          <p style="font-size:12px;margin:0;">Speichere V1, V2, V3 mit kurzer Notiz, welche Änderung den Durchbruch gebracht hat.</p>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:4px;">
+          <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;font-weight:500;">Erfolgsquote</div>
+          <p style="font-size:12px;margin:0;">Dokumentiere, wie hoch die Trefferquote ist — z.B. "9/10 Versuche exzellent".</p>
+        </div>
+      </div>
+
+      <h3>Prompt Library Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Deine persönliche Prompt-Bibliothek für diese Session. Bereits mit Beispiel-Prompts vorgeladen.</p>
+
+      <div class="lib-wrap">
+        <div class="lib-toolbar">
+          <span class="lib-toolbar-title">Prompt Library</span>
+          <span class="lib-count" id="lib-count">3 Prompts</span>
+          <button class="lib-add-btn" onclick="openModal()">+ Prompt hinzufügen</button>
+        </div>
+        <div class="lib-table-wrap">
+          <table class="lib-table">
+            <thead><tr><th>Name</th><th>Kategorie</th><th>Version</th><th>Erfolgsquote</th><th>Notiz</th><th></th></tr></thead>
+            <tbody id="lib-tbody"></tbody>
+          </table>
+          <div class="lib-empty" id="lib-empty" style="display:none;">
+            <div class="lib-empty-icon">📂</div>
+            <p>Noch keine Prompts. Füge deinen ersten Prompt hinzu.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>🧠 Wissenscheck</h2>
+    <p>Teste dein Verständnis von systematischem Prompt-Testing.</p>
+    <div class="quiz-progress">
+      <div class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</div>
+      <div class="quiz-streak">🔥 Streak: <span id="streak-count">0</span></div>
+    </div>
+    <div id="quiz-game">
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">richtige Antworten</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Quiz wiederholen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── PROGRESS BAR ─────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = Math.min(100, Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100));
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = pct + '% gelesen';
+});
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ════════════════════════════════════
+// P-O-E-T WALKTHROUGH
+// ════════════════════════════════════
+const poetScenarios = [
+  {
+    name: 'Newsletter-Betreffzeile',
+    gold: 'Betreff: "3 Fehler, die deinen Newsletter unsichtbar machen"\n\n→ 38% Öffnungsrate, klar, neugierig, Zahl am Anfang, kein Spam-Wort',
+    v1prompt: 'Schreibe eine Betreffzeile für unseren Marketing-Newsletter.',
+    v1output: 'Betreff: "Der neue Marketing-Newsletter ist da!"\n\n→ Generisch, kein Mehrwert, kein Grund zum Öffnen',
+    care: [
+      { l: 'C', label: 'Consistency', status: 'ok', note: 'Markenstil passt' },
+      { l: 'A', label: 'Accuracy', status: 'ok', note: 'Keine Fehler' },
+      { l: 'R', label: 'Relevance', status: 'fail', note: 'Kein konkreter Nutzen erkennbar' },
+      { l: 'E', label: 'Engagement', status: 'fail', note: 'Kein Anreiz zum Öffnen, zu generisch' }
+    ],
+    diagnosis: 'Problem: Output ist zu generisch. Kein Engagement-Trigger, kein Nutzenversprechen.',
+    tuneOptions: [
+      { label: 'Few-Shot: 2 Beispiel-Betreffzeilen hinzufügen', correct: true, sub: 'Zeigt der KI das gewünschte Format und die Schärfe' },
+      { label: 'Temperature erhöhen', correct: false, sub: 'Hilft bei Kreativität, behebt nicht das Generizitäts-Problem' },
+      { label: 'Prompt ins Englische übersetzen', correct: false, sub: 'Sprachenwechsel ändert nicht die Prompt-Qualität' }
+    ],
+    v2output: 'Betreff: "Dein letzter Newsletter hat niemanden interessiert — woran lag es?"\n\n→ Direkter, provokant, klarer Nutzen: Problem + Lösung angedeutet'
+  },
+  {
+    name: 'LinkedIn-Post',
+    gold: 'Hook: Konkrete Zahl + unerwartete These\nBody: 3 kurze Punkte, jeder mit einem Praxisbeispiel\nCTA: Frage an die Community\n\n→ Avg. 180 Likes, 34 Kommentare',
+    v1prompt: 'Schreibe einen LinkedIn-Post über KI im Marketing.',
+    v1output: 'KI verändert das Marketing grundlegend. Viele Unternehmen setzen bereits auf KI-Tools. Was sind deine Erfahrungen?\n\n→ Zu kurz, keine Struktur, kein Mehrwert, kein Hook',
+    care: [
+      { l: 'C', label: 'Consistency', status: 'warn', note: 'Kein erkennbarer Markenstil' },
+      { l: 'A', label: 'Accuracy', status: 'ok', note: 'Aussagen korrekt' },
+      { l: 'R', label: 'Relevance', status: 'fail', note: 'Keine konkreten Insights, zu vage' },
+      { l: 'E', label: 'Engagement', status: 'fail', note: 'Kein Hook, keine Struktur' }
+    ],
+    diagnosis: 'Problem: Verliert roten Faden, kein strukturierter Aufbau. Kein Hook der stoppen lässt.',
+    tuneOptions: [
+      { label: 'XML-Tags für Struktur: <hook>, <body>, <cta>', correct: true, sub: 'Erzwingt klar getrennten Aufbau' },
+      { label: 'Prompt kürzer machen', correct: false, sub: 'Kürzere Prompts lösen keine Struktur-Probleme' },
+      { label: 'Anderen Kanal wählen', correct: false, sub: 'Das ist kein Prompt-Problem' }
+    ],
+    v2output: 'Hook: "73% der Marketer nutzen KI-Tools — aber nur 12% nutzen sie strategisch."\n\nWoran liegt das? Drei Muster die ich täglich beobachte:\n\n→ 1. Copy-Paste ohne Strategie\n→ 2. KI als Ersatz statt Hebel\n→ 3. Kein systematisches Testing\n\nWelches Muster erkennst du in deinem Team?'
+  },
+  {
+    name: 'Produktbeschreibung',
+    gold: 'Hook-Satz → USP in einer Zeile → 3 konkrete Benefits → Emotionaler Abschluss\nTon: aspirational, max. 100 Wörter\n\n→ Konversionsrate +22% vs. altem Text',
+    v1prompt: 'Schreibe eine Produktbeschreibung für unsere neue Kaffeemaschine.',
+    v1output: 'Unsere neue Kaffeemaschine ist ein hochwertiges Produkt, das Ihnen täglich frischen Kaffee bereitet. Mit verschiedenen Einstellungen können Sie Ihren Kaffee ganz nach Ihrem Geschmack zubereiten. Kaufen Sie jetzt!\n\n→ Förmlich, keine Benefits, kein Markenstil, schwacher CTA',
+    care: [
+      { l: 'C', label: 'Consistency', status: 'fail', note: 'Siezen statt Duzen, falsche Tonalität' },
+      { l: 'A', label: 'Accuracy', status: 'ok', note: 'Keine falschen Angaben' },
+      { l: 'R', label: 'Relevance', status: 'fail', note: 'Keine konkreten Benefits genannt' },
+      { l: 'E', label: 'Engagement', status: 'fail', note: 'Kein Sog, kein emotionaler Anker' }
+    ],
+    diagnosis: 'Problem: Falscher Ton (Siezen) und zu generisch. Keine spezifischen Benefits.',
+    tuneOptions: [
+      { label: 'Negative Constraint: "Nutze Du-Form, keine Floskeln wie hochwertiges Produkt"', correct: true, sub: 'Steuert Tonalität direkt und eliminiert bekannte Schwächen' },
+      { label: 'Prompt auf Englisch schreiben', correct: false, sub: 'Löst das deutsche Ton-Problem nicht' },
+      { label: 'Mehr Keywords hinzufügen', correct: false, sub: 'Keywords helfen bei SEO, nicht bei Tonalität' }
+    ],
+    v2output: 'Morgens besser ankommen.\n\nDein Kaffee. Dein Tempo. Die neue Kaffeemaschine passt sich dir an — nicht umgekehrt. Drei Stärken, ein Knopf, kein Kompromiss.\n\nFür alle, die ihren Tag nicht mit Kompromissen beginnen.'
+  }
+];
+
+let poetStep = 0;
+let poetScenarioIdx = 0;
+let poetTuneSelected = null;
+let poetTuneApplied = false;
+
+function updatePoetScenario() {
+  poetScenarioIdx = parseInt(document.getElementById('poet-scenario').value);
+  renderPoetStep(0);
+}
+
+function setPoetStep(step) {
+  if (poetTuneApplied && step === 3) { /* allow */ }
+  poetStep = step;
+  document.querySelectorAll('.poet-step-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i < step) t.classList.add('done');
+    if (i === step) t.classList.add('active');
+  });
+  document.querySelectorAll('.poet-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === step);
+  });
+  renderPoetStep(step);
+}
+
+function renderPoetStep(step) {
+  const s = poetScenarios[poetScenarioIdx];
+  if (step === 0) {
+    document.getElementById('poet-gold').textContent = s.gold;
+  } else if (step === 1) {
+    document.getElementById('poet-v1-prompt').textContent = s.v1prompt;
+    document.getElementById('poet-v1-output').innerHTML = esc(s.v1output);
+  } else if (step === 2) {
+    const grid = document.getElementById('poet-care-grid');
+    grid.innerHTML = s.care.map(c => `
+      <div class="care-card">
+        <div class="care-letter">${c.l}</div>
+        <div class="care-label">${c.label}</div>
+        <div style="font-size:12px;color:var(--text-muted);">${c.note}</div>
+        <span class="care-status ${c.status === 'ok' ? 'care-ok' : c.status === 'fail' ? 'care-fail' : 'care-warn'}">${c.status === 'ok' ? '✓ OK' : c.status === 'fail' ? '✗ Problem' : '⚠ Prüfen'}</span>
+      </div>`).join('');
+    document.getElementById('poet-diagnosis').textContent = s.diagnosis;
+  } else if (step === 3) {
+    poetTuneSelected = null;
+    poetTuneApplied = false;
+    document.getElementById('poet-result').style.display = 'none';
+    document.getElementById('poet-v2-output') && (document.getElementById('poet-v2-output').textContent = '');
+    const wrap = document.getElementById('poet-tune-options');
+    wrap.innerHTML = s.tuneOptions.map((opt, i) => `
+      <div class="tune-option" id="tune-opt-${i}" onclick="selectTune(${i})">
+        <div class="tune-radio" id="tune-radio-${i}"></div>
+        <div>
+          <div class="tune-label">${esc(opt.label)}</div>
+          <div class="tune-sub">${esc(opt.sub)}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function selectTune(idx) {
+  if (poetTuneApplied) return;
+  poetTuneSelected = idx;
+  document.querySelectorAll('.tune-option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+}
+
+function applyTune() {
+  if (poetTuneSelected === null) return;
+  const s = poetScenarios[poetScenarioIdx];
+  const opt = s.tuneOptions[poetTuneSelected];
+  poetTuneApplied = true;
+  const resultDiv = document.getElementById('poet-result');
+  const v2out = document.getElementById('poet-v2-output');
+  if (opt.correct) {
+    v2out.innerHTML = '<span style="color:#3FB950;">' + esc(s.v2output) + '</span>';
+    resultDiv.style.display = 'block';
+  } else {
+    v2out.innerHTML = '<span style="color:#F85149;">Nicht der optimale Hebel für dieses Problem. Die Ausgabe hat sich kaum verbessert. Probiere den anderen Ansatz.</span>';
+    resultDiv.style.display = 'block';
+    document.querySelector('.poet-result').style.background = 'var(--red-light)';
+    document.querySelector('.poet-result').style.borderColor = '#FFBDAD';
+    document.querySelector('.poet-result-icon').textContent = '❌';
+    document.querySelector('.poet-result-title').textContent = 'Nicht der richtige Hebel';
+    document.querySelector('.poet-result-title').style.color = 'var(--red)';
+    document.querySelector('.poet-result-sub').textContent = 'Das Diagnose-Tool oben zeigt den richtigen Fix für dieses Problem.';
+  }
+}
+
+renderPoetStep(0);
+
+// ════════════════════════════════════
+// A/B PROMPT TESTER
+// ════════════════════════════════════
+const abScenarios = [
+  {
+    v1prompt: 'Schreibe einen Newsletter über unsere neue Kaffeemaschine.',
+    v2prompt: 'Schreibe einen Newsletter über unsere neue Kaffeemaschine. <span class="ab-delta">Nutze das AIDA-Modell für den Aufbau.</span>',
+    v1out: 'Hallo zusammen,\n\nwir freuen uns, euch unsere neue Kaffeemaschine vorstellen zu dürfen. Sie hat viele tolle Features. Kauft sie jetzt!\n\nViele Grüße',
+    v2out: 'Stell dir vor: Perfekter Kaffee, jeden Morgen.\n\n<span class="ab-improved">[Attention]</span> 78% der Kaffeetrinker sind mit ihrem Morgenritual unzufrieden.\n<span class="ab-improved">[Interest]</span> Unsere neue Kaffeemaschine löst genau das — mit 3 vorprogrammierten Profilen für jeden Geschmack.\n<span class="ab-improved">[Desire]</span> 2.400 Tester gaben ihr 4.8/5 Sterne.\n<span class="ab-improved">[Action]</span> Jetzt 15% Einführungsrabatt sichern.',
+    verdict: '<strong>Ergebnis:</strong> V2 folgt einer klaren Argumentationskette. AIDA zwingt die KI zu Struktur — kein generisches Auffüllen mehr.'
+  },
+  {
+    v1prompt: 'Schreibe einen Facebook-Ad-Text für nachhaltige Schuhe.',
+    v2prompt: 'Schreibe einen Facebook-Ad-Text für nachhaltige Schuhe. <span class="ab-delta">Zielgruppe: Frauen 28–40, urban, bewusst. Hook: max. 8 Wörter.</span>',
+    v1out: 'Entdecke unsere nachhaltigen Schuhe! Sie sind aus umweltfreundlichen Materialien gefertigt und sehen toll aus. Jetzt kaufen und die Umwelt schützen!',
+    v2out: '<span class="ab-improved">Gutes Gewissen. Kein Kompromiss beim Stil.</span>\n\nSchuhe, die du nicht erklären musst. Aus recyceltem Ozean-Plastik, handgefertigt in Portugal.\n\nFür Frauen, die beides wollen — und wissen, dass beides geht.\n\n→ Jetzt entdecken',
+    verdict: '<strong>Ergebnis:</strong> Zielgruppen-Präzision und Hook-Constraint vervierfachen die Relevanz. Die KI schreibt für eine echte Person, nicht für alle.'
+  },
+  {
+    v1prompt: 'Schreibe einen SEO-Text über Content-Marketing.',
+    v2prompt: 'Schreibe einen SEO-Text über Content-Marketing. <span class="ab-delta">Fokus-Keyword: "Content-Marketing Strategie 2025". Ziel-Intent: Informational. Struktur: H1 + 3×H2 mit je 80–100 Wörtern.</span>',
+    v1out: 'Content-Marketing ist eine wichtige Strategie für Unternehmen. Es gibt viele Möglichkeiten, Content zu erstellen. Guter Content hilft bei der Suchmaschinenoptimierung und ist wichtig für die digitale Präsenz eines Unternehmens.',
+    v2out: '<span class="ab-improved">## Content-Marketing Strategie 2025: Was wirklich funktioniert</span>\n\nContent-Marketing ohne Strategie ist wie Werbung ohne Zielgruppe — laut, aber wirkungslos.\n\n<span class="ab-improved">### Warum 2025 ein Wendepunkt ist</span>\nKI-Tools demokratisieren Content-Erstellung. Wer keine klare Strategie hat, verliert sich im Rauschen.\n\n<span class="ab-improved">### Die drei Säulen erfolgreichen Contents</span>\nRelevanz, Konsistenz, Distribution. Jede Säule hat messbaren Einfluss auf Sichtbarkeit und Konversion.',
+    verdict: '<strong>Ergebnis:</strong> Keyword, Intent und Struktur-Constraint ergeben einen direkt verwendbaren SEO-Text statt generischem Fließtext.'
+  }
+];
+
+let currentAb = 0, abRunning = false;
+
+function selectAb(idx, btn) {
+  currentAb = idx;
+  document.querySelectorAll('.ab-scenario-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  resetAb();
+}
+
+function resetAb() {
+  const s = abScenarios[currentAb];
+  document.getElementById('ab-prompt-v1').innerHTML = esc(s.v1prompt);
+  document.getElementById('ab-prompt-v2').innerHTML = s.v2prompt;
+  document.getElementById('ab-out-v1').innerHTML = '<span style="color:rgba(201,209,217,0.3)">Testen starten...</span>';
+  document.getElementById('ab-out-v1').classList.remove('loading');
+  document.getElementById('ab-out-v2').innerHTML = '<span style="color:rgba(201,209,217,0.3)">Testen starten...</span>';
+  document.getElementById('ab-out-v2').classList.remove('loading');
+  document.getElementById('ab-verdict').style.display = 'none';
+  abRunning = false;
+}
+
+function runAb() {
+  if (abRunning) return;
+  abRunning = true;
+  const s = abScenarios[currentAb];
+  const o1 = document.getElementById('ab-out-v1');
+  const o2 = document.getElementById('ab-out-v2');
+  o1.innerHTML = ''; o1.classList.add('loading');
+  o2.innerHTML = ''; o2.classList.add('loading');
+  document.getElementById('ab-verdict').style.display = 'none';
+  setTimeout(() => {
+    o1.classList.remove('loading');
+    o1.innerHTML = esc(s.v1out).replace(/\n/g, '\n');
+    setTimeout(() => {
+      o2.classList.remove('loading');
+      o2.innerHTML = s.v2out;
+      const verdict = document.getElementById('ab-verdict');
+      verdict.innerHTML = s.verdict;
+      verdict.style.display = 'block';
+      abRunning = false;
+    }, 900);
+  }, 800);
+  resetAb();
+  setTimeout(() => {
+    o1.innerHTML = ''; o1.classList.add('loading');
+    o2.innerHTML = ''; o2.classList.add('loading');
+    setTimeout(() => {
+      o1.classList.remove('loading');
+      o1.innerHTML = esc(s.v1out).replace(/\n/g, '\n');
+      setTimeout(() => {
+        o2.classList.remove('loading');
+        o2.innerHTML = s.v2out;
+        const verdict = document.getElementById('ab-verdict');
+        verdict.innerHTML = s.verdict;
+        verdict.style.display = 'block';
+        abRunning = false;
+      }, 900);
+    }, 800);
+  }, 50);
+}
+
+resetAb();
+
+// ════════════════════════════════════
+// DIAGNOSE TOOL
+// ════════════════════════════════════
+const diagData = {
+  generic: {
+    module: 'Modul 2 — Few-Shot',
+    title: 'Fix: Konkrete Beispiele geben (Few-Shot)',
+    desc: 'Wenn die KI zu generisch antwortet, fehlen ihr Ankerpunkte. 2–3 Beispiele im Prompt zeigen ihr präzise, in welche Richtung du willst. Die KI extrapoliert das Muster — und bleibt viel schärfer.',
+    before: '// V1 — Kein Beispiel\nSchreibe eine Betreffzeile für unseren Newsletter.',
+    after: '// V2 — Mit Beispielen\nSchreibe eine Betreffzeile für unseren Newsletter.\nBeispiel 1: "3 Fehler, die deinen Newsletter unsichtbar machen"\nBeispiel 2: "Warum 94% der Marketer diesen Hebel ignorieren"'
+  },
+  structure: {
+    module: 'Modul 2 — Delimiter',
+    title: 'Fix: XML-Tags für Struktur einsetzen',
+    desc: 'Wenn die KI den roten Faden verliert, fehlt ihr ein klares Gerüst. XML-Tags zwingen die KI, jeden Abschnitt separat zu "denken" — das verhindert, dass Teile des Prompts verdrängt werden.',
+    before: '// V1 — Keine Struktur\nSchreibe einen LinkedIn-Post über KI. Nutze einen guten Hook und einen CTA.',
+    after: '// V2 — Mit XML-Tags\n<hook>Konkrete Zahl + provokante These, max. 10 Wörter</hook>\n<body>3 Punkte mit je einem Praxis-Beispiel</body>\n<cta>Frage an die Community</cta>'
+  },
+  logic: {
+    module: 'Modul 3 — Chain-of-Thought',
+    title: 'Fix: Chain-of-Thought aktivieren',
+    desc: 'Logik-Fehler entstehen, weil die KI direkt zur Antwort springt statt herzuleiten. "Denke Schritt für Schritt" zwingt sie, jeden Schluss explizit zu machen — und macht Fehler sofort sichtbar.',
+    before: '// V1 — Direkte Frage\nWie viel Budget benötigen wir für 50.000 Impressionen bei CPM 8 Euro?',
+    after: '// V2 — CoT aktiviert\nWie viel Budget benötigen wir für 50.000 Impressionen bei CPM 8 Euro?\nDenke Schritt für Schritt und zeige jeden Rechenschritt.'
+  },
+  tone: {
+    module: 'Modul 2 — Positive Instruktionen',
+    title: 'Fix: Negativen Constraint + Beispielsatz',
+    desc: 'Tonalitäts-Probleme brauchen zwei Hebel: Einen negativen Constraint (was vermeiden) und einen positiven Beispielsatz (wie es klingen soll). Zusammen steuern sie den Ton sehr präzise.',
+    before: '// V1 — Kein Ton-Constraint\nSchreibe eine Produktbeschreibung für unsere Kaffeemaschine.',
+    after: '// V2 — Mit Ton-Steuerung\nSchreibe eine Produktbeschreibung. Vermeide: "hochwertiges Produkt", "top Qualität".\nKlinge wie dieser Satz: "Morgens besser ankommen. Ohne Kompromiss."'
+  },
+  long: {
+    module: 'Modul 2 — Positive Instruktionen',
+    title: 'Fix: Konkrete Längenvorgabe + Struktur',
+    desc: 'Vage Längenvorgaben wie "kurz" funktionieren nicht. Gib eine exakte Wortzahl und eine Struktur-Vorgabe. Positive Instruktionen sind immer effektiver als "schreibe nicht so lang".',
+    before: '// V1 — Vage\nSchreibe einen kurzen Post über unser Produkt.',
+    after: '// V2 — Konkret\nSchreibe einen Post über unser Produkt.\nMax. 80 Wörter. Struktur: 1 Satz Hook, 2 Sätze Nutzen, 1 Satz CTA.'
+  },
+  hallucination: {
+    module: 'Modul 1 — RAG',
+    title: 'Fix: RAG — eigenes Dokument als Quelle',
+    desc: 'Halluzinationen entstehen, wenn die KI Wissenslücken mit plausiblen aber falschen Inhalten füllt. Die Lösung: Lade dein eigenes Dokument hoch und weise die KI an, ausschließlich daraus zu antworten.',
+    before: '// V1 — Keine Quelle\nWelche Features hat unser Produkt?',
+    after: '// V2 — Mit RAG\n[Produkt-PDF hochgeladen]\nAntworte NUR basierend auf dem hochgeladenen Dokument.\nWenn eine Information nicht darin steht, sage: "Nicht im Dokument".'
+  }
+};
+
+function showDiag(key, btn) {
+  document.querySelectorAll('.diag-tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const d = diagData[key];
+  const el = document.getElementById('diag-result');
+  el.innerHTML = `
+    <div class="diag-result-header">
+      <span class="diag-module-badge">${d.module}</span>
+      <span class="diag-fix-title">${d.title}</span>
+    </div>
+    <p class="diag-fix-desc">${d.desc}</p>
+    <div class="diag-example">
+<span class="ex-label">// Vorher (Problem)</span>
+<span class="ex-before">${esc(d.before)}</span>
+
+<span class="ex-label">// Nachher (Fix)</span>
+<span class="ex-after">${esc(d.after)}</span>
+    </div>`;
+  el.classList.add('visible');
+}
+
+// ════════════════════════════════════
+// PROMPT LIBRARY
+// ════════════════════════════════════
+const catClass = { SEO: 'cat-seo', Social: 'cat-social', Strategie: 'cat-strategie', Support: 'cat-support' };
+let library = [
+  { id: 1, name: 'LinkedIn-Post-Generator', cat: 'Social', version: 'V3', score: '9/10', note: 'XML-Tags + Hook-Constraint hinzugefügt', prompt: 'Agiere als Social Media Manager. <hook>[HOOK]</hook> <body>[THEMA] in 3 Punkten</body> <cta>Frage an Community</cta>' },
+  { id: 2, name: 'SEO-Artikel-Gliederung', cat: 'SEO', version: 'V2', score: '8/10', note: 'Keyword-Intent-Struktur hinzugefügt', prompt: 'Erstelle Gliederung für [KEYWORD]. Intent: [INTENT]. Struktur: H1 + 4×H2 mit Keyword-Varianten.' },
+  { id: 3, name: 'Kundensupport-Antwort', cat: 'Support', version: 'V1', score: '7/10', note: 'Basis-Version, noch ohne Few-Shot', prompt: 'Antworte auf diese Kundenanfrage professionell und empathisch: [ANFRAGE]' }
+];
+let nextId = 4;
+
+function renderLibrary() {
+  const tbody = document.getElementById('lib-tbody');
+  const empty = document.getElementById('lib-empty');
+  document.getElementById('lib-count').textContent = library.length + ' Prompt' + (library.length !== 1 ? 's' : '');
+  if (library.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = library.map(p => `
+    <tr>
+      <td><strong style="font-size:13px;">${esc(p.name)}</strong><div style="font-size:11px;color:var(--text-subtle);margin-top:2px;font-family:'JetBrains Mono',monospace;">${esc(p.prompt.substring(0,50))}...</div></td>
+      <td><span class="lib-cat-tag ${catClass[p.cat] || 'cat-seo'}">${esc(p.cat)}</span></td>
+      <td><span class="lib-version">${esc(p.version)}</span></td>
+      <td><span class="lib-score">${esc(p.score)}</span></td>
+      <td style="color:var(--text-muted);font-size:12px;">${esc(p.note)}</td>
+      <td><button class="lib-delete-btn" onclick="deletePrompt(${p.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function deletePrompt(id) {
+  library = library.filter(p => p.id !== id);
+  renderLibrary();
+}
+
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-prompt').value = '';
+  document.getElementById('f-version').value = 'V1';
+  document.getElementById('f-score').value = '';
+  document.getElementById('f-note').value = '';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+function savePrompt() {
+  const name = document.getElementById('f-name').value.trim();
+  const prompt = document.getElementById('f-prompt').value.trim();
+  if (!name || !prompt) { alert('Name und Prompt sind Pflichtfelder.'); return; }
+  library.push({
+    id: nextId++,
+    name,
+    cat: document.getElementById('f-cat').value,
+    version: document.getElementById('f-version').value || 'V1',
+    score: document.getElementById('f-score').value || '—',
+    note: document.getElementById('f-note').value || '—',
+    prompt
+  });
+  renderLibrary();
+  closeModal();
+}
+
+renderLibrary();
+
+// ════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════
+const questions = [
+  { q: 'Was ist das Ziel des P-O-E-T Frameworks?', options: ['Prompts schneller zu schreiben', 'Prompt-Qualität systematisch und reproduzierbar zu verbessern statt nach Bauchgefühl', 'Die KI zu ersetzen', 'JSON-Output zu erzwingen'], correct: 1, feedback: 'Richtig. P-O-E-T ist ein Optimierungssystem: Prepare (Benchmark), Output (Nullmessung), Evaluate (Fehlerdiagnose), Tune (gezielte Reparatur).' },
+  { q: 'Was bedeutet "Robustheit" bei einem Prompt?', options: ['Der Prompt ist sehr lang', 'Der Prompt liefert bei 10 Versuchen 10-mal exzellente Ergebnisse — nicht zufällig, sondern reproduzierbar', 'Der Prompt funktioniert nur auf einem Modell', 'Der Prompt enthält XML-Tags'], correct: 1, feedback: 'Korrekt. Ein robuster Prompt ist kein Glückstreffer — er ist systematisch optimiert, sodass er verlässlich liefert.' },
+  { q: 'Was ist der "Gold-Standard" im P-O-E-T Framework?', options: ['Das teuerste KI-Modell', 'Dein bisher bestes Ergebnis als Referenzpunkt für die Optimierung', 'Ein Prompt aus einer Bibliothek', 'Eine externe Bewertungsskala'], correct: 1, feedback: 'Genau. Du kannst nur optimieren, was du messen kannst. Der Gold-Standard ist die Messlatte, gegen die jeder neue Output bewertet wird.' },
+  { q: 'Warum solltest du bei Tests immer nur eine Variable im Prompt ändern?', options: ['Weil mehrere Änderungen zu langsam sind', 'Damit du weißt, welche spezifische Änderung die Verbesserung oder Verschlechterung verursacht hat', 'Weil KI nur eine Variable verarbeiten kann', 'Weil das die Regel ist'], correct: 1, feedback: 'Richtig. Mehrere gleichzeitige Änderungen machen das Ergebnis unlesbar. Isolation ist die Grundlage des wissenschaftlichen Testens — und des Prompt-Engineerings.' },
+  { q: 'Welcher Fix hilft am besten, wenn die KI zu generische Texte produziert?', options: ['Temperature erhöhen', 'Prompt auf Englisch übersetzen', 'Few-Shot: 2–3 konkrete Beispiele hinzufügen', 'Chain-of-Thought aktivieren'], correct: 2, feedback: 'Korrekt. Few-Shot gibt der KI Ankerpunkte. Sie extrapoliert das Muster deiner Beispiele und bleibt dadurch deutlich schärfer und spezifischer.' },
+  { q: 'Was ist der richtige Fix, wenn die KI Logik-Fehler oder Rechenfehler macht?', options: ['Einen anderen Browser nutzen', 'Das Modell wechseln', 'Chain-of-Thought: "Denke Schritt für Schritt" hinzufügen', 'Den Prompt kürzen'], correct: 2, feedback: 'Genau. CoT zwingt die KI, jeden Schluss explizit herzuleiten. Fehler in der Logik werden sichtbar und kumulieren sich nicht.' },
+  { q: 'Was ist der Unterschied zwischen einer Prompt-Bibliothek und einem Chat-Verlauf?', options: ['Keiner, beides ist dasselbe', 'Eine Prompt-Bibliothek ist strukturiert, durchsuchbar, versioniert und dokumentiert Erfolgsquoten — ein Chat-Verlauf nicht', 'Chat-Verläufe sind besser durchsuchbar', 'Eine Bibliothek enthält nur System Prompts'], correct: 1, feedback: 'Richtig. Chat-Verläufe sind schwer zu durchsuchen und enthalten keinen Kontext über Modell, Version oder Erfolgsquote. Eine Bibliothek macht Prompts zu Assets.' },
+  { q: 'Welche Information sollte NICHT in einer Prompt-Bibliothek fehlen?', options: ['Das Datum der Erstellung', 'Das Modell, für das der Prompt optimiert wurde, und die Erfolgsquote', 'Die E-Mail-Adresse des Erstellers', 'Die Zeichenanzahl des Prompts'], correct: 1, feedback: 'Korrekt. LLMs reagieren auf Prompts unterschiedlich — was bei GPT-4 perfekt funktioniert, muss bei Claude nicht gleich gut sein. Und die Erfolgsquote zeigt, ob der Prompt wirklich robust ist.' },
+  { q: 'Was ist das C-A-R-E Audit im E-Schritt von P-O-E-T?', options: ['Ein KI-Sicherheitsprotokoll', 'Ein Bewertungsrahmen: Consistency, Accuracy, Relevance, Engagement', 'Eine Checkliste für Datenschutz', 'Ein Prompt-Template'], correct: 1, feedback: 'Genau. C-A-R-E gibt dir vier konkrete Dimensionen, um einen Output systematisch zu bewerten — statt nach Gefühl zu urteilen.' },
+  { q: 'Was ist der Hauptnutzen der Variablen-Methode (isolierter Test)?', options: ['Er macht Prompts schneller', 'Er ermöglicht kausales Wissen: Du weißt genau, welcher Hebel welches Ergebnis verursacht', 'Er funktioniert ohne Gold-Standard', 'Er ersetzt den Reflexions-Loop'], correct: 1, feedback: 'Richtig. Der isolierte Test ist das Fundament des echten Prompt-Wissens. Du baust nicht Glück auf, sondern verstehst Ursache und Wirkung — das macht dich zum echten Prompt-Engineer.' }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach((lbl, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<div class="opt-indicator">${lbl}</div><span>${q.options[i]}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '✓';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = `<strong>✓ Richtig!${streak >= 3 ? ' 🔥 ' + streak + 'er-Streak!' : ''}</strong>${q.feedback}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '✗';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '✓';
+    streak = 0; document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = `<strong>✗ Leider falsch.</strong>${q.feedback}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1) { badge = '🏆'; title = 'Testing-Experte!'; sub = 'Perfekte Punktzahl. Du weißt, wie man Prompts systematisch optimiert.'; }
+  else if (pct >= 0.8) { badge = '🥇'; title = 'Sehr stark!'; sub = 'Fast perfekt. Du hast das Optimierungs-Mindset verinnerlicht.'; }
+  else if (pct >= 0.6) { badge = '🥈'; title = 'Guter Ansatz.'; sub = 'Einige Konzepte nochmal vertiefen lohnt sich.'; }
+  else { badge = '📚'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// ─── TOOLTIP POSITIONING ─────────────────────
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var triggerRect = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var popupW = popup.offsetWidth;
+    var popupH = popup.offsetHeight;
+    var triggerCenterX = triggerRect.left + triggerRect.width / 2;
+    var rawLeft = triggerCenterX - popupW / 2;
+    var clampedLeft = Math.max(8, Math.min(rawLeft, vw - popupW - 8));
+    popup.style.left = clampedLeft + 'px';
+    popup.style.top = (triggerRect.top - popupH - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (triggerCenterX - clampedLeft) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+</body>
+</html>

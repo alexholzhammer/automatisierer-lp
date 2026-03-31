@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul 3: Logik-Ebene</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════
+   INTERACTIVE: CoT SIMULATOR
+════════════════════════════════════ */
+.cot-sim { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.cot-scenario-bar { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cot-scenario-label { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px; }
+.cot-btn { padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.cot-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.cot-cols { display: grid; grid-template-columns: 1fr 1fr; }
+.cot-col { padding: 16px; }
+.cot-col:first-child { border-right: 1px solid var(--border); }
+.cot-col-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; }
+.cot-output { background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.75; color: #C9D1D9; min-height: 140px; }
+.cot-step { color: #58A6FF; }
+.cot-result { color: #3FB950; font-weight: 500; }
+.cot-wrong { color: #F85149; }
+.cot-prompt-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; background: rgba(255,166,87,0.15); color: #FFA657; border: 1px solid rgba(255,166,87,0.3); padding: 2px 8px; border-radius: var(--radius); margin-bottom: 8px; }
+
+/* ════════════════════════════════════
+   INTERACTIVE: STEP-BACK BUILDER
+════════════════════════════════════ */
+.stepback-builder { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.stepback-row { display: grid; grid-template-columns: 28px 1fr; }
+.stepback-row + .stepback-row { border-top: 1px solid var(--border); }
+.stepback-step-num { background: var(--surface-2); border-right: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); padding: 14px 0; }
+.stepback-inner { padding: 14px 16px; }
+.stepback-step-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+.stepback-textarea { width: 100%; resize: vertical; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px; outline: none; line-height: 1.6; color: var(--text); background: var(--surface); transition: border-color 0.15s; min-height: 60px; }
+.stepback-textarea:focus { border-color: var(--accent); }
+.stepback-suggest-btn { margin-top: 8px; padding: 6px 14px; font-size: 12px; font-weight: 500; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--accent-light); color: var(--accent); cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.stepback-suggest-btn:hover { background: var(--accent); color: white; }
+.stepback-generated { margin-top: 8px; background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; color: #C9D1D9; display: none; }
+.stepback-arrow { text-align: center; padding: 8px; background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 16px; color: var(--text-subtle); }
+.stepback-final { background: var(--surface-2); border-top: 1px solid var(--border); padding: 14px 16px; }
+.stepback-final-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-2); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+.stepback-final-preview { background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.75; color: #C9D1D9; min-height: 50px; }
+.stepback-final-preview .sb-principle { color: #FFA657; }
+.stepback-final-preview .sb-task { color: #C9D1D9; }
+.stepback-final-preview .sb-empty { color: rgba(201,209,217,0.25); }
+
+/* ════════════════════════════════════
+   INTERACTIVE: SELF-CONSISTENCY PANEL
+════════════════════════════════════ */
+.sc-sim { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.sc-toolbar { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sc-scenario-label { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.sc-scenario-btn { padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.sc-scenario-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.sc-run-btn { margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--accent-2); border-radius: var(--radius); background: var(--accent-2-light); color: var(--green); cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s; }
+.sc-run-btn:hover { background: var(--accent-2); color: white; }
+.sc-panel-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
+.sc-panel { padding: 14px; }
+.sc-panel + .sc-panel { border-left: 1px solid var(--border); }
+.sc-panel-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); margin-bottom: 8px; }
+.sc-output { background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius); padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; color: #C9D1D9; min-height: 100px; position: relative; overflow: hidden; }
+.sc-output.loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(88,166,255,0.06) 50%, transparent 100%); animation: shimmer 1.2s infinite; }
+.sc-verdict { color: #3FB950; font-weight: 500; }
+.sc-verdict-neg { color: #F85149; font-weight: 500; }
+.sc-verdict-neu { color: #FFA657; font-weight: 500; }
+.sc-vote-row { background: var(--surface-2); padding: 14px 16px; display: flex; align-items: center; gap: 16px; }
+.sc-vote-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); }
+.sc-vote-pills { display: flex; gap: 8px; flex: 1; }
+.sc-vote-pill { padding: 4px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 600; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; opacity: 0.4; transition: all 0.3s; }
+.sc-vote-pill.winner { opacity: 1; background: var(--accent-2-light); border-color: var(--accent-2); color: var(--green); }
+.sc-final-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-subtle); margin-left: auto; }
+.sc-final-value { font-size: 13px; font-weight: 600; color: var(--accent-2); font-family: 'JetBrains Mono', monospace; margin-left: 6px; }
+
+/* ════════════════════════════════════
+   INTERACTIVE: TREE OF THOUGHTS
+════════════════════════════════════ */
+.tot-wrapper { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.tot-toolbar { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+.tot-toolbar-label { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.tot-phase-btn { padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.tot-phase-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.tot-canvas { padding: 20px; min-height: 340px; position: relative; }
+
+/* SVG tree */
+.tot-svg { width: 100%; overflow: visible; }
+.tot-node { cursor: default; }
+.tot-node-root rect { fill: #0E0D0C; stroke: #2A2520; stroke-width: 1; rx: 4; }
+.tot-node-branch rect { fill: var(--surface-2); stroke: var(--border); stroke-width: 1; }
+.tot-node-branch.selected rect { fill: var(--accent-light); stroke: var(--accent); stroke-width: 1.5; }
+.tot-node-branch.rejected rect { fill: var(--red-light); stroke: #FFBDAD; stroke-width: 1; opacity: 0.6; }
+.tot-node-master rect { fill: var(--accent-2-light); stroke: var(--accent-2); stroke-width: 1.5; }
+.tot-node text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; fill: var(--text); }
+.tot-node-root text { fill: white; }
+.tot-node-master text { fill: var(--green); }
+.tot-edge { stroke: var(--border-strong); stroke-width: 1; fill: none; }
+.tot-edge.selected { stroke: var(--accent); stroke-width: 1.5; }
+.tot-edge.rejected { stroke: var(--border); stroke-width: 1; opacity: 0.4; }
+.tot-phase-info { margin-top: 12px; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--text-muted); }
+.tot-phase-info strong { color: var(--text); }
+
+/* ════════════════════════════════════
+   INTERACTIVE: JUNIOR / SENIOR MATCHER
+════════════════════════════════════ */
+.matcher-wrapper { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.matcher-score-bar { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.matcher-score-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); }
+.matcher-score-val { font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text); }
+.matcher-score-total { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.matcher-progress-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.matcher-progress-fill { height: 100%; background: var(--accent-2); border-radius: 99px; transition: width 0.4s; }
+.matcher-card-wrap { padding: 16px; }
+.matcher-task { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; }
+.matcher-task-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); margin-bottom: 8px; }
+.matcher-task-text { font-size: 14px; color: var(--text); line-height: 1.5; font-weight: 500; }
+.matcher-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.matcher-choice-btn { padding: 14px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; transition: all 0.15s; text-align: center; }
+.matcher-choice-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+.matcher-choice-btn.correct { border-color: var(--accent-2); background: var(--accent-2-light); }
+.matcher-choice-btn.wrong { border-color: var(--red); background: var(--red-light); }
+.matcher-choice-btn.disabled { cursor: default; }
+.matcher-choice-icon { font-size: 24px; margin-bottom: 6px; }
+.matcher-choice-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.matcher-choice-sub { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.matcher-feedback { border-radius: var(--radius); padding: 11px 14px; font-size: 13px; display: none; margin-bottom: 12px; line-height: 1.55; }
+.matcher-feedback.correct { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.matcher-feedback.wrong { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.matcher-feedback strong { display: block; margin-bottom: 2px; font-size: 12px; }
+.matcher-next-btn { padding: 8px 20px; font-size: 13px; font-weight: 500; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--accent); color: white; cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; display: none; }
+.matcher-next-btn:hover { background: var(--accent-hover); }
+.matcher-result { text-align: center; padding: 20px; display: none; }
+.matcher-result-score { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 500; color: var(--accent); margin: 8px 0; }
+
+@media(max-width: 600px) {
+  .cot-cols { grid-template-columns: 1fr; }
+  .sc-panel-grid { grid-template-columns: 1fr; }
+  .matcher-choices { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-prompting.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">2.3 / 2.5</span>
+  <a href="module-2-4.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Modul 4 · Prompting</div>
+    <h1>Logik-Ebene</h1>
+    <p>Weg vom Output-Generieren, hin zum strukturierten Problemlösen. Die KI denkt laut, du bekommst fundierte Ergebnisse.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~12 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>5 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- CALLOUTS -->
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Du lernst, wie du die KI nicht nur nach einem Ergebnis fragst, sondern sie dazu bringst, den logischen Herleitungsweg selbst zu entwickeln.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du beherrschst Chain-of-Thought, Step-Back Prompting und Self-Consistency für reproduzierbare, logisch fundierte Ergebnisse.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 1: CHAIN-OF-THOUGHT
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Chain-of-Thought (CoT)</h2>
+        <p>Der KI beim Denken helfen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>LLMs sind <span class="tooltip-word">statistische Vorhersagemaschinen<span class="tooltip-popup">LLMs berechnen bei jedem Token, was am wahrscheinlichsten folgt. Bei komplexen Aufgaben fehlt ihnen ohne explizite Anweisung der "Zwischenschritt-Reflex".</span></span>. Bei komplexen Aufgaben "verrechnen" sie sich oft, weil sie direkt zur Antwort springen, statt systematisch herzuleiten.</p>
+      <p>Die Lösung: Mit einem einfachen Satz zwingen wir die KI, <strong>intermediate reasoning steps</strong> zu generieren — logische Zwischenschritte, die die Fehlerquote massiv reduzieren.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Das Schlüsselwort</strong>
+          <p>Füge einfach hinzu: <span class="inline-code">Lass uns Schritt für Schritt denken</span> oder <span class="inline-code">Let's think step by step</span>. Das ist alles.</p>
+        </div>
+      </div>
+
+      <p><strong>Warum das funktioniert:</strong> Jeder Token baut auf dem vorherigen auf. Ein logisch richtiger Zwischenschritt erhöht die Wahrscheinlichkeit, dass der nächste ebenfalls korrekt ist — und so fort bis zum finalen Ergebnis.</p>
+
+      <h3>CoT Simulator — Vergleich direkt vs. Schritt-für-Schritt</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle ein Szenario und sieh den Unterschied zwischen einem direkten Prompt und einem CoT-Prompt.</p>
+
+      <div class="cot-sim">
+        <div class="cot-scenario-bar">
+          <span class="cot-scenario-label">Szenario:</span>
+          <button class="cot-btn active" onclick="selectCot(0,this)">Budget-Kalkulation</button>
+          <button class="cot-btn" onclick="selectCot(1,this)">Logik-Aufgabe</button>
+          <button class="cot-btn" onclick="selectCot(2,this)">Sentiment-Analyse</button>
+        </div>
+        <div class="cot-cols">
+          <div class="cot-col">
+            <div class="cot-col-label"><span style="color:#F85149;">❌</span> Direkter Prompt</div>
+            <div class="cot-prompt-tag" id="cot-prompt-direct"></div>
+            <div class="cot-output" id="cot-output-direct"></div>
+          </div>
+          <div class="cot-col">
+            <div class="cot-col-label"><span style="color:#3FB950;">✅</span> Mit CoT-Anweisung</div>
+            <div class="cot-prompt-tag" id="cot-prompt-cot"></div>
+            <div class="cot-output" id="cot-output-cot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">☝️</div>
+        <div class="callout-text">
+          <strong>Wann besonders wertvoll</strong>
+          <p>Budget-Kalkulationen, Daten-Analysen, komplexe Finanzpläne — überall dort, wo die KI Fakten falsch kombiniert.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2: STEP-BACK PROMPTING
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Step-Back Prompting</h2>
+        <p>Erst das Prinzip, dann die Lösung</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Oft verlieren sich Modelle in den Details einer spezifischen Anfrage. Step-Back Prompting bringt die KI dazu, zuerst einen Schritt zurückzutreten und ein übergeordnetes Prinzip zu beantworten — bevor sie die eigentliche Aufgabe angeht.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Abstraktion</strong>
+          <p>Frage erst nach grundlegenden Prinzipien: <em>„Was sind die 5 Kernfaktoren für eine erfolgreiche Viral-Kampagne?"</em></p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Anwendung</strong>
+          <p>Nutze diese Antwort als Kontext für die eigentliche Aufgabe. Die KI hat jetzt relevantes Hintergrundwissen aktiviert.</p>
+        </div>
+      </div>
+
+      <p>Dies aktiviert relevantes Hintergrundwissen im <span class="tooltip-word">Vektorraum<span class="tooltip-popup">Der Vektorraum ist der hochdimensionale Bedeutungsraum der KI. Ähnliche Konzepte liegen räumlich nah beieinander. Step-Back navigiert die KI in die richtige "Experten-Ecke".</span></span> der KI, bevor sie die eigentliche Aufgabe löst.</p>
+
+      <h3>Step-Back Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Gib deine spezifische Aufgabe ein. Das Tool schlägt die passende Step-Back-Frage vor und kombiniert beides zu einem fertigen Zwei-Schritt-Prompt.</p>
+
+      <div class="stepback-builder">
+        <div class="stepback-row">
+          <div class="stepback-step-num">1</div>
+          <div class="stepback-inner">
+            <div class="stepback-step-label">Deine spezifische Aufgabe</div>
+            <textarea class="stepback-textarea" id="sb-task" placeholder="z.B. Schreibe einen LinkedIn-Post für unseren neuen KI-Newsletter, Zielgruppe: B2B Marketing Manager" oninput="updateStepBack()"></textarea>
+          </div>
+        </div>
+        <div class="stepback-arrow">↓ Step-Back generiert übergeordnetes Prinzip</div>
+        <div class="stepback-row">
+          <div class="stepback-step-num">2</div>
+          <div class="stepback-inner">
+            <div class="stepback-step-label">Step-Back Frage (automatisch generiert)</div>
+            <div class="stepback-generated" id="sb-generated"></div>
+            <button class="stepback-suggest-btn" onclick="generateStepBack()">Step-Back-Frage generieren</button>
+          </div>
+        </div>
+        <div class="stepback-final">
+          <div class="stepback-final-label">✅ Fertiger Zwei-Schritt-Prompt</div>
+          <div class="stepback-final-preview" id="sb-final-preview">
+            <span class="sb-empty">Fülle die Felder aus und klicke "generieren"...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3: SELF-CONSISTENCY
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Self-Consistency</h2>
+        <p>Sicherheit durch Mehrheitsentscheid</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>KI-Ergebnisse sind <span class="tooltip-word">nicht-deterministisch<span class="tooltip-popup">Nicht-deterministisch bedeutet: Gleicher Input führt nicht immer zum exakt gleichen Output. Die Zufälligkeit entsteht durch die probabilistische Natur der Token-Auswahl.</span></span>. Für kritische Entscheidungen reicht ein einzelner Versuch nicht aus.</p>
+      <p>Die Technik: Denselben Prompt mehrfach abschicken und die häufigste Antwort wählen (<strong>Majority Voting</strong>). Zufällige Halluzinationen werden durch die Mehrheit der korrekten Pfade "überstimmt".</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Profi-Tipp: Das simulierte Experten-Panel</strong>
+          <p>Du musst nicht fünf Chats starten. Weise die KI an, drei verschiedene Lösungswege intern zu erarbeiten, gegeneinander abzuwägen und das stabilste Ergebnis auszugeben.</p>
+        </div>
+      </div>
+
+      <h3>Panel Simulator</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Simuliert drei unabhängige Analysedurchläufe und zeigt, wie Majority Voting das stabilste Ergebnis liefert.</p>
+
+      <div class="sc-sim">
+        <div class="sc-toolbar">
+          <span class="sc-scenario-label">Szenario:</span>
+          <button class="sc-scenario-btn active" onclick="selectScScenario(0,this)">Mehrdeutige Bewertung</button>
+          <button class="sc-scenario-btn" onclick="selectScScenario(1,this)">Ironischer Kommentar</button>
+          <button class="sc-scenario-btn" onclick="selectScScenario(2,this)">Gemischtes Feedback</button>
+          <button class="sc-run-btn" onclick="runSelfConsistency()">▶ Panel starten</button>
+        </div>
+        <div class="sc-panel-grid">
+          <div class="sc-panel">
+            <div class="sc-panel-label">Durchlauf 1 — Wörtlich</div>
+            <div class="sc-output" id="sc-out-1"><span style="color:rgba(201,209,217,0.3)">Panel starten...</span></div>
+          </div>
+          <div class="sc-panel">
+            <div class="sc-panel-label">Durchlauf 2 — Emotional</div>
+            <div class="sc-output" id="sc-out-2"><span style="color:rgba(201,209,217,0.3)">Panel starten...</span></div>
+          </div>
+          <div class="sc-panel">
+            <div class="sc-panel-label">Durchlauf 3 — Kontextuell</div>
+            <div class="sc-output" id="sc-out-3"><span style="color:rgba(201,209,217,0.3)">Panel starten...</span></div>
+          </div>
+        </div>
+        <div class="sc-vote-row">
+          <span class="sc-vote-label">Majority Vote:</span>
+          <div class="sc-vote-pills" id="sc-vote-pills">
+            <span class="sc-vote-pill" id="sc-pill-pos">POSITIV</span>
+            <span class="sc-vote-pill" id="sc-pill-neu">NEUTRAL</span>
+            <span class="sc-vote-pill" id="sc-pill-neg">NEGATIV</span>
+          </div>
+          <span class="sc-final-label">Ergebnis:</span>
+          <span class="sc-final-value" id="sc-final-value">—</span>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🔁</div>
+        <div class="callout-text">
+          <strong>Bonus: Reflexions-Loop</strong>
+          <p>Für sehr kritische Daten: <span class="inline-code">Schreibe erst eine Analyse, kritisiere diese dann selbst aus der Sicht eines Skeptikers und korrigiere dein Ergebnis.</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4: TREE OF THOUGHTS
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Tree of Thoughts (ToT)</h2>
+        <p>Das virtuelle Brainstorming-Team</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Während Chain-of-Thought ein <strong>linearer Pfad</strong> ist, erlaubt Tree of Thoughts der KI, mehrere verschiedene Lösungswege gleichzeitig zu erkunden und zu bewerten.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;">
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;">Phase 1</div>
+          <strong style="font-size:13px;">Divergenz</strong>
+          <p style="font-size:12px;margin:0;">3 radikal verschiedene Kampagnen-Ideen entwickeln</p>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;">Phase 2</div>
+          <strong style="font-size:13px;">Evaluation</strong>
+          <p style="font-size:12px;margin:0;">Jeden Pfad nach Kosten, Viralität, Zielgruppen-Fit bewerten</p>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;">Phase 3</div>
+          <strong style="font-size:13px;">Konvergenz</strong>
+          <p style="font-size:12px;margin:0;">Stärkste Elemente zu einem Master-Konzept kombinieren</p>
+        </div>
+      </div>
+
+      <h3>Tree of Thoughts Visualizer</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke durch die drei Phasen und sieh, wie der ToT-Prozess aus drei Kampagnen-Ideen ein optimiertes Master-Konzept formt.</p>
+
+      <div class="tot-wrapper">
+        <div class="tot-toolbar">
+          <span class="tot-toolbar-label">Phase:</span>
+          <button class="tot-phase-btn active" onclick="setTotPhase(0,this)">1 · Divergenz</button>
+          <button class="tot-phase-btn" onclick="setTotPhase(1,this)">2 · Evaluation</button>
+          <button class="tot-phase-btn" onclick="setTotPhase(2,this)">3 · Konvergenz</button>
+        </div>
+        <div class="tot-canvas">
+          <svg class="tot-svg" id="tot-svg" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="tot-phase-info" id="tot-phase-info"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5: JUNIOR VS SENIOR
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Standard vs. Reasoning-Modelle</h2>
+        <p>Das richtige Werkzeug für die richtige Aufgabe</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Nicht jede Aufgabe braucht das gleiche "Gehirn". Der Unterschied liegt in der Arbeitsweise:</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+        <div class="callout gray" style="margin:0;">
+          <div class="callout-icon">⚡</div>
+          <div class="callout-text">
+            <strong>Standard-Modell (Junior)</strong>
+            <p>Schnell, kosteneffizient. Braucht explizite, detaillierte Instruktionen. Perfekt für klar definierten, repetitiven Output.</p>
+          </div>
+        </div>
+        <div class="callout blue" style="margin:0;">
+          <div class="callout-icon">🧠</div>
+          <div class="callout-text">
+            <strong>Reasoning-Modell (Senior)</strong>
+            <p>Führt CoT intern aus. Versteht High-Level-Ziele und plant selbst. Für komplexe Analyse und Strategie.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Model Matcher — Welches Modell passt?</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Lies die Aufgabe und entscheide: Standard- oder Reasoning-Modell? 6 Aufgaben, direkt Feedback.</p>
+
+      <div class="matcher-wrapper">
+        <div class="matcher-score-bar">
+          <span class="matcher-score-label">Score</span>
+          <span class="matcher-score-val" id="matcher-score-val">0</span>
+          <span class="matcher-score-total">/ 6</span>
+          <div class="matcher-progress-wrap"><div class="matcher-progress-fill" id="matcher-progress-fill" style="width:0%"></div></div>
+        </div>
+        <div class="matcher-card-wrap" id="matcher-card-wrap">
+          <div class="matcher-task">
+            <div class="matcher-task-label">Aufgabe</div>
+            <div class="matcher-task-text" id="matcher-task-text"></div>
+          </div>
+          <div class="matcher-choices">
+            <div class="matcher-choice-btn" id="matcher-btn-standard" onclick="matcherAnswer('standard')">
+              <div class="matcher-choice-icon">⚡</div>
+              <div class="matcher-choice-title">Standard-Modell</div>
+              <div class="matcher-choice-sub">Schnell · Explizite Instruktionen</div>
+            </div>
+            <div class="matcher-choice-btn" id="matcher-btn-reasoning" onclick="matcherAnswer('reasoning')">
+              <div class="matcher-choice-icon">🧠</div>
+              <div class="matcher-choice-title">Reasoning-Modell</div>
+              <div class="matcher-choice-sub">Tief · High-Level-Ziele</div>
+            </div>
+          </div>
+          <div class="matcher-feedback" id="matcher-feedback"></div>
+          <button class="matcher-next-btn" id="matcher-next-btn" onclick="matcherNext()">Nächste Aufgabe →</button>
+        </div>
+        <div class="matcher-result" id="matcher-result">
+          <div class="result-badge" id="matcher-badge"></div>
+          <div class="matcher-result-score" id="matcher-result-score"></div>
+          <p style="color:var(--text-muted);font-size:13px;" id="matcher-result-sub"></p>
+          <button class="matcher-next-btn" style="display:inline-block;margin-top:12px;" onclick="matcherRestart()">Nochmal spielen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       KEY LEARNINGS
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" style="font-size:12px;">✓</div>
+      <div><h2>Key Learnings</h2><p>Die wichtigsten Logik-Prinzipien</p></div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">1</div>
+        <div class="chain-content"><strong>Logik-Pflicht</strong><p>Schritt-für-Schritt-Anweisungen erhöhen die statistische Treffsicherheit bei Analysen und Berechnungen massiv.</p></div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">2</div>
+        <div class="chain-content"><strong>Abstraktion zuerst</strong><p>Step-Back liefert strategische Tiefe statt generischen Output, indem erst nach Prinzipien gefragt wird.</p></div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">3</div>
+        <div class="chain-content"><strong>Fehler minimieren</strong><p>Self-Consistency durch Majority Voting für wichtige Klassifizierungen und Analysen.</p></div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">4</div>
+        <div class="chain-content"><strong>Modellwahl</strong><p>Reasoning-Modelle für komplexe Planung. Standard-Modelle für schnellen, instruktionsbasierten Content.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>🧠 Wissenscheck</h2>
+    <p>Teste dein Verständnis der Logik-Ebene.</p>
+    <div class="quiz-progress">
+      <div class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</div>
+      <div class="quiz-streak">🔥 Streak: <span id="streak-count">0</span></div>
+    </div>
+    <div id="quiz-game">
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">richtige Antworten</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Quiz wiederholen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── PROGRESS BAR ─────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = Math.min(100, Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100));
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = pct + '% gelesen';
+});
+
+// ════════════════════════════════════
+// COT SIMULATOR
+// ════════════════════════════════════
+const cotScenarios = [
+  {
+    promptDirect: 'Was ist das monatliche Budget?',
+    promptCot: 'Was ist das monatliche Budget? Lass uns Schritt für Schritt rechnen.',
+    directOut: '<span class="cot-wrong">Das monatliche Budget beträgt 2.833 €.</span>\n\n<span style="color:rgba(201,209,217,0.4);font-size:11px;">// Falsch — KI hat gerundet und Kontext ignoriert</span>',
+    cotOut: '<span class="cot-step">Schritt 1: Jahresbudget identifizieren</span>\nGesamtbudget: 45.000 €\n\n<span class="cot-step">Schritt 2: Kampagnenmonate</span>\nLaufzeit: 9 Monate (März–Nov)\n\n<span class="cot-step">Schritt 3: Division</span>\n45.000 ÷ 9 = 5.000 €\n\n<span class="cot-step">Schritt 4: Pufferreserve abziehen (10%)</span>\n5.000 × 0,9 = 4.500 €\n\n<span class="cot-result">✓ Monatliches Netto-Budget: 4.500 €</span>'
+  },
+  {
+    promptDirect: 'Wer gewinnt? Anna ist schneller als Bob. Bob ist schneller als Clara.',
+    promptCot: 'Wer gewinnt? Erkläre Schritt für Schritt.',
+    directOut: '<span class="cot-wrong">Bob gewinnt das Rennen.</span>\n\n<span style="color:rgba(201,209,217,0.4);font-size:11px;">// Falsch — KI hat die Transitivität nicht korrekt verkettet</span>',
+    cotOut: '<span class="cot-step">Schritt 1: Beziehung Anna–Bob</span>\nAnna > Bob (Anna schneller)\n\n<span class="cot-step">Schritt 2: Beziehung Bob–Clara</span>\nBob > Clara (Bob schneller)\n\n<span class="cot-step">Schritt 3: Transitive Kette</span>\nAnna > Bob > Clara\n\n<span class="cot-result">✓ Anna gewinnt das Rennen.</span>'
+  },
+  {
+    promptDirect: 'Analysiere die Stimmung: "Wow, schnelle Lieferung! Schade, dass das Produkt kaputt war."',
+    promptCot: 'Analysiere die Stimmung Schritt für Schritt nach Aspekten.',
+    directOut: '<span class="cot-wrong">Die Bewertung ist positiv.</span>\n\n<span style="color:rgba(201,209,217,0.4);font-size:11px;">// Zu simpel — KI hat nur den ersten Satz gewichtet</span>',
+    cotOut: '<span class="cot-step">Aspekt 1: Lieferung</span>\n"Wow, schnelle Lieferung" → positiv (Begeisterung)\n\n<span class="cot-step">Aspekt 2: Produkt</span>\n"Schade, kaputt" → stark negativ (Kernproblem)\n\n<span class="cot-step">Gewichtung</span>\nProduktqualität > Liefergeschwindigkeit\n\n<span class="cot-result">✓ Gesamtsentiment: NEGATIV\nHandlungsbedarf: Qualitätskontrolle</span>'
+  }
+];
+
+let currentCot = 0;
+function selectCot(idx, btn) {
+  currentCot = idx;
+  document.querySelectorAll('.cot-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCot();
+}
+function renderCot() {
+  const s = cotScenarios[currentCot];
+  document.getElementById('cot-prompt-direct').textContent = s.promptDirect;
+  document.getElementById('cot-prompt-cot').textContent = s.promptCot;
+  document.getElementById('cot-output-direct').innerHTML = s.directOut;
+  document.getElementById('cot-output-cot').innerHTML = s.cotOut;
+}
+renderCot();
+
+// ════════════════════════════════════
+// STEP-BACK BUILDER
+// ════════════════════════════════════
+const stepBackTemplates = [
+  { keywords: ['linkedin','post','social','content','text'], principle: 'Was sind die 5 psychologischen Prinzipien, die professionelle B2B-LinkedIn-Posts für maximales Engagement nutzen?' },
+  { keywords: ['email','newsletter','kampagne'], principle: 'Was sind die wissenschaftlich fundierten Faktoren, die E-Mail-Öffnungsraten und Klickraten bei B2B-Zielgruppen treiben?' },
+  { keywords: ['werbung','ad','anzeige'], principle: 'Was sind die Kernprinzipien effektiver digitaler Werbung nach den bewährtesten Copywriting-Frameworks?' },
+  { keywords: ['strategie','plan','roadmap'], principle: 'Was sind die fundamentalen Erfolgsfaktoren für eine Marketing-Strategie in diesem spezifischen Marktumfeld?' },
+  { keywords: ['zielgruppe','persona'], principle: 'Welche tiefenpsychologischen Motivationen und Ängste treiben Kaufentscheidungen in dieser Zielgruppe?' }
+];
+
+function generateStepBack() {
+  const task = document.getElementById('sb-task').value.trim();
+  if (!task) { alert('Bitte erst die Aufgabe eingeben.'); return; }
+  const lower = task.toLowerCase();
+  let principle = 'Was sind die übergeordneten Prinzipien und Best Practices, die den Erfolg dieser Aufgabe am stärksten beeinflussen?';
+  for (const tpl of stepBackTemplates) {
+    if (tpl.keywords.some(k => lower.includes(k))) { principle = tpl.principle; break; }
+  }
+  const gen = document.getElementById('sb-generated');
+  gen.textContent = principle;
+  gen.style.display = 'block';
+  updateStepBackFinal(task, principle);
+}
+
+function updateStepBack() {
+  const gen = document.getElementById('sb-generated');
+  if (gen.style.display === 'block') {
+    const task = document.getElementById('sb-task').value.trim();
+    updateStepBackFinal(task, gen.textContent);
+  }
+}
+
+function updateStepBackFinal(task, principle) {
+  const el = document.getElementById('sb-final-preview');
+  if (!task || !principle) { el.innerHTML = '<span class="sb-empty">Fülle die Felder aus und klicke "generieren"...</span>'; return; }
+  el.innerHTML = `<span class="sb-principle"># Schritt 1 — Abstraktion</span>\n${esc(principle)}\n\n<span class="sb-principle"># Schritt 2 — Anwendung</span>\nNutze die obigen Prinzipien als Kontext.\n${esc(task)}`;
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ════════════════════════════════════
+// SELF-CONSISTENCY PANEL
+// ════════════════════════════════════
+const scScenarios = [
+  {
+    review: '"Das Produkt ist okay, aber der Preis... ich weiss nicht. Meine Erwartungen wurden nicht wirklich erfüllt."',
+    runs: [
+      { out: 'Analyse: Wörtliche Bedeutung\n\n"nicht erfüllt" → Enttäuschung\n"ich weiss nicht" → Unsicherheit\n"okay" → schwach positiv\n\n<span class="sc-verdict-neg">Verdict: NEGATIV</span>', verdict: 'neg' },
+      { out: 'Analyse: Emotionaler Unterton\n\nZögerlichkeit signalisiert\ninneren Konflikt\n"okay" als Euphemismus\nfür enttäuscht\n\n<span class="sc-verdict-neg">Verdict: NEGATIV</span>', verdict: 'neg' },
+      { out: 'Analyse: Kontextuell\n\nPreis-Kritik = konkretes\nHandlungsproblem\nKeine positiven Aspekte\nbetont\n\n<span class="sc-verdict-neu">Verdict: NEUTRAL</span>', verdict: 'neu' }
+    ],
+    winner: 'neg', winnerLabel: 'NEGATIV', explanation: '2 von 3 Durchläufen: NEGATIV'
+  },
+  {
+    review: '"Super, schon wieder eine Lieferung die drei Wochen dauert. Sehr beeindruckend."',
+    runs: [
+      { out: 'Analyse: Wörtlich\n\n"Super" → positiv\n"beeindruckend" → positiv\nKeine direkten\nNegativwörter\n\n<span class="sc-verdict-pos">Verdict: POSITIV</span>', verdict: 'pos' },
+      { out: 'Analyse: Emotionaler Ton\n\n"schon wieder" → Frustration\n"drei Wochen" → Beschwerde\nIronie-Signal erkannt\n\n<span class="sc-verdict-neg">Verdict: NEGATIV</span>', verdict: 'neg' },
+      { out: 'Analyse: Kontextuell\n\n"schon wieder" + Wartezeit\n= eindeutige Ironie\n"Beeindruckend" sarkastisch\n\n<span class="sc-verdict-neg">Verdict: NEGATIV</span>', verdict: 'neg' }
+    ],
+    winner: 'neg', winnerLabel: 'NEGATIV', explanation: '2 von 3: NEGATIV (Ironie erkannt)'
+  },
+  {
+    review: '"Das Tool hat mir viel Zeit gespart, aber der Support hat mich wirklich enttäuscht."',
+    runs: [
+      { out: 'Analyse: Wörtlich\n\n"Zeit gespart" → stark positiv\n"enttäuscht" → klar negativ\nGleiche Gewichtung\n\n<span class="sc-verdict-neu">Verdict: NEUTRAL</span>', verdict: 'neu' },
+      { out: 'Analyse: Emotional\n\n"wirklich enttäuscht" stärker\ngewichtet als Zeitersparnis\nNachhaltig negativer Eindruck\n\n<span class="sc-verdict-neg">Verdict: NEGATIV</span>', verdict: 'neg' },
+      { out: 'Analyse: Kontextuell\n\nProdukt-Lob vs.\nService-Kritik — zwei\ngetrennte Dimensionen\n\n<span class="sc-verdict-neu">Verdict: NEUTRAL</span>', verdict: 'neu' }
+    ],
+    winner: 'neu', winnerLabel: 'NEUTRAL', explanation: '2 von 3: NEUTRAL'
+  }
+];
+
+let currentSc = 0;
+function selectScScenario(idx, btn) {
+  currentSc = idx;
+  document.querySelectorAll('.sc-scenario-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  resetSc();
+}
+function resetSc() {
+  ['sc-out-1','sc-out-2','sc-out-3'].forEach(id => {
+    document.getElementById(id).innerHTML = '<span style="color:rgba(201,209,217,0.3)">Panel starten...</span>';
+    document.getElementById(id).classList.remove('loading');
+  });
+  ['sc-pill-pos','sc-pill-neu','sc-pill-neg'].forEach(id => document.getElementById(id).classList.remove('winner'));
+  document.getElementById('sc-final-value').textContent = '—';
+}
+
+function runSelfConsistency() {
+  resetSc();
+  const s = scScenarios[currentSc];
+  const ids = ['sc-out-1','sc-out-2','sc-out-3'];
+  ids.forEach(id => { document.getElementById(id).innerHTML = ''; document.getElementById(id).classList.add('loading'); });
+
+  s.runs.forEach((run, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(ids[i]);
+      el.classList.remove('loading');
+      el.innerHTML = run.out;
+      if (i === 2) {
+        setTimeout(() => {
+          const winPill = { pos: 'sc-pill-pos', neu: 'sc-pill-neu', neg: 'sc-pill-neg' }[s.winner];
+          document.getElementById(winPill).classList.add('winner');
+          document.getElementById('sc-final-value').textContent = s.winnerLabel;
+        }, 600);
+      }
+    }, (i + 1) * 900);
+  });
+}
+
+// ════════════════════════════════════
+// TREE OF THOUGHTS
+// ════════════════════════════════════
+const totPhases = [
+  {
+    info: '<strong>Phase 1 — Divergenz:</strong> Die KI entwickelt 3 radikal verschiedene Kampagnen-Ansätze. Kein Ansatz ist bevorzugt — das Ziel ist maximale Breite.',
+    nodes: {
+      root: true, branches: [
+        { label: 'Ansatz A', sub: 'Preisfokus', state: 'branch' },
+        { label: 'Ansatz B', sub: 'Emotion', state: 'branch' },
+        { label: 'Ansatz C', sub: 'Nachhaltigkeit', state: 'branch' }
+      ], master: false
+    }
+  },
+  {
+    info: '<strong>Phase 2 — Evaluation:</strong> Jeder Pfad wird nach Kosten, Viralität und Zielgruppen-Fit bewertet. Ansatz C fällt raus, A und B werden für die Konvergenz ausgewählt.',
+    nodes: {
+      root: true, branches: [
+        { label: 'Ansatz A', sub: '★ Kosten: gut\n★ Viral: mittel', state: 'selected' },
+        { label: 'Ansatz B', sub: '★ Emotion: stark\n★ Viral: hoch', state: 'selected' },
+        { label: 'Ansatz C', sub: '✗ Zielgruppe: miss\n✗ Kosten: hoch', state: 'rejected' }
+      ], master: false
+    }
+  },
+  {
+    info: '<strong>Phase 3 — Konvergenz:</strong> Die stärksten Elemente aus A (Preisklarheit) und B (emotionaler Hook) werden zu einem optimierten Master-Konzept kombiniert.',
+    nodes: {
+      root: true, branches: [
+        { label: 'Ansatz A', sub: 'Preisklarheit', state: 'selected' },
+        { label: 'Ansatz B', sub: 'Emotion', state: 'selected' },
+        { label: 'Ansatz C', sub: 'Verworfen', state: 'rejected' }
+      ], master: true
+    }
+  }
+];
+
+let totPhase = 0;
+function setTotPhase(idx, btn) {
+  totPhase = idx;
+  document.querySelectorAll('.tot-phase-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTot();
+}
+
+function renderTot() {
+  const svg = document.getElementById('tot-svg');
+  const phase = totPhases[totPhase];
+  const W = 700, H = 300;
+  const rootX = 80, rootY = H / 2;
+  const branchX = 280;
+  const branchYs = [60, 150, 240];
+  const masterX = 560, masterY = H / 2;
+
+  let markup = '';
+
+  // Edges root → branches
+  phase.nodes.branches.forEach((b, i) => {
+    const cls = b.state === 'rejected' ? 'tot-edge rejected' : (totPhase >= 2 && b.state === 'selected' ? 'tot-edge selected' : 'tot-edge');
+    markup += `<path class="${cls}" d="M${rootX+80},${rootY} C${rootX+160},${rootY} ${branchX-60},${branchYs[i]} ${branchX},${branchYs[i]}"/>`;
+  });
+
+  // Edges branches → master
+  if (phase.nodes.master) {
+    phase.nodes.branches.forEach((b, i) => {
+      if (b.state !== 'rejected') {
+        markup += `<path class="tot-edge selected" d="M${branchX+110},${branchYs[i]} C${branchX+180},${branchYs[i]} ${masterX-60},${masterY} ${masterX},${masterY}"/>`;
+      }
+    });
+  }
+
+  // Root node
+  markup += `<g class="tot-node tot-node-root">
+    <rect x="${rootX-40}" y="${rootY-28}" width="120" height="56" rx="4"/>
+    <text x="${rootX+20}" y="${rootY-8}" text-anchor="middle" font-size="12" font-weight="600" fill="white">Kampagne</text>
+    <text x="${rootX+20}" y="${rootY+10}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.5)">Ziel definiert</text>
+  </g>`;
+
+  // Branch nodes
+  phase.nodes.branches.forEach((b, i) => {
+    const cls = `tot-node tot-node-branch ${b.state}`;
+    const textColor = b.state === 'rejected' ? '#8C939E' : (b.state === 'selected' ? '#0052CC' : '#161A1D');
+    const subLines = b.sub.split('\n');
+    markup += `<g class="${cls}">
+      <rect x="${branchX}" y="${branchYs[i]-28}" width="110" height="56" rx="4"/>
+      <text x="${branchX+55}" y="${branchYs[i]-10}" text-anchor="middle" font-size="12" font-weight="600" fill="${textColor}">${b.label}</text>
+      <text x="${branchX+55}" y="${branchYs[i]+8}" text-anchor="middle" font-size="10" fill="${b.state === 'rejected' ? '#8C939E' : '#5E6673'}">${subLines[0]}</text>
+      ${subLines[1] ? `<text x="${branchX+55}" y="${branchYs[i]+22}" text-anchor="middle" font-size="10" fill="${b.state === 'rejected' ? '#8C939E' : '#5E6673'}">${subLines[1]}</text>` : ''}
+    </g>`;
+  });
+
+  // Master node
+  if (phase.nodes.master) {
+    markup += `<g class="tot-node tot-node-master">
+      <rect x="${masterX}" y="${masterY-32}" width="130" height="64" rx="4"/>
+      <text x="${masterX+65}" y="${masterY-12}" text-anchor="middle" font-size="12" font-weight="600" fill="#006644">Master-Konzept</text>
+      <text x="${masterX+65}" y="${masterY+6}" text-anchor="middle" font-size="10" fill="#00875A">Preis + Emotion</text>
+      <text x="${masterX+65}" y="${masterY+20}" text-anchor="middle" font-size="10" fill="#00875A">optimiert</text>
+    </g>`;
+  }
+
+  svg.innerHTML = markup;
+  document.getElementById('tot-phase-info').innerHTML = phase.info;
+}
+
+renderTot();
+
+// ════════════════════════════════════
+// JUNIOR / SENIOR MATCHER
+// ════════════════════════════════════
+const matcherTasks = [
+  { text: 'Erstelle 10 Betreffzeilen-Varianten für unseren Black-Friday-Newsletter mit dem Fokus auf Dringlichkeit.', correct: 'standard', explanation: 'Standard-Modell. Die Aufgabe ist klar und repetitiv: 10 Varianten, ein Fokus. Explizite Instruktionen reichen aus.' },
+  { text: 'Analysiere unsere letzten 6 Quartale und identifiziere, warum unsere Conversion Rate im dritten Quartal immer einbricht — trotz gleichem Budget.', correct: 'reasoning', explanation: 'Reasoning-Modell. Das ist eine komplexe Kausalanalyse mit Mustererkennung über mehrere Variablen. Braucht internen Chain-of-Thought.' },
+  { text: 'Übersetze diesen Produkttext ins Englische, behalte die gleiche Länge und den sachlichen Ton.', correct: 'standard', explanation: 'Standard-Modell. Klare, gut definierte Aufgabe mit expliziten Constraints. Kein komplexes Reasoning nötig.' },
+  { text: 'Entwickle eine Go-to-Market-Strategie für unser neues SaaS-Produkt im deutschen Mittelstand.', correct: 'reasoning', explanation: 'Reasoning-Modell. Eine GTM-Strategie erfordert mehrstufiges strategisches Denken, Abwägungen und Self-Correction — genau das, was Reasoning-Modelle intern leisten.' },
+  { text: 'Schreibe 5 Social-Media-Captions für unsere neue Herbstkollektion. Stil: frisch, jung, 18–25 Jährige.', correct: 'standard', explanation: 'Standard-Modell. Kreativer, klar umrissener Output mit definierten Parametern. Schnelle Ausführung mit expliziten Instruktionen.' },
+  { text: 'Warum performen unsere LinkedIn-Ads bei identischem Creative und Budget in München 40% schlechter als in Berlin?', correct: 'reasoning', explanation: 'Reasoning-Modell. Ursachenforschung mit mehreren möglichen Erklärungspfaden (Demografie, Wettbewerb, Verhalten). Braucht strukturiertes Problemlösen.' }
+];
+
+let matcherCurrent = 0, matcherScore = 0, matcherAnswered = false;
+
+function renderMatcherCard() {
+  const task = matcherTasks[matcherCurrent];
+  document.getElementById('matcher-task-text').textContent = task.text;
+  document.getElementById('matcher-feedback').style.display = 'none';
+  document.getElementById('matcher-next-btn').style.display = 'none';
+  ['matcher-btn-standard','matcher-btn-reasoning'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('correct','wrong','disabled');
+  });
+  matcherAnswered = false;
+}
+
+function matcherAnswer(choice) {
+  if (matcherAnswered) return;
+  matcherAnswered = true;
+  const task = matcherTasks[matcherCurrent];
+  const correct = choice === task.correct;
+  const chosenId = 'matcher-btn-' + choice;
+  const correctId = 'matcher-btn-' + task.correct;
+  document.getElementById(chosenId).classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) document.getElementById(correctId).classList.add('correct');
+  ['matcher-btn-standard','matcher-btn-reasoning'].forEach(id => document.getElementById(id).classList.add('disabled'));
+  const fb = document.getElementById('matcher-feedback');
+  fb.className = 'matcher-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = `<strong>${correct ? '✓ Richtig!' : '✗ Nicht ganz.'}</strong>${task.explanation}`;
+  fb.style.display = 'block';
+  if (correct) {
+    matcherScore++;
+    document.getElementById('matcher-score-val').textContent = matcherScore;
+    document.getElementById('matcher-progress-fill').style.width = (matcherScore / matcherTasks.length * 100) + '%';
+  }
+  document.getElementById('matcher-next-btn').style.display = 'inline-block';
+}
+
+function matcherNext() {
+  matcherCurrent++;
+  if (matcherCurrent >= matcherTasks.length) {
+    document.getElementById('matcher-card-wrap').style.display = 'none';
+    const result = document.getElementById('matcher-result');
+    result.style.display = 'block';
+    const pct = matcherScore / matcherTasks.length;
+    let badge, sub;
+    if (pct === 1) { badge = '🏆'; sub = 'Perfekt. Du kennst den Unterschied.'; }
+    else if (pct >= 0.67) { badge = '🥇'; sub = 'Sehr gut. Fast alles richtig.'; }
+    else { badge = '📚'; sub = 'Nochmal üben, das Prinzip wird klar.'; }
+    document.getElementById('matcher-badge').textContent = badge;
+    document.getElementById('matcher-result-score').textContent = matcherScore + ' / ' + matcherTasks.length;
+    document.getElementById('matcher-result-sub').textContent = sub;
+  } else {
+    renderMatcherCard();
+  }
+}
+
+function matcherRestart() {
+  matcherCurrent = 0; matcherScore = 0;
+  document.getElementById('matcher-score-val').textContent = 0;
+  document.getElementById('matcher-progress-fill').style.width = '0%';
+  document.getElementById('matcher-result').style.display = 'none';
+  document.getElementById('matcher-card-wrap').style.display = 'block';
+  renderMatcherCard();
+}
+
+renderMatcherCard();
+
+// ════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════
+const questions = [
+  { q: 'Was ist Chain-of-Thought (CoT) Prompting?', options: ['Eine Technik, bei der mehrere KI-Modelle verkettet werden', 'Die Anweisung an die KI, Zwischenschritte laut zu denken statt direkt zu antworten', 'Eine Methode zur Token-Optimierung', 'Das Hinzufügen von Beispielen zum Prompt'], correct: 1, feedback: 'Richtig. CoT zwingt die KI, ihren Denkprozess Schritt für Schritt zu externalisieren. Jeder korrekte Zwischenschritt erhöht die Wahrscheinlichkeit des nächsten korrekten Schritts.' },
+  { q: 'Warum verbessert CoT die Genauigkeit bei Berechnungen?', options: ['Weil die KI mehr Token verbraucht', 'Weil jeder korrekte Token die Wahrscheinlichkeit des nächsten korrekten Tokens erhöht', 'Weil CoT die Temperature senkt', 'Weil längere Prompts immer besser sind'], correct: 1, feedback: 'Korrekt. Die probabilistische Natur von LLMs bedeutet: Baut man auf korrekten Zwischenschritten auf, steigt die Gesamtgenauigkeit kumulativ.' },
+  { q: 'Was ist der erste Schritt beim Step-Back Prompting?', options: ['Die spezifische Aufgabe direkt stellen', 'Eine allgemeinere, übergeordnete Frage nach Prinzipien stellen', 'JSON-Format anfordern', 'Das Modell wechseln'], correct: 1, feedback: 'Richtig. Step-Back bedeutet: Erst abstrahieren, dann anwenden. Zuerst die übergeordneten Prinzipien aktivieren, dann die spezifische Aufgabe mit diesem Kontext lösen.' },
+  { q: 'Was bedeutet "nicht-deterministisch" bei LLMs?', options: ['Die KI antwortet immer gleich', 'Gleicher Input führt nicht zwingend zum gleichen Output', 'Die KI kann keine Fakten merken', 'LLMs funktionieren nur mit strukturierten Prompts'], correct: 1, feedback: 'Korrekt. Die probabilistische Token-Auswahl sorgt für Varianz. Das ist der Grund, warum Self-Consistency bei kritischen Aufgaben wertvoll ist.' },
+  { q: 'Wie funktioniert Majority Voting bei Self-Consistency?', options: ['Man schickt den Prompt an drei verschiedene KI-Anbieter', 'Man schickt denselben Prompt mehrfach und wählt die häufigste Antwort', 'Man lässt die KI drei Mal rechnen und addiert die Ergebnisse', 'Man aktiviert eine spezielle API-Option'], correct: 1, feedback: 'Genau. Indem man denselben Prompt mehrfach abschickt (in neuen Chats), werden zufällige Halluzinationen durch die Mehrheit korrekter Pfade überstimmt.' },
+  { q: 'Was unterscheidet Tree of Thoughts von Chain-of-Thought?', options: ['ToT ist für Bilder, CoT für Text', 'CoT ist linear, ToT erkundet mehrere Pfade gleichzeitig und bewertet sie', 'ToT ist langsamer aber identisch', 'CoT braucht Reasoning-Modelle, ToT nicht'], correct: 1, feedback: 'Richtig. CoT = ein linearer Gedankenpfad. ToT = mehrere Pfade parallel, Evaluation, dann Konvergenz zum besten Ergebnis. Ideal für strategische Aufgaben.' },
+  { q: 'Wofür eignet sich ein Standard-Modell am besten?', options: ['Komplexe Wettbewerbsanalysen mit vielen Variablen', 'Strategische Go-to-Market-Planung', 'Klar definierte, repetitive Aufgaben mit expliziten Instruktionen', 'Kausalanalysen über mehrere Datenpunkte'], correct: 2, feedback: 'Korrekt. Standard-Modelle sind schnell und kosteneffizient bei gut definierten, instruktionsbasierten Aufgaben wie Textvarianten oder Übersetzungen.' },
+  { q: 'Was macht ein Reasoning-Modell intern, bevor es antwortet?', options: ['Es sucht im Internet', 'Es führt automatisch einen internen Chain-of-Thought aus', 'Es erhöht seine Temperature', 'Es konvertiert den Input in JSON'], correct: 1, feedback: 'Richtig. Reasoning-Modelle (wie o1, Claude-3.5-Sonnet im Extended-Thinking-Modus) führen intern Selbst-Überprüfungsschritte durch, bevor sie die Antwort ausgeben.' },
+  { q: 'Was ist der Reflexions-Loop?', options: ['Eine Schleife, die denselben Prompt wiederholt', 'Die KI schreibt eine Analyse, kritisiert diese selbst und korrigiert das Ergebnis', 'Ein Feature in ChatGPT Plus', 'Eine Methode zum Token sparen'], correct: 1, feedback: 'Genau. Der Reflexions-Loop nutzt die Fähigkeit der KI, besser zu kritisieren als zu schreiben. Erst Output, dann Skeptiker-Kritik, dann korrigierter Output.' },
+  { q: 'Warum ist Step-Back Prompting besonders bei Marketing-Strategie wertvoll?', options: ['Weil es JSON-Output erzeugt', 'Weil es die KI zwingt, relevantes strategisches Hintergrundwissen zu aktivieren, bevor sie die Detailaufgabe löst', 'Weil es Prompts kürzer macht', 'Weil es Self-Consistency automatisch einbaut'], correct: 1, feedback: 'Richtig. Indem man erst nach Prinzipien fragt, aktiviert man die relevante "Experten-Ecke" im Vektorraum der KI. Die darauffolgende Antwort wird deutlich kontextreicher.' }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach((lbl, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<div class="opt-indicator">${lbl}</div><span>${q.options[i]}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '✓';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = `<strong>✓ Richtig!${streak >= 3 ? ' 🔥 ' + streak + 'er-Streak!' : ''}</strong>${q.feedback}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '✗';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '✓';
+    streak = 0; document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = `<strong>✗ Leider falsch.</strong>${q.feedback}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1) { badge = '🏆'; title = 'Logik-Experte!'; sub = 'Perfekte Punktzahl. Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '🥇'; title = 'Sehr stark!'; sub = 'Fast perfekt. Du beherrschst die Logik-Ebene.'; }
+  else if (pct >= 0.6) { badge = '🥈'; title = 'Guter Ansatz.'; sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else { badge = '📚'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// ─── TOOLTIP POSITIONING ─────────────────────
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var triggerRect = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var popupW = popup.offsetWidth;
+    var popupH = popup.offsetHeight;
+    var triggerCenterX = triggerRect.left + triggerRect.width / 2;
+    var rawLeft = triggerCenterX - popupW / 2;
+    var clampedLeft = Math.max(8, Math.min(rawLeft, vw - popupW - 8));
+    popup.style.left = clampedLeft + 'px';
+    popup.style.top = (triggerRect.top - popupH - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (triggerCenterX - clampedLeft) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+</body>
+</html>
