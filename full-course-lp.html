@@ -10,8 +10,8 @@
   <!-- End Google Tag Manager -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prompting für Marketer – Kostenloser KI-Kurs</title>
-  <meta name="description" content="Lern in 6 Lektionen, wie du KI-Modelle präzise steuerst und bessere Ergebnisse aus jedem Prompt holst. Kostenlos, sofort, direkt anwendbar." />
+  <title>Marketing KI-Bootcamp – Der Praxis-Kurs für Marketer</title>
+  <meta name="description" content="KI im Marketing lernen – praxisnah, speziell für den deutschen Markt, ohne Hype. Jetzt das Prompting-Modul gratis sichern." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
@@ -448,6 +448,83 @@
     .inline-form input[type="email"]::placeholder { color: rgba(255,255,255,.35); }
     .inline-form input[type="email"]:focus { border-color: var(--clr-accent); }
 
+    /* ─── Course Overview ──────────────────────────────────── */
+    .course { background: var(--clr-bg-light); }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 36px;
+      margin-bottom: 40px;
+    }
+    .module-card {
+      background: var(--clr-bg-white);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      transition: box-shadow .2s;
+    }
+    .module-card:hover { box-shadow: var(--shadow-sm); }
+    .module-card--highlight {
+      border-color: var(--clr-accent);
+      background: var(--clr-accent-lt);
+    }
+    .module-card__num {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--clr-text-muted);
+      background: var(--clr-bg-light);
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .module-card--highlight .module-card__num {
+      background: var(--clr-accent);
+      color: #fff;
+    }
+    .module-card h3 {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--clr-text);
+    }
+    .module-card--highlight h3 { color: var(--clr-accent-dk); }
+    .module-card__sub {
+      font-size: .75rem;
+      font-weight: 400;
+      margin-top: 2px;
+      color: var(--clr-text-muted);
+    }
+    .module-card__sub a {
+      color: inherit;
+      text-decoration: underline;
+    }
+    .module-card__sub a:hover { color: var(--clr-accent); }
+
+    .course__price-box {
+      background: var(--clr-bg-dark);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .price-tag { display: flex; align-items: baseline; gap: 6px; }
+    .price-tag__amount {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .price-tag__label { color: var(--clr-text-light); font-size: .9rem; }
+    .course__price-box p { color: var(--clr-text-light); font-size: .9rem; max-width: 340px; line-height: 1.6; }
+    .course__price-box p strong { color: #fff; }
+
     /* ─── About ────────────────────────────────────────────── */
     .about { background: var(--clr-bg-white); }
 
@@ -621,11 +698,15 @@
       .pain__grid { grid-template-columns: 1fr; }
       .promise__grid { grid-template-columns: 1fr; }
       .module-topics { grid-template-columns: 1fr 1fr; }
+      .modules-grid { grid-template-columns: 1fr 1fr; }
       .about__grid { grid-template-columns: 1fr; }
+      .course__price-box { flex-direction: column; text-align: center; }
+      .course__price-box .btn { width: 100%; }
     }
 
     @media (max-width: 520px) {
       .module-topics { grid-template-columns: 1fr; }
+      .modules-grid { grid-template-columns: 1fr; }
       .signup-box { padding: 24px; }
       .inline-form { flex-direction: column; }
       .inline-form input, .inline-form .btn { width: 100%; }
@@ -642,7 +723,7 @@
   <header style="position:relative; background: var(--clr-bg-dark);">
     <nav class="nav">
       <div class="nav__logo">Marketing <span>KI-Bootcamp</span></div>
-      <a href="#free-module" class="btn btn--primary nav__cta">Jetzt kostenlos anmelden</a>
+      <a href="#free-module" class="btn btn--primary nav__cta">Gratis-Modul sichern</a>
     </nav>
   </header>
 
@@ -652,11 +733,11 @@
       <div class="hero__layout">
         <div class="hero__copy">
           <h1>
-            Der Prompting-Kurs für Marketer. <em>Kostenlos.</em>
+            KI verdrängt Marketer. Nur nicht die, <em>die sie beherrschen</em>.
           </h1>
 
           <p class="hero__sub">
-            In 6 Lektionen lernst du, wie du KI-Modelle präzise steuerst — und aus jedem Prompt bessere Ergebnisse holst. Kein Hype, kein Vorwissen nötig. Nur das, was du als Marketer heute direkt einsetzen kannst.
+            Wir haben den KI-Kurs gebaut, den wir als Online-Marketer und Selbstständige gerne gehabt hätten. Kein Hype, sondern pures, erprobtes Praxiswissen aus >100 Projekten.
           </p>
 
         </div>
@@ -664,20 +745,20 @@
         <div class="hero__form">
           <div class="signup-box" id="hero-signup">
             <div class="form-fields">
-              <p class="signup-box__title">Dein kostenloser Kurs — sofort verfügbar</p>
-              <p class="signup-box__sub">Trag dich ein und erhalte <strong>sofort Zugang</strong> zum vollständigen Kurs "Prompting für Marketer".</p>
+              <p class="signup-box__title">Kauf die Katze nicht im Sack: Dein Gratis-Modul</p>
+              <p class="signup-box__sub">Trag dich ein und erhalte <strong>sofort Zugang</strong> zum Modul "Prompting für Marketer".</p>
               <form class="form-row" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
                 <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
                 <button type="submit" class="btn btn--primary btn--full btn--lg">
                   Zugang erhalten →
                 </button>
               </form>
-              <p class="form-note">Kein Spam. Nur dein Kurs + gelegentliche Updates. Abmeldung jederzeit.</p>
+              <p class="form-note">Kein Spam. Nur dein Modul + gelegentliche Updates. Abmeldung jederzeit.</p>
             </div>
             <div class="form-success" id="success-hero">
               <div class="form-success__icon">✓</div>
               <p class="form-success__title">Auf dem Weg zu dir!</p>
-              <p class="form-success__sub">Schau gleich in dein Postfach — du bekommst sofortigen Zugang zum Kurs.</p>
+              <p class="form-success__sub">Schau gleich in dein Postfach — du bekommst sofortigen Zugang zum Prompting-Modul.</p>
             </div>
           </div>
         </div>
@@ -727,9 +808,9 @@
   <!-- ─── PROMISE ───────────────────────────────────────────── -->
   <section class="section promise">
     <div class="container">
-      <span class="eyebrow reveal">Was du lernst</span>
+      <span class="eyebrow reveal">Was du bekommst</span>
       <h2 class="reveal">Kein Theorie-Blabla. Nur das,<br />was du heute direkt einsetzen kannst.</h2>
-      <p class="lead reveal" style="margin-top: 12px; max-width: 600px;">Nach dem Kurs weißt du genau, wie du Prompts schreibst, die wirklich funktionieren — und warum. Kein Raten mehr, kein Trial-and-Error.</p>
+      <p class="lead reveal" style="margin-top: 12px; max-width: 600px;">Nach dem Kurs weißt du genau, welche Tools du wofür nutzt, wie du Prompts schreibst, die wirklich funktionieren, und wie du KI sinnvoll in deinen Alltag integrierst — ohne jeden Trend mitzumachen.</p>
 
       <div class="promise__grid" style="margin-top: 44px;">
         <div class="promise__item reveal reveal-delay-1">
@@ -738,23 +819,23 @@
         </div>
         <div class="promise__item reveal reveal-delay-2">
           <div class="promise__check">✓</div>
-          <p><strong>Du produzierst qualitative Inhalte — schnell:</strong> Mit den richtigen Prompting-Techniken holst du aus KI-Modellen Texte raus, die du wirklich verwenden kannst.</p>
+          <p><strong>Du produzierst qualitative Inhalte - schnell:</strong> Texte, Bilder oder Videos. Du hast einen klaren Workflow für jeden Content-Typ, den du in deinem Marketing brauchst.</p>
         </div>
         <div class="promise__item reveal reveal-delay-3">
           <div class="promise__check">✓</div>
-          <p><strong>Du verstehst, wie KI-Modelle wirklich funktionieren:</strong> Kein Mythos, kein Hype. Du weißt, was im Hintergrund passiert — und wie du das zu deinem Vorteil nutzt.</p>
+          <p><strong>Du weißt, welches Tool wofür gut ist:</strong> Kein Tool-Hopping mehr. Du kennst die relevanten Werkzeuge, ihre Stärken und weißt, welche du brauchst und welche nicht.</p>
         </div>
         <div class="promise__item reveal reveal-delay-4">
           <div class="promise__check">✓</div>
-          <p><strong>Du baust eigene KI-Assistenten:</strong> Gems, GPTs, Projects — du richtest dir Assistenten ein, die deine Arbeitsweise kennen und immer wieder für dich liefern.</p>
         </div>
+          <p><strong>Du bleibst up-to-date, ohne täglich Stunden zu recherchieren:</strong> Du hast ein System, mit dem du relevante KI-Entwicklungen im Blick behältst, ohne im Informations-Overload zu versinken.</p>
         <div class="promise__item reveal reveal-delay-1">
           <div class="promise__check">✓</div>
-          <p><strong>Du optimierst Prompts systematisch:</strong> Du weißt, wie du Prompts testest und verbesserst — und wann ein Prompt gut genug ist, um ihn zu verwenden.</p>
+          <p><strong>Du arbeitest rechtskonform:</strong> Was du im deutschen Markt bei KI-Inhalten rechtlich beachten musst. Klar erklärt, ohne Juristendeutsch.</p>
         </div>
         <div class="promise__item reveal reveal-delay-2">
           <div class="promise__check">✓</div>
-          <p><strong>Du startest sofort — kostenlos:</strong> Kein Setup, keine Kreditkarte, kein Risiko. Trag dich ein und fang heute noch an.</p>
+          <p><strong>Du automatisierst erste Aufgaben:</strong> Nicht alles, aber die richtigen. Du weißt, wo Automatisierung wirklich Zeit spart und wie du anfängst.</p>
         </div>
       </div>
     </div>
@@ -763,9 +844,9 @@
   <!-- ─── FREE MODULE ───────────────────────────────────────── -->
   <section class="section free-module" id="free-module">
     <div class="container">
-      <span class="eyebrow reveal">Kursinhalt</span>
-      <h2 class="reveal">6 Lektionen. Alles, was du<br />zum Prompting brauchst.</h2>
-      <p class="lead reveal" style="margin-top: 12px;">Der Kurs deckt alles ab, was du als Marketer wirklich brauchst — von den Grundlagen bis zu fortgeschrittenen Techniken. Kein Teaser, kein Halbwissen, kein Appetithappen.</p>
+      <span class="eyebrow reveal">Gratis starten</span>
+      <h2 class="reveal">Das Prompting-Modul — sofort,<br />kostenlos, direkt anwendbar.</h2>
+      <p class="lead reveal" style="margin-top: 12px;">Trag dich ein und du bekommst sofortigen Zugang zum kompletten Prompting-Modul. Kein Teaser, kein Appetithappen — das ganze Modul mit allen Inhalten.</p>
 
       <div class="module-topics reveal" style="margin-top: 40px;">
         <div class="module-topic">
@@ -801,8 +882,8 @@
       </div>
 
       <div class="free-module__cta reveal">
-        <h3>Jetzt kostenlos anmelden</h3>
-        <p>Direkt nach Eintragung bekommst du Zugang zum vollständigen Kurs.</p>
+        <h3>Jetzt Zugang sichern — kostenlos</h3>
+        <p>Direkt nach Eintragung bekommst du den Link zum vollständigen Prompting-Modul.</p>
         <form class="inline-form" id="form-module" onsubmit="handleSignup(event, 'form-module')">
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
           <button type="submit" class="btn btn--primary">Jetzt gratis anmelden →</button>
@@ -816,6 +897,85 @@
     </div>
   </section>
 
+  <!-- ─── COURSE OVERVIEW ───────────────────────────────────── -->
+  <section class="section course" id="kurs">
+    <div class="container">
+      <span class="eyebrow reveal">Der vollständige Kurs</span>
+      <h2 class="reveal">13 Module. Alles, was du für<br />KI im Marketing brauchst.</h2>
+      <p class="lead reveal" style="margin-top: 12px; max-width: 620px;">Von den Grundlagen bis zu Automatisierung und rechtlichen Fragen — der Kurs begleitet dich vom ersten Prompt bis zum fertigen KI-Workflow.</p>
+
+      <div class="modules-grid reveal" style="margin-top: 36px;">
+        <div class="module-card">
+          <span class="module-card__num">01</span>
+          <h3>Basiswissen</h3>
+        </div>
+        <div class="module-card module-card--highlight">
+          <span class="module-card__num">02</span>
+          <div>
+            <h3>Prompting</h3>
+            <p class="module-card__sub"><a href="#free-module">Jetzt gratis erhalten</a></p>
+          </div>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">03</span>
+          <h3>Contentproduktion</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">04</span>
+          <h3>Bildkreation</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">05</span>
+          <h3>Videokreation</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">06</span>
+          <h3>Recherche &amp; Analyse</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">07</span>
+          <h3>Daten-Management</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">08</span>
+          <h3>Agenten &amp; Automatisierung</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">09</span>
+          <h3>Vibe Coding</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">10</span>
+          <h3>KI-Tools</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">11</span>
+          <h3>Rechtliches</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">12</span>
+          <h3>Up-to-date bleiben</h3>
+        </div>
+        <div class="module-card">
+          <span class="module-card__num">13</span>
+          <h3>Zukunftsausblick</h3>
+        </div>
+      </div>
+
+      <div class="course__price-box reveal">
+        <div>
+          <div class="price-tag">
+            <span class="price-tag__amount">€ 99</span>
+            <span class="price-tag__label">einmalig · kein Abo</span>
+          </div>
+          <p style="margin-top: 10px;"><strong>Einmaliger Preis. Kein Abo.</strong> Du bekommst Zugang zu allen 13 Modulen, regelmäßige Updates und alle neuen Inhalte — ohne Folgekosten.</p>
+        </div>
+        <a href="#free-module" class="btn btn--primary btn--lg">
+          Erstmal gratis starten →
+        </a>
+      </div>
+    </div>
+  </section>
 
   <!-- ─── ABOUT ─────────────────────────────────────────────── -->
   <section class="section about" id="about">
@@ -871,55 +1031,55 @@
           </button>
           <div class="faq__answer">
             <div class="faq__answer__inner">
-              <strong>Ja, genau dafür ist der Kurs gemacht.</strong> Du brauchst kein technisches Vorwissen, keinen Programmier-Hintergrund, keine Vorerfahrung mit KI. Wir fangen bei null an — aber ohne dich wie einen Anfänger zu behandeln. Du bist Marketer, und das bleibt der Fokus. KI ist das Werkzeug, nicht das Thema.
+              <strong>Ja, genau dafür ist der Kurs gemacht.</strong> Du brauchst kein technisches Vorwissen, kein Programmier-Hintergrund, keine Vorerfahrung mit KI. Wir fangen bei null an — aber ohne dich wie ein Anfänger zu behandeln. Du bist Marketer, und das bleibt der Fokus. KI ist das Werkzeug, nicht das Thema.
             </div>
           </div>
         </div>
 
         <div class="faq__item reveal reveal-delay-1">
           <button class="faq__question" onclick="toggleFaq(this)">
-            Was lerne ich konkret in diesem Kurs?
+            Ist das viel Theorie oder wirklich praxisnah?
             <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="faq__answer">
             <div class="faq__answer__inner">
-              Der Kurs umfasst 6 Lektionen: Prompting Basics, Prompt Engineering, Prompting Markups, Meta Prompting, Gems/GPTs/Projects und Testing & Optimierung. <strong>Nach jeder Lektion kannst du das Gelernte direkt anwenden</strong> — in deinen echten Marketing-Aufgaben, mit deinen echten Tools.
+              Praxisnah ist kein Versprechen, das wir leichtfertig machen. <strong>Jedes Modul hat einen klaren, anwendbaren Kern</strong>: Was machst du damit? Wie setzt du es ein? Welche Tools nutzt du dafür? Hintergrundinformationen sind dabei — aber nur so viel, wie du brauchst, um zu verstehen, was du tust. Kein Wissen um des Wissens willen.
             </div>
           </div>
         </div>
 
         <div class="faq__item reveal reveal-delay-2">
           <button class="faq__question" onclick="toggleFaq(this)">
-            Ist das viel Theorie oder wirklich praxisnah?
+            KI ändert sich ständig — ist der Kurs dann nicht schnell veraltet?
             <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="faq__answer">
             <div class="faq__answer__inner">
-              Praxisnah ist kein Versprechen, das wir leichtfertig machen. <strong>Jede Lektion hat einen klaren, anwendbaren Kern</strong>: Was machst du damit? Wie setzt du es ein? Hintergrundinformationen sind dabei — aber nur so viel, wie du brauchst, um zu verstehen, was du tust. Kein Wissen um des Wissens willen.
+              Das ist eine berechtigte Frage. <strong>Wir aktualisieren den Kurs regelmäßig</strong> — neue Tools, veränderte Plattformen, neue Techniken. Du zahlst einmal und bekommst alle Updates ohne Aufpreis. Dazu gibt es ein eigenes Modul darüber, wie du selbst auf dem Laufenden bleibst — damit du nicht von jedem Update abhängig bist.
             </div>
           </div>
         </div>
 
         <div class="faq__item reveal reveal-delay-3">
           <button class="faq__question" onclick="toggleFaq(this)">
-            KI ändert sich ständig — bleibt der Kurs aktuell?
+            Was passiert nach dem Gratis-Modul?
             <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="faq__answer">
             <div class="faq__answer__inner">
-              Das ist eine berechtigte Frage. <strong>Wir aktualisieren den Kurs regelmäßig</strong> — neue Tools, neue Techniken, neue Erkenntnisse. Als Kursteilnehmer hast du immer Zugang zur aktuellen Version. Und du lernst im Kurs auch, wie du selbst auf dem Laufenden bleibst — damit du nicht von jedem Update abhängig bist.
+              Du bekommst das vollständige Prompting-Modul — kein Teaser, kein Halbwissen. <strong>Danach entscheidest du selbst</strong>, ob du den Rest des Kurses für €99 dazukaufst. Kein automatisches Abo, kein Upsell-Druck, keine ständigen Mails. Du bekommst gelegentlich Updates von uns — und wenn du mehr willst, findest du den Weg zum Kurs.
             </div>
           </div>
         </div>
 
         <div class="faq__item reveal reveal-delay-4">
           <button class="faq__question" onclick="toggleFaq(this)">
-            Was unterscheidet diesen Kurs von anderen Prompting-Ressourcen?
+            Was unterscheidet den Kurs von anderen KI-Kursen?
             <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="faq__answer">
             <div class="faq__answer__inner">
-              Die meisten Prompting-Guides sind entweder zu technisch oder zu oberflächlich — und kommen aus dem US-Markt, ohne Bezug zur deutschen Sprache, Tonalität und Plattformen. <strong>Wir sind selbst Marketer und reden aus der Praxis: eigene Projekte, echter Markt, keine theoretischen Szenarien.</strong> Und das Beste: Du musst nichts dafür zahlen.
+              Die meisten KI-Kurse sind entweder zu technisch oder zu oberflächlich. Viele kommen aus dem US-Markt und ignorieren, was im deutschsprachigen Raum relevant ist — Sprache, Tonalität, Plattformen, Rechtslage. <strong>Wir reden aus der Praxis: eigene Projekte, echter Markt, keine theoretischen Szenarien.</strong> Dazu sind wir selbst Marketer — kein Tech-Hintergrund, sondern derselbe Ausgangspunkt wie du.
             </div>
           </div>
         </div>
@@ -932,20 +1092,20 @@
   <section class="final-cta" id="signup">
     <div class="container">
       <span class="eyebrow reveal" style="display:block; margin-bottom: 16px;">Fang heute an</span>
-      <h2 class="reveal">Der Prompting-Kurs für Marketer.<br /><em style="font-style:normal; color:var(--clr-accent);">Kostenlos. Sofort. Direkt anwendbar.</em></h2>
-      <p class="lead reveal">Trag dich ein, bekomm sofortigen Zugang und fang heute noch an — kein Risiko, kein Trick, €0.</p>
+      <h2 class="reveal">Das Prompting-Modul<br />wartet auf dich.</h2>
+      <p class="lead reveal">Trag dich ein, bekomm sofortigen Zugang und fang an — kostenlos, ohne Risiko, ohne Bullshit.</p>
 
       <div class="reveal">
         <form class="final-signup" id="form-final" onsubmit="handleSignup(event, 'form-final')">
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
           <button type="submit" class="btn btn--primary btn--full btn--lg">
-            Jetzt kostenlos Zugang sichern →
+            Jetzt Prompting-Modul gratis sichern →
           </button>
         </form>
         <div class="form-success" id="success-final" style="display:none; margin-top: 24px;">
           <div class="form-success__icon" style="margin: 0 auto 16px;">✓</div>
           <p class="form-success__title">Alles klar — bis gleich im Postfach!</p>
-          <p class="form-success__sub">Du bekommst sofortigen Zugang zum Kurs. Wir freuen uns, dass du dabei bist.</p>
+          <p class="form-success__sub">Du bekommst sofortigen Zugang zum Prompting-Modul. Wir freuen uns, dass du dabei bist.</p>
         </div>
         <p class="final-cta__note">Kein Spam. Abmeldung jederzeit. €0, kein Trick.</p>
       </div>
@@ -1067,7 +1227,8 @@
     });
 
     // ── Staggered grid reveal ──────────────────────────────────
-    document.querySelectorAll('.module-topics .module-topic').forEach((card, i) => {
+    // Add slight stagger to grid items that don't already have delay classes
+    document.querySelectorAll('.modules-grid .module-card, .module-topics .module-topic').forEach((card, i) => {
       card.style.transitionDelay = `${(i % 3) * 0.07}s`;
     });
   </script>
