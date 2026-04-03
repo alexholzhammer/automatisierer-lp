@@ -117,6 +117,15 @@
       box-shadow: 0 6px 24px rgba(14,165,233,.45);
     }
     .btn--primary:active { transform: translateY(0); }
+    .btn--ghost {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    .btn--ghost:hover {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.6);
+    }
     .btn--lg { padding: 17px 36px; font-size: 1.1rem; border-radius: 12px; }
     .btn--full { width: 100%; }
 
@@ -616,7 +625,7 @@
   <header style="position:relative; background: var(--clr-bg-dark);">
     <nav class="nav">
       <div class="nav__logo">Marketing <span>KI-Bootcamp</span></div>
-      <a href="#free-module" class="btn btn--primary nav__cta">Jetzt kostenlos anmelden</a>
+      <a href="#free-module" class="btn btn--ghost nav__cta">Jetzt kostenlos Zugang sichern →</a>
     </nav>
   </header>
 
@@ -624,14 +633,14 @@
   <section class="hero" id="hero">
     <div class="container">
       <div class="hero__centered">
-        <div class="hero__badge">Kostenlos · Sofort verfügbar · Kein Vorwissen nötig</div>
+        <div class="hero__badge">Kein Vorwissen nötig · Sofort verfügbar · €0</div>
         <h1>Der Prompting-Kurs<br />für Marketer. <em>Kostenlos.</em></h1>
         <p class="hero__sub">
           In 6 Lektionen lernst du, wie du KI-Modelle präzise steuerst — und aus jedem Prompt bessere Ergebnisse holst. Kein Hype, kein Vorwissen nötig.
         </p>
         <form class="hero__form-inline" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
-          <button type="submit" class="btn btn--primary btn--lg">Zugang erhalten →</button>
+          <button type="submit" class="btn btn--primary btn--lg">Jetzt kostenlos Zugang sichern →</button>
         </form>
         <div class="form-success" id="success-hero" style="display:none; margin-top: 20px;">
           <div class="form-success__icon" style="margin: 0 auto 12px;">✓</div>
@@ -761,9 +770,10 @@
       <div class="free-module__cta reveal">
         <h3>Jetzt kostenlos anmelden</h3>
         <p>Direkt nach Eintragung bekommst du Zugang zum vollständigen Kurs.</p>
+        <p style="margin-bottom: 20px; font-size: .95rem; color: rgba(255,255,255,.6);">Das alles bekommst du. Kostenlos, sofort, ohne Kreditkarte.</p>
         <form class="inline-form" id="form-module" onsubmit="handleSignup(event, 'form-module')">
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
-          <button type="submit" class="btn btn--primary">Jetzt gratis anmelden →</button>
+          <button type="submit" class="btn btn--primary">Jetzt kostenlos Zugang sichern →</button>
         </form>
         <div class="form-success" id="success-module" style="display:none; color:#fff; margin-top: 16px;">
           <div class="form-success__icon" style="margin:0 auto 12px;">✓</div>
