@@ -191,8 +191,7 @@
 
     .hero h1 {
       color: #fff;
-      max-width: 760px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .hero h1 em {
       font-style: normal;
@@ -201,50 +200,29 @@
 
     .hero__sub {
       color: var(--clr-text-light);
-      max-width: 580px;
-      font-size: 1.1rem;
-      line-height: 1.7;
-      margin-bottom: 32px;
+      font-size: 1.15rem;
+      line-height: 1.75;
+      margin-bottom: 36px;
     }
 
-    /* ─── Hero Layout ───────────────────────── */
-    .hero__layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 56px;
-      align-items: center;
+    /* ─── Hero Centered Layout ──────────────────────────────── */
+    .hero__centered {
+      text-align: center;
+      max-width: 680px;
+      margin-inline: auto;
     }
-    .hero__copy { display: flex; flex-direction: column; }
 
-    /* ─── Signup Form ──────────────────────────────────────── */
-    .signup-box {
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.1);
-      backdrop-filter: blur(12px);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-    }
-    .signup-box__title {
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .signup-box__sub {
-      color: var(--clr-text-light);
-      font-size: .875rem;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-    .signup-box__sub strong { color: #fff; }
-    .form-row {
+    .hero__form-inline {
       display: flex;
-      flex-direction: column;
       gap: 10px;
+      max-width: 480px;
+      margin-inline: auto;
+      flex-wrap: wrap;
     }
-    .form-row input[type="text"],
-    .form-row input[type="email"] {
-      padding: 13px 16px;
+    .hero__form-inline input[type="email"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 15px 18px;
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.15);
       background: rgba(255,255,255,.08);
@@ -254,15 +232,15 @@
       outline: none;
       transition: border-color .2s, background .2s;
     }
-    .form-row input::placeholder { color: rgba(255,255,255,.35); }
-    .form-row input:focus {
+    .hero__form-inline input[type="email"]::placeholder { color: rgba(255,255,255,.35); }
+    .hero__form-inline input[type="email"]:focus {
       border-color: var(--clr-accent);
       background: rgba(255,255,255,.12);
     }
     .form-note {
       font-size: .75rem;
       color: rgba(255,255,255,.35);
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     /* Success State */
@@ -289,6 +267,7 @@
       margin-top: 20px;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 20px;
       flex-wrap: wrap;
     }
@@ -617,7 +596,8 @@
     @media (max-width: 768px) {
       .section { padding-block: 56px; }
       .nav__cta { display: none; }
-      .hero__layout { grid-template-columns: 1fr; gap: 40px; }
+      .hero__form-inline { flex-direction: column; }
+      .hero__form-inline input, .hero__form-inline .btn { width: 100%; }
       .pain__grid { grid-template-columns: 1fr; }
       .promise__grid { grid-template-columns: 1fr; }
       .module-topics { grid-template-columns: 1fr 1fr; }
@@ -626,7 +606,6 @@
 
     @media (max-width: 520px) {
       .module-topics { grid-template-columns: 1fr; }
-      .signup-box { padding: 24px; }
       .inline-form { flex-direction: column; }
       .inline-form input, .inline-form .btn { width: 100%; }
     }
@@ -648,39 +627,23 @@
 
   <!-- ─── HERO ─────────────────────────────────────────────── -->
   <section class="hero" id="hero">
-    <div class="container container--wide">
-      <div class="hero__layout">
-        <div class="hero__copy">
-          <h1>
-            Der Prompting-Kurs für Marketer. <em>Kostenlos.</em>
-          </h1>
-
-          <p class="hero__sub">
-            In 6 Lektionen lernst du, wie du KI-Modelle präzise steuerst — und aus jedem Prompt bessere Ergebnisse holst. Kein Hype, kein Vorwissen nötig. Nur das, was du als Marketer heute direkt einsetzen kannst.
-          </p>
-
+    <div class="container">
+      <div class="hero__centered">
+        <div class="hero__badge">Kostenlos · Sofort verfügbar · Kein Vorwissen nötig</div>
+        <h1>Der Prompting-Kurs<br />für Marketer. <em>Kostenlos.</em></h1>
+        <p class="hero__sub">
+          In 6 Lektionen lernst du, wie du KI-Modelle präzise steuerst — und aus jedem Prompt bessere Ergebnisse holst. Kein Hype, kein Vorwissen nötig.
+        </p>
+        <form class="hero__form-inline" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
+          <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
+          <button type="submit" class="btn btn--primary btn--lg">Zugang erhalten →</button>
+        </form>
+        <div class="form-success" id="success-hero" style="display:none; margin-top: 20px;">
+          <div class="form-success__icon" style="margin: 0 auto 12px;">✓</div>
+          <p class="form-success__title">Auf dem Weg zu dir!</p>
+          <p class="form-success__sub">Schau gleich in dein Postfach — du bekommst sofortigen Zugang zum Kurs.</p>
         </div>
-
-        <div class="hero__form">
-          <div class="signup-box" id="hero-signup">
-            <div class="form-fields">
-              <p class="signup-box__title">Dein kostenloser Kurs — sofort verfügbar</p>
-              <p class="signup-box__sub">Trag dich ein und erhalte <strong>sofort Zugang</strong> zum vollständigen Kurs "Prompting für Marketer".</p>
-              <form class="form-row" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
-                <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
-                <button type="submit" class="btn btn--primary btn--full btn--lg">
-                  Zugang erhalten →
-                </button>
-              </form>
-              <p class="form-note">Kein Spam. Nur dein Kurs + gelegentliche Updates. Abmeldung jederzeit.</p>
-            </div>
-            <div class="form-success" id="success-hero">
-              <div class="form-success__icon">✓</div>
-              <p class="form-success__title">Auf dem Weg zu dir!</p>
-              <p class="form-success__sub">Schau gleich in dein Postfach — du bekommst sofortigen Zugang zum Kurs.</p>
-            </div>
-          </div>
-        </div>
+        <p class="form-note">Kein Spam. Nur dein Kurs + gelegentliche Updates. Abmeldung jederzeit.</p>
       </div>
     </div>
   </section>
@@ -954,7 +917,7 @@
 
   <!-- ─── FOOTER ────────────────────────────────────────────── -->
   <footer class="footer">
-    <p>© 2025 Marketing KI-Bootcamp · <a href="#">Impressum</a> · <a href="#">Datenschutz</a></p>
+    <p>© 2026 Comvitalo Ltd · <a href="https://automatisierer.io/impressum/">Impressum</a> · <a href="https://automatisierer.io/datenschutz/">Datenschutz</a></p>
   </footer>
 
   <!-- ─── JS ───────────────────────────────────────────────── -->
