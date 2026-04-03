@@ -223,14 +223,13 @@
 
     .hero__form-inline {
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      max-width: 480px;
+      max-width: 420px;
       margin-inline: auto;
-      flex-wrap: wrap;
     }
     .hero__form-inline input[type="email"] {
-      flex: 1;
-      min-width: 200px;
+      width: 100%;
       padding: 15px 18px;
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.15);
@@ -240,6 +239,7 @@
       font-size: 1rem;
       outline: none;
       transition: border-color .2s, background .2s;
+      text-align: center;
     }
     .hero__form-inline input[type="email"]::placeholder { color: rgba(255,255,255,.35); }
     .hero__form-inline input[type="email"]:focus {
@@ -416,14 +416,13 @@
     /* Inline form (light on dark) */
     .inline-form {
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      max-width: 460px;
+      max-width: 420px;
       margin-inline: auto;
-      flex-wrap: wrap;
     }
     .inline-form input[type="email"] {
-      flex: 1;
-      min-width: 200px;
+      width: 100%;
       padding: 13px 16px;
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.15);
@@ -433,6 +432,7 @@
       font-size: 1rem;
       outline: none;
       transition: border-color .2s;
+      text-align: center;
     }
     .inline-form input[type="email"]::placeholder { color: rgba(255,255,255,.35); }
     .inline-form input[type="email"]:focus { border-color: var(--clr-accent); }
@@ -600,8 +600,6 @@
     @media (max-width: 768px) {
       .section { padding-block: 56px; }
       .nav__cta { display: none; }
-      .hero__form-inline { flex-direction: column; }
-      .hero__form-inline input, .hero__form-inline .btn { width: 100%; }
       .pain__grid { grid-template-columns: 1fr; }
       .promise__grid { grid-template-columns: 1fr; }
       .module-topics { grid-template-columns: 1fr 1fr; }
@@ -610,8 +608,6 @@
 
     @media (max-width: 520px) {
       .module-topics { grid-template-columns: 1fr; }
-      .inline-form { flex-direction: column; }
-      .inline-form input, .inline-form .btn { width: 100%; }
     }
   </style>
 </head>
@@ -625,7 +621,7 @@
   <header style="position:relative; background: var(--clr-bg-dark);">
     <nav class="nav">
       <div class="nav__logo">Marketing <span>KI-Bootcamp</span></div>
-      <a href="#free-module" class="btn btn--ghost nav__cta">Jetzt kostenlos Zugang sichern →</a>
+      <a href="#signup" class="btn btn--ghost nav__cta">Jetzt kostenlos Zugang sichern →</a>
     </nav>
   </header>
 
@@ -640,7 +636,7 @@
         </p>
         <form class="hero__form-inline" id="form-hero" onsubmit="handleSignup(event, 'form-hero')">
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
-          <button type="submit" class="btn btn--primary btn--lg">Jetzt kostenlos Zugang sichern →</button>
+          <button type="submit" class="btn btn--primary btn--lg btn--full">Jetzt kostenlos Zugang sichern →</button>
         </form>
         <div class="form-success" id="success-hero" style="display:none; margin-top: 20px;">
           <div class="form-success__icon" style="margin: 0 auto 12px;">✓</div>
@@ -770,10 +766,9 @@
       <div class="free-module__cta reveal">
         <h3>Jetzt kostenlos anmelden</h3>
         <p>Direkt nach Eintragung bekommst du Zugang zum vollständigen Kurs.</p>
-        <p style="margin-bottom: 20px; font-size: .95rem; color: rgba(255,255,255,.6);">Das alles bekommst du. Kostenlos, sofort, ohne Kreditkarte.</p>
         <form class="inline-form" id="form-module" onsubmit="handleSignup(event, 'form-module')">
           <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required autocomplete="email" />
-          <button type="submit" class="btn btn--primary">Jetzt kostenlos Zugang sichern →</button>
+          <button type="submit" class="btn btn--primary btn--full">Jetzt kostenlos Zugang sichern →</button>
         </form>
         <div class="form-success" id="success-module" style="display:none; color:#fff; margin-top: 16px;">
           <div class="form-success__icon" style="margin:0 auto 12px;">✓</div>
@@ -901,7 +896,7 @@
     <div class="container">
       <span class="eyebrow reveal" style="display:block; margin-bottom: 16px;">Fang heute an</span>
       <h2 class="reveal">Der Prompting-Kurs für Marketer.<br /><em style="font-style:normal; color:var(--clr-accent);">Kostenlos. Sofort. Direkt anwendbar.</em></h2>
-      <p class="lead reveal">Trag dich ein, bekomm sofortigen Zugang und fang heute noch an — kein Risiko, kein Trick, €0.</p>
+      <p class="lead reveal">Erhalte den Zugang sofort per E-Mail.</p>
 
       <div class="reveal">
         <form class="final-signup" id="form-final" onsubmit="handleSignup(event, 'form-final')">
@@ -915,7 +910,7 @@
           <p class="form-success__title">Alles klar — bis gleich im Postfach!</p>
           <p class="form-success__sub">Du bekommst sofortigen Zugang zum Kurs. Wir freuen uns, dass du dabei bist.</p>
         </div>
-        <p class="final-cta__note">Kein Spam. Abmeldung jederzeit. €0, kein Trick.</p>
+        <p class="final-cta__note">Abmeldung jederzeit möglich.</p>
       </div>
     </div>
   </section>
