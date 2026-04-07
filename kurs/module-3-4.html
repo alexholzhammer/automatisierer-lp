@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.4 Konsistenz &amp; Brandvoice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Contrast check: side-by-side voice examples */
+.voice-compare {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.voice-compare-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.vc-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.vc-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.vc-panel { display: none; padding: 16px; }
+.vc-panel.active { display: block; }
+.vc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 6px;
+}
+.vc-label.bad { color: var(--red); }
+.vc-label.good { color: var(--green); }
+.vc-text {
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+.vc-text.bad { background: var(--red-light); border-color: #FFBDAD; }
+.vc-text.good { background: var(--accent-2-light); border-color: #ABF5D1; }
+.vc-verdict {
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+}
+.vc-verdict.bad { background: var(--red-light); color: var(--red); }
+.vc-verdict.good { background: var(--accent-2-light); color: var(--green); }
+
+/* 4 Säulen DNA grid */
+.dna-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+@media (max-width: 600px) { .dna-grid { grid-template-columns: 1fr; } }
+.dna-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.dna-card-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.dna-card-inner {
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--surface);
+}
+.dna-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.dna-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Brand Voice Builder */
+.bvb-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.bvb-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bvb-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.bvb-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bvb-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.bvb-row { display: flex; flex-direction: column; gap: 4px; }
+.bvb-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.bvb-input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  transition: border 0.15s;
+}
+.bvb-input:focus { outline: none; border-color: var(--accent); }
+.bvb-inline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 600px) { .bvb-inline-grid { grid-template-columns: 1fr; } }
+.bvb-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bvb-run-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  background: var(--accent-2-light);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.bvb-run-btn:hover { background: var(--accent-2); color: white; }
+.bvb-output-wrap { display: none; padding: 0 16px 16px; }
+.bvb-output-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.bvb-output {
+  position: relative;
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  min-height: 100px;
+  white-space: pre-wrap;
+}
+.bvb-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.bvb-copy-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* Vibe shift channel tabs */
+.vibe-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.vibe-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.vibe-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.vibe-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.vibe-panel { display: none; padding: 16px; }
+.vibe-panel.active { display: block; }
+.vibe-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.55;
+}
+.vibe-prompt {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  margin-bottom: 10px;
+}
+.vibe-result {
+  background: var(--accent-2-light);
+  border: 1px solid #ABF5D1;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* Justierung selector */
+.fix-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.fix-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fix-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.fix-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.fix-panel { display: none; padding: 16px; }
+.fix-panel.active { display: block; }
+.fix-problem {
+  background: var(--red-light);
+  border: 1px solid #FFBDAD;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+.fix-prompt {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-content.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">3.4 / 3.4</span>
+  <a href="topic-content.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 3 · Content-Produktion</div>
+    <h1>Konsistenz &amp; Brand Voice</h1>
+    <p>Wie du der KI deinen individuellen Schreibstil beibringst und sicherstellst, dass alle Outputs wie aus einem Guss klingen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>4 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Du lernst, wie du der KI deinen individuellen Schreibstil beibringst. Wir entwickeln ein System, mit dem alle KI-Outputs, ob Newsletter, Blogbeitrag oder Social-Media-Post, wie aus einem Guss klingen.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du kannst deinen eigenen Markenstil analysieren, in Regeln übersetzen und diese so in der KI hinterlegen, dass sie dauerhaft konsistent schreibt und deine Brand Voice transportiert.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Die Identitätskrise -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die Identitäts-Krise: Warum Standard-KI deiner Marke schadet</h2>
+        <p>Grau ist die Standardfarbe, wenn du keinen Kontext gibst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn du ChatGPT oder andere Tools ohne spezifische Anweisungen zu deinem Stil nutzt, greift die KI auf den "statistischen Durchschnitt" zurück. Sie schreibt so, wie die Mehrheit im Internet schreibt. Das Ergebnis ist ein Einheitsbrei, der absolut nicht zu deiner Brand passt.</p>
+
+      <p>Das Gute: Die KI <em>will</em> gar nicht langweilig klingen. Sie ist ein sprachliches Chamäleon. Sie passt sich exakt der Umgebung an, die du ihr vorgibst. Gibst du ihr keinen Kontext zu deiner Brand Voice, wählt sie die Farbe "Grau". Gibst du ihr ein klares Regelwerk, wird sie zu deinem besten Markenbotschafter.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Das Risiko der Austauschbarkeit</strong>
+          <p>Deine Marke ist das Versprechen, das du deinen Kunden gibst. Wer Standard-KI nutzt, riskiert drei Dinge: <strong>Unsichtbarkeit</strong> (die Inhalte "triggern" das Gehirn der Zielgruppe nicht), <strong>Vertrauensverlust</strong> (Kunden merken unbewusst, wenn die Kommunikation unpersönlich wird) und <strong>Marken-Verwässerung</strong> (heute locker, morgen steif, übermorgen technokratisch).</p>
+        </div>
+      </div>
+
+      <h3>Grau vs. Marke: Der Kontrast-Check</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Dieselbe Nachricht, zwei völlig verschiedene Marken-Realitäten. Klicke zwischen Standard-Output und einem Beispiel mit echter Brand Voice.</p>
+
+      <div class="voice-compare">
+        <div class="voice-compare-toolbar">
+          <button class="vc-tab active" onclick="showVc('grau', this)">⬜ Standard-KI</button>
+          <button class="vc-tab" onclick="showVc('brand', this)">🎨 Mit Brand Voice</button>
+        </div>
+        <div class="vc-panel active" id="vcp-grau">
+          <div class="vc-label bad">Standard-Output (Farbe Grau)</div>
+          <div class="vc-text bad">"Wir möchten Sie darüber informieren, dass am kommenden Sonntag Wartungsarbeiten an unseren Servern durchgeführt werden. Es kann zu kurzzeitigen Unterbrechungen kommen. Wir danken für Ihr Verständnis."</div>
+          <div class="vc-verdict bad">❌ Steril, langweilig, klingt nach Behörde. Könnte von jedem Unternehmen stammen. Kein Funke Persönlichkeit.</div>
+        </div>
+        <div class="vc-panel" id="vcp-brand">
+          <div class="vc-label good">Mit Brand Voice (jung, direkt, humorvoll)</div>
+          <div class="vc-text good">"Kurzes Update: Am Sonntag verpassen wir unseren Servern eine kleine Wellness-Kur. Während wir schrubben und ölen, kann es kurz haken. Danach läuft dafür aber alles besser als je zuvor. Danke für eure Geduld!"</div>
+          <div class="vc-verdict good">✓ Menschlich, nahbar, baut Nähe auf. Die Nachricht ist identisch, aber die Wirkung komplett anders.</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Der Blind-Test</strong>
+          <p>Nimm zwei deiner Unternehmenstexte. Ersetze deinen Markennamen durch "Firma X". Könnten diese Texte auch eins zu eins von deinem größten Konkurrenten stammen? Falls ja: Willkommen in der Identitäts-Krise. Der Rest dieses Moduls löst das.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Reverse Engineering -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Reverse Engineering: Deinen Stil entschlüsseln</h2>
+        <p>Lass die KI analysieren, was du intuitiv schon kannst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die meisten Menschen haben Schwierigkeiten, ihren eigenen Schreibstil zu beschreiben. Wir schreiben aus dem Bauch heraus, aber für die KI ist dein Bauchgefühl eine unlösbare Rechenaufgabe. Sie braucht Daten, keine Adjektive.</p>
+
+      <p>Beim <strong>Reverse Engineering</strong> drehen wir den Spieß um: Wir füttern die KI mit deinen besten, selbst geschriebenen Texten und lassen sie die zugrunde liegenden Regeln finden. Die KI bemerkt dabei Dinge, die dir selbst oft gar nicht auffallen: Satzlängen, Wortwahl, die Art der Leseransprache und sogar die emotionale Temperatur deiner Texte.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Warum "professionell, aber locker" nicht hilft</strong>
+          <p>"Locker" bedeutet für einen Anwalt etwas völlig anderes als für einen Skateboard-Hersteller. Die KI braucht keine vagen Adjektive, sondern konkrete Muster. Deshalb analysierst du zuerst, bevor du definierst.</p>
+        </div>
+      </div>
+
+      <h3>Die 4 Säulen deiner Stil-DNA</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wenn die KI deinen Stil analysiert, schaut sie vor allem auf diese vier Bereiche. Sie bilden die Grundlage jedes Brand Voice Guides.</p>
+
+      <div class="dna-grid">
+        <div class="dna-card">
+          <div class="dna-card-inner">
+            <div class="dna-card-num">1</div>
+            <div>
+              <div class="dna-card-title">Vokabular</div>
+              <div class="dna-card-desc">Fachbegriffe oder einfache Sprache? Bildhafte Wörter oder sachliche Formulierungen?</div>
+            </div>
+          </div>
+        </div>
+        <div class="dna-card">
+          <div class="dna-card-inner">
+            <div class="dna-card-num">2</div>
+            <div>
+              <div class="dna-card-title">Satzbau</div>
+              <div class="dna-card-desc">Kurze, feurige Sätze oder lange, erklärende Passagen? Aktiv oder passiv?</div>
+            </div>
+          </div>
+        </div>
+        <div class="dna-card">
+          <div class="dna-card-inner">
+            <div class="dna-card-num">3</div>
+            <div>
+              <div class="dna-card-title">Perspektive</div>
+              <div class="dna-card-desc">Direktes "Du", förmliches "Sie" oder die Distanz der "Wir"-Form?</div>
+            </div>
+          </div>
+        </div>
+        <div class="dna-card">
+          <div class="dna-card-inner">
+            <div class="dna-card-num">4</div>
+            <div>
+              <div class="dna-card-title">Tonalität</div>
+              <div class="dna-card-desc">Schwingt Humor mit? Eher besorgter Ratgeber, motivierender Coach oder nüchterner Analyst?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">🔍</div>
+        <div class="callout-text">
+          <strong>Der Style-Extraktor-Prompt</strong>
+          <p>Sammle 3 bis 5 Texte von dir, die deine Marke perfekt repräsentieren (mind. 200 Wörter je Text). Gib sie der KI mit diesem Auftrag: "Analysiere diese Texte auf Vokabular, Satzbau, Tonalität und Ansprache. Erstelle daraus ein Regelwerk, das ich als Anweisung für zukünftige Texte nutzen kann." Das Ergebnis ist dein persönlicher Sprach-Spiegel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Das Regelwerk -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Das Regelwerk: Der AI Brand Voice Guide</h2>
+        <p>Dos, Don'ts und die Tabu-Liste als KI-Gesetzbuch</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein AI Brand Voice Guide ist das Gesetzbuch für deine KI. Ohne klare Regeln fällt sie immer wieder in ihre alten Muster zurück. Ein effektives Regelwerk besteht aus drei Kernbereichen: <strong>Tonalität, Struktur und der Tabu-Liste.</strong></p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bereich</th>
+              <th>Das tun wir (DOs)</th>
+              <th>Das lassen wir (Don'ts)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ansprache</strong></td>
+              <td>Direktes, respektvolles "Du"</td>
+              <td>Förmliches "Sie" oder distanziertes "Man"</td>
+            </tr>
+            <tr>
+              <td><strong>Satzbau</strong></td>
+              <td>Kurze, aktive Sätze. Maximal 15 Wörter.</td>
+              <td>Verschachtelte Sätze oder Passiv-Konstruktionen</td>
+            </tr>
+            <tr>
+              <td><strong>Tonalität</strong></td>
+              <td>Optimistisch, lösungsorientiert, fachlich fundiert</td>
+              <td>Arroganter Experten-Ton oder übertriebener Hype</td>
+            </tr>
+            <tr>
+              <td><strong>Humor</strong></td>
+              <td>Dezenter, trockener Humor erlaubt</td>
+              <td>Platte Witze oder Ironie, die missverstanden wird</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🚫</div>
+        <div class="callout-text">
+          <strong>Die Tabu-Liste: Dein stärkster Hebel</strong>
+          <p>Die wirkungsvollste Methode, um KI-Einheitsbrei zu vermeiden, ist eine explizite Verbotsliste. Nicht nur "schreibe locker", sondern "verwende niemals: bahnbrechend, revolutionär, nahtlos, ultimativ." Verbote wirken präziser als Beschreibungen. Füge auch Floskeln hinzu: "Im heutigen Zeitalter..." oder "Zusammenfassend lässt sich sagen..."</p>
+        </div>
+      </div>
+
+      <h3>Brand Voice Builder: Erstelle dein Regelwerk</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Fülle die Felder aus und erhalte deinen fertigen Brand Voice Prompt, den du direkt in die Custom Instructions deines KI-Tools einfügen kannst.</p>
+
+      <div class="bvb-wrap">
+        <div class="bvb-toolbar">
+          <span>🎨 Brand Voice Builder</span>
+        </div>
+        <div class="bvb-body">
+          <div>
+            <div class="bvb-section-label">Marke &amp; Identität</div>
+            <div class="bvb-row">
+              <label class="bvb-label">Markenname / Dein Name</label>
+              <input class="bvb-input" id="bvb-name" type="text" placeholder="z.B. automatisierer.io" style="min-height:auto;">
+            </div>
+          </div>
+          <div>
+            <div class="bvb-section-label">Tonalität (3 Adjektive)</div>
+            <div class="bvb-inline-grid">
+              <div class="bvb-row">
+                <label class="bvb-label">Adjektiv 1</label>
+                <input class="bvb-input" id="bvb-adj1" type="text" placeholder="z.B. direkt" style="min-height:auto;">
+              </div>
+              <div class="bvb-row">
+                <label class="bvb-label">Adjektiv 2</label>
+                <input class="bvb-input" id="bvb-adj2" type="text" placeholder="z.B. pragmatisch" style="min-height:auto;">
+              </div>
+              <div class="bvb-row">
+                <label class="bvb-label">Adjektiv 3</label>
+                <input class="bvb-input" id="bvb-adj3" type="text" placeholder="z.B. humorvoll" style="min-height:auto;">
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="bvb-section-label">Ansprache &amp; Struktur</div>
+            <div class="bvb-row">
+              <label class="bvb-label">Wie sprichst du den Leser an?</label>
+              <input class="bvb-input" id="bvb-ansprache" type="text" placeholder="z.B. Immer direktes 'Du', niemals 'Sie'" style="min-height:auto;">
+            </div>
+            <div class="bvb-row" style="margin-top:8px;">
+              <label class="bvb-label">Wie sollen Texte strukturiert sein?</label>
+              <input class="bvb-input" id="bvb-struktur" type="text" placeholder="z.B. Kurze Absätze, keine langen Bulletpoint-Listen" style="min-height:auto;">
+            </div>
+          </div>
+          <div>
+            <div class="bvb-section-label">Tabu-Liste (verbotene Wörter, durch Komma trennen)</div>
+            <div class="bvb-row">
+              <textarea class="bvb-input" id="bvb-tabu" placeholder="z.B. bahnbrechend, revolutionär, nahtlos, unverzichtbar, transformativ" style="min-height:54px;"></textarea>
+            </div>
+          </div>
+          <div>
+            <div class="bvb-section-label">Rolle &amp; Ziel</div>
+            <div class="bvb-row">
+              <label class="bvb-label">Als wen schreibt die KI? (Rolle)</label>
+              <input class="bvb-input" id="bvb-rolle" type="text" placeholder="z.B. Erfahrener Marketing-Mentor, der komplexe Dinge einfach erklärt" style="min-height:auto;">
+            </div>
+          </div>
+        </div>
+        <div class="bvb-footer">
+          <span style="font-size:12px;color:var(--text-subtle);">Mindestens Name und Tonalität ausfüllen</span>
+          <button class="bvb-run-btn" onclick="generateBvb()">▶ Guide generieren</button>
+        </div>
+        <div class="bvb-output-wrap" id="bvb-output-wrap">
+          <div class="bvb-output-label">Dein Brand Voice Prompt (für Custom Instructions)</div>
+          <div class="bvb-output" id="bvb-output">
+            <button class="bvb-copy-btn" onclick="copyBvb()">Kopieren</button>
+            <span id="bvb-output-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Implementierung & Vibe Shift -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Implementierung: Eine Stimme, viele Kanäle</h2>
+        <p>Custom Instructions, Wissensdatenbanken und der Vibe-Shift</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Damit die KI dauerhaft so schreibt wie du, musst du sie "programmieren", aber keine Sorge, das passiert ganz ohne Code. Die wichtigste Methode: <strong>Custom Instructions</strong>. Stell dir vor, du gibst der KI eine Brille, durch die sie ab jetzt alles betrachtet. In den Einstellungen trägst du die Essenz deines Brand Voice Guides ein. Ab sofort musst du nicht mehr bei jedem Prompt sagen "Schreibe ohne Floskeln", die KI weiß es bereits.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">📚</div>
+        <div class="callout-text">
+          <strong>Wissensdatenbanken für Profis</strong>
+          <p>Wenn dein Brand Voice Guide umfangreicher ist oder du mit verschiedenen Personas arbeitest, lade Dokumente direkt hoch. Viele Tools erlauben PDFs in einer Wissensdatenbank. Der Vorteil: Die KI kann bei Unsicherheit nachschlagen und reproduziert nicht nur deinen Stil, sondern auch deine Fachbegriffe und Firmenwerte korrekt.</p>
+        </div>
+      </div>
+
+      <h3>Der Vibe-Shift: Eine Stimme, angepasst an den Kanal</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Konsistenz bedeutet nicht, überall gleich zu klingen. Der Kern bleibt stabil, aber der Vibe passt sich der Plattform an. Klicke die Kanäle durch und sieh, wie derselbe Inhalt unterschiedlich aufbereitet wird.</p>
+
+      <div class="vibe-wrap">
+        <div class="vibe-toolbar">
+          <button class="vibe-btn active" onclick="showVibe('linkedin', this)">💼 LinkedIn</button>
+          <button class="vibe-btn" onclick="showVibe('instagram', this)">📸 Instagram</button>
+          <button class="vibe-btn" onclick="showVibe('newsletter', this)">📧 Newsletter</button>
+        </div>
+
+        <div class="vibe-panel active" id="vp-linkedin">
+          <div class="vibe-meta">Fachliche Tiefe, klare Struktur, starker Call-to-Action für Entscheider. Etwas förmlicher als auf anderen Kanälen, aber immer noch in deiner Brand Voice.</div>
+          <div class="vibe-prompt"><span style="color:#58A6FF;">Erstelle basierend auf meiner Brand Voice</span> einen Post für LinkedIn.
+Fokus: Fachliche Tiefe und ein starker Call-to-Action für Entscheider.
+Nutze kurze Absätze und eine klare Struktur ohne lange Bullet-Listen.</div>
+          <div class="vibe-result">"Jeder spricht über KI-Content. Kaum jemand spricht über die Qualitätslücke, die dadurch entsteht. In den letzten 6 Monaten haben wir analysiert, warum 80 % der KI-Texte performancemäßig hinter handgeschriebenen Inhalten zurückbleiben. Das Ergebnis überrascht: Es liegt selten am Modell. Es liegt fast immer am fehlenden Brand Voice System. Hier sind die drei Hebel, die wir seitdem nutzen."</div>
+        </div>
+
+        <div class="vibe-panel" id="vp-instagram">
+          <div class="vibe-meta">Extrem kurze Zeilen, Emojis als Aufzählungszeichen, emotional und nahbar. Derselbe Kern, aber die Darbietung ist lockerer und visuell strukturiert.</div>
+          <div class="vibe-prompt"><span style="color:#58A6FF;">Nutze meine Brand Voice</span> für einen Instagram-Post.
+Brich den Text in sehr kurze Zeilen auf.
+Nutze Emojis als Aufzählungszeichen.
+Halte dich extrem kurz. Kein Fließtext.</div>
+          <div class="vibe-result">KI-Texte klingen meistens gleich.
+Weißt du warum?
+
+🤖 Kein System dahinter.
+📋 Kein Regelwerk.
+🎨 Keine Brand Voice.
+
+Das ist der Unterschied zwischen Content,
+der konvertiert, und Content, der scrollt.
+
+Dein Stil ist dein stärkster USP.
+Fang heute an, ihn zu definieren. 👇</div>
+        </div>
+
+        <div class="vibe-panel" id="vp-newsletter">
+          <div class="vibe-meta">Persönlicher Ton, direkte Ansprache, erzählerischer Einstieg. Newsletter-Leser haben sich aktiv entschieden, dich zu hören. Das verlangt nach mehr Tiefe.</div>
+          <div class="vibe-prompt"><span style="color:#58A6FF;">Schreibe den Einstieg</span> für meinen Newsletter.
+Persönlicher Erzähl-Stil, direkte Ansprache.
+Beginne mit einer kurzen persönlichen Beobachtung oder Anekdote,
+bevor du zum Thema führst.</div>
+          <div class="vibe-result">"Diese Woche hatte ich ein Gespräch mit einem Kunden, das mir nicht aus dem Kopf geht. Er hatte drei Monate lang konsequent KI für seinen Content genutzt, und die Zahlen gingen trotzdem bergab. Nicht wegen der KI. Sondern weil der Output immer gleich klang, egal was er reingab. Heute zeige ich dir, was wir gemeinsam geändert haben."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Konsistenz-Check & Justierung -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Konsistenz-Check: Den "Marken-Filter" anwenden</h2>
+        <p>Was tun, wenn die KI aus der Rolle fällt</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Der Marken-Filter ist dein persönliches Qualitäts-Siegel. Ein Text ist erst dann fertig, wenn er nicht nur inhaltlich überzeugt, sondern sich nahtlos in deine bisherige Kommunikation einfügt. Manchmal liefert die KI trotz guter Anweisungen einen Entwurf, der zu förmlich, zu aufgeregt oder zu roboterhaft klingt.</p>
+
+      <p>Anstatt den Text mühsam selbst umzuschreiben, nutzt du <strong>Justierungs-Prompts</strong>: kurze, gezielte Korrekturbefehle, die das spezifische Problem direkt adressieren.</p>
+
+      <h3>Die drei häufigsten Korrekturfälle</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke das Problem an, das du gerade mit deinem KI-Text hast. Du bekommst den passenden Justierungs-Prompt direkt.</p>
+
+      <div class="fix-wrap">
+        <div class="fix-toolbar">
+          <button class="fix-btn active" onclick="showFix('holzern', this)">🪵 Zu hölzern</button>
+          <button class="fix-btn" onclick="showFix('tabu', this)">🚫 Verbotenes Wort</button>
+          <button class="fix-btn" onclick="showFix('starr', this)">📋 Zu starr formatiert</button>
+        </div>
+
+        <div class="fix-panel active" id="fp-holzern">
+          <div class="fix-problem">Problem: Der Text klingt steif und unpersönlich, wie ein Versicherungsvertreter statt wie du.</div>
+          <div class="fix-prompt"><span style="color:#FFA657;">Du klingst gerade wie ein Versicherungsvertreter.</span>
+Geh zurück zu Regel 1 meiner Brand Voice (nahbar und locker).
+Formuliere den zweiten Absatz um und nutze Wörter,
+die man auch in einem echten Gespräch verwenden würde.
+Keine Fachbegriffe, keine Passiv-Konstruktionen.</div>
+        </div>
+
+        <div class="fix-panel" id="fp-tabu">
+          <div class="fix-problem">Problem: Die KI hat ein verbotenes Wort oder eine Floskel aus deiner Tabu-Liste benutzt.</div>
+          <div class="fix-prompt"><span style="color:#FFA657;">Stopp, du hast das Wort "[Tabu-Wort]" benutzt.</span>
+Das steht auf meiner Tabu-Liste.
+Ersetze es durch eine sachliche Beschreibung des Nutzens,
+ohne dieses Wort oder ähnliche Superlative zu verwenden.</div>
+        </div>
+
+        <div class="fix-panel" id="fp-starr">
+          <div class="fix-problem">Problem: Der Text sieht optisch zu sehr nach KI aus, mit vielen Bulletpoints und fetten Überschriften.</div>
+          <div class="fix-prompt">Der Text sieht optisch zu sehr nach KI aus
+<span style="color:#FFA657;">(viele Bulletpoints mit fetten Doppelpunkten).</span>
+Wandle die Aufzählung in einen fliessenden Erzähltext um,
+ohne die Kernaussagen zu verlieren.
+Nutze höchstens einen Aufzählungspunkt pro Seite.</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">🔊</div>
+        <div class="callout-text">
+          <strong>Der Laut-Lese-Check</strong>
+          <p>Lies den fertigen Text laut vor. Stolperst du über Wörter, die du niemals so sagen würdest? Markiere sie und gib sie der KI zurück: "Diese Begriffe passen nicht zu mir. Ersetze sie durch [Deine Alternative] und übertrage den gleichen Tonfall auf den gesamten Text."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Standard ist gefährlich</strong>
+          Ohne Führung schreibt die KI im "Durchschnitts-Modus". Das macht dich unsichtbar. Deine Persönlichkeit ist der einzige Schutz gegen Austauschbarkeit, aber sie muss definiert und der KI übergeben werden.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Reverse Engineering schlägt Intuition</strong>
+          Lass die KI deinen Stil analysieren. Sie erkennt Muster, die dir selbst verborgen bleiben. Deine besten eigenen Texte sind das präziseste Trainingsmaterial, das es gibt.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Verbote wirken Wunder</strong>
+          Eine Tabu-Liste ist effektiver als eine Beschreibung. "Verwende niemals X" ist für die KI präziser und leichter einzuhalten als "klingt bitte locker und frisch".
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Kern vs. Bühne: Der Vibe-Shift</strong>
+          Konsistenz bedeutet nicht, überall gleich zu klingen. Deine Markenwerte bleiben stabil. Aber die Darbietung passt sich dem Kanal an: etwas förmlicher auf LinkedIn, lockerer auf Instagram.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Custom Instructions sparen Energie</strong>
+          Einmal den Brand Voice Guide in die Einstellungen eingetragen, musst du deinen Stil nicht bei jedem Chat neu erklären. Das ist Automatisierung im besten Sinne: einmal gut machen, danach automatisch profitieren.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// VOICE COMPARE TABS
+function showVc(id, btn) {
+  document.querySelectorAll('.vc-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.vc-tab').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vcp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// VIBE SHIFT TABS
+function showVibe(id, btn) {
+  document.querySelectorAll('.vibe-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.vibe-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// FIX TABS
+function showFix(id, btn) {
+  document.querySelectorAll('.fix-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.fix-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('fp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// BRAND VOICE BUILDER
+function generateBvb() {
+  var name = document.getElementById('bvb-name').value.trim();
+  var adj1 = document.getElementById('bvb-adj1').value.trim();
+  var adj2 = document.getElementById('bvb-adj2').value.trim();
+  var adj3 = document.getElementById('bvb-adj3').value.trim();
+  var ansprache = document.getElementById('bvb-ansprache').value.trim();
+  var struktur = document.getElementById('bvb-struktur').value.trim();
+  var tabu = document.getElementById('bvb-tabu').value.trim();
+  var rolle = document.getElementById('bvb-rolle').value.trim();
+
+  if (!name || (!adj1 && !adj2 && !adj3)) {
+    alert('Bitte gib mindestens einen Markennamen und ein Tonalitäts-Adjektiv ein.');
+    return;
+  }
+
+  var adjList = [adj1, adj2, adj3].filter(Boolean).join(', ');
+  var lines = [];
+
+  if (rolle) {
+    lines.push('Du schreibst als: ' + (rolle || 'Lead-Texter fur ' + name) + '.');
+  } else {
+    lines.push('Du bist der Lead-Texter fur ' + name + '.');
+  }
+  lines.push('');
+  lines.push('TONALITAT: ' + adjList + '.');
+  if (ansprache) lines.push('ANSPRACHE: ' + ansprache);
+  if (struktur) lines.push('STRUKTUR: ' + struktur);
+  lines.push('');
+  lines.push('REGELN:');
+  lines.push('- Schreibe aktiv. Wer tut was? Nie Passiv-Konstruktionen.');
+  lines.push('- Kurze Satze. Maximal 15 Worter pro Satz.');
+  lines.push('- Du duzt den Leser. Augenhöhe, kein Expertenton.');
+  if (struktur) lines.push('- ' + struktur);
+  lines.push('');
+  if (tabu) {
+    lines.push('TABU-LISTE (NIEMALS VERWENDEN):');
+    var tabuWords = tabu.split(',').map(function(w) { return '- ' + w.trim(); });
+    lines.push(tabuWords.join('\n'));
+    lines.push('');
+  }
+  lines.push('Halte dich bei JEDEM Text an diese Regeln, ohne explizite Aufforderung.');
+
+  document.getElementById('bvb-output-text').textContent = lines.join('\n');
+  document.getElementById('bvb-output-wrap').style.display = 'block';
+}
+
+function copyBvb() {
+  var text = document.getElementById('bvb-output-text').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.bvb-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+const questions = [
+  {
+    q: 'Was passiert, wenn du ChatGPT ohne spezifische Stil-Anweisungen nutzt?',
+    options: [
+      'Die KI erfindet automatisch eine passende Brand Voice fur dich.',
+      'Die KI greift auf den statistischen Durchschnitt zurück und schreibt generisch, ohne Persönlichkeit.',
+      'Die KI analysiert deine Website und passt sich automatisch an.',
+      'Der Output ist zufällig und unstrukturiert.'
+    ],
+    correct: 1,
+    feedback: 'Ohne Kontext optimiert die KI auf statistische Wahrscheinlichkeit. Das ergibt den sprachlichen Durchschnitt des Internets, was bedeutet: austauschbar, steril, ohne Charakter. Die Lösung ist kein neues Tool, sondern ein klares Regelwerk.'
+  },
+  {
+    q: 'Was beschreibt die Metapher "Die KI als Chamäleon" in diesem Modul?',
+    options: [
+      'Die KI wechselt ihre Meinung ständig und ist unzuverlässig.',
+      'Die KI passt sich exakt dem Kontext an, den du ihr gibst. Gibst du keinen, wählt sie Grau.',
+      'Die KI kann unterschiedliche Programmiersprachen sprechen.',
+      'Die KI verändert ihr Verhalten je nach Tageszeit.'
+    ],
+    correct: 1,
+    feedback: 'Das Chamäleon-Bild beschreibt die Stärke der KI, die auch ihr Problem ist: Sie passt sich perfekt an. Wenn du keinen Kontext gibst, passt sie sich an "nichts Konkretes" an, also den Durchschnitt. Mit einem Brand Voice Guide gibst du ihr die Farbe vor, die sie tragen soll.'
+  },
+  {
+    q: 'Was ist das Ziel des "Blind-Tests" aus diesem Modul?',
+    options: [
+      'Zu prüfen, ob die KI deinen Text ohne Hilfsmittel schreiben kann.',
+      'Den Markennamen aus deinen Texten zu entfernen und zu prüfen, ob sie auch von einem Konkurrenten stammen könnten.',
+      'Zu testen, ob deine Texte SEO-optimiert sind.',
+      'Den Text auf Rechtschreibfehler zu überprüfen.'
+    ],
+    correct: 1,
+    feedback: 'Der Blind-Test ist ein ehrlicher Spiegel: Wenn du deinen Markennamen entfernst und der Text trotzdem noch eindeutig "nach dir" klingt, hast du eine echte Brand Voice. Wenn er genauso gut von einem Konkurrenten stammen könnte, ist das das Signal, ein Regelwerk aufzubauen.'
+  },
+  {
+    q: 'Was ist Reverse Engineering im Kontext der Brand Voice?',
+    options: [
+      'Du schreibst einen Text rückwärts, damit die KI ihn analysieren kann.',
+      'Du gibst der KI deine besten selbst geschriebenen Texte und lässt sie daraus die zugrunde liegenden Stil-Regeln extrahieren.',
+      'Du nimmst den Output der KI und schreibst ihn manuell um.',
+      'Du analysierst die Texte deines Wettbewerbs.'
+    ],
+    correct: 1,
+    feedback: 'Reverse Engineering dreht den üblichen Prozess um: Statt der KI zu sagen, wie sie schreiben soll, lässt du sie erst analysieren, wie du bereits schreibst. Das Ergebnis ist ein auf Daten basierendes Stil-Profil, das präziser ist als jede intuitive Selbstbeschreibung.'
+  },
+  {
+    q: 'Warum hilft die Beschreibung "professionell, aber locker" der KI wenig?',
+    options: [
+      'Weil die KI keine Adjektive versteht.',
+      'Weil "locker" fur einen Anwalt etwas völlig anderes bedeutet als fur einen Skateboard-Hersteller. Die KI braucht konkrete Muster, keine vagen Beschreibungen.',
+      'Weil Adjektive zu viel Tokenplatz verbrauchen.',
+      'Weil die KI nur Zahlen und nicht Qualitäten verarbeiten kann.'
+    ],
+    correct: 1,
+    feedback: 'Vage Adjektive sind subjektiv. Dieselbe Beschreibung wird von der KI sehr unterschiedlich interpretiert, abhängig von dem Kontext, den sie im Training gesehen hat. Konkrete Muster, Satzbau-Regeln und Beispiele sind zuverlässiger als Stimmungs-Beschreibungen.'
+  },
+  {
+    q: 'Warum ist eine Tabu-Liste so effektiv?',
+    options: [
+      'Weil die KI Verbote leichter versteht als Beschreibungen. "Nie X" ist präziser als "klingt locker".',
+      'Weil Tabu-Listen die Antwortgeschwindigkeit der KI erhöhen.',
+      'Weil verbotene Wörter SEO-schädlich sind.',
+      'Weil die KI sonst nicht weiß, welche Sprache sie benutzen soll.'
+    ],
+    correct: 0,
+    feedback: 'Verbote sind präzise und eindeutig. "Verwende niemals bahnbrechend" lässt keine Interpretationsspielraum. Eine Beschreibung wie "klingt authentisch" hingegen ist subjektiv und wird von der KI möglicherweise anders interpretiert als von dir erwartet.'
+  },
+  {
+    q: 'Was bedeutet "Vibe-Shift" im Kontext von Brand Voice und Kanälen?',
+    options: [
+      'Die Marke wechselt ihre Identität je nach Trendthema.',
+      'Der Kern der Brand Voice bleibt stabil, aber die Darbietung passt sich der Plattform an (z.B. förmlicher auf LinkedIn, lockerer auf Instagram).',
+      'Die KI wechselt automatisch den Stil je nach Publikumsgröße.',
+      'Der Vibe-Shift beschreibt das Update eines Brand Voice Guides nach einem Rebranding.'
+    ],
+    correct: 1,
+    feedback: 'Konsistenz bedeutet nicht, überall identisch zu klingen. Deine Werte, Tabu-Liste und Grundhaltung bleiben gleich. Aber die Verpackung ändert sich: LinkedIn braucht mehr Tiefe und Struktur, Instagram lebt von kurzen Zeilen und Emojis. Kern stabil, Bühne variabel.'
+  },
+  {
+    q: 'Welcher Justierungs-Prompt ist am präzisesten, wenn die KI "zu hölzern" klingt?',
+    options: [
+      '"Schreibe den Text besser um."',
+      '"Mach es lockerer."',
+      '"Du klingst gerade wie ein Versicherungsvertreter. Geh zurück zu Regel 1 meiner Brand Voice und formuliere den zweiten Absatz mit Gesprächswörtern um."',
+      '"Sei kreativer."'
+    ],
+    correct: 2,
+    feedback: 'Gute Justierungs-Prompts benennen das konkrete Problem, verweisen auf das Regelwerk und geben eine klare Aufgabe. Vage Befehle wie "mach es besser" führen zu unvorhersehbaren Ergebnissen. Je konkreter der Korrekturbefehl, desto besser das Ergebnis.'
+  },
+  {
+    q: 'Was ist der Zweck von Custom Instructions in KI-Tools?',
+    options: [
+      'Sie erlauben es, der KI mehr Speicher zur Verfügung zu stellen.',
+      'Sie sind ein Ort, an dem du deinen Brand Voice Guide einmalig hinterlegst, damit die KI ihn bei jedem neuen Chat automatisch anwendet.',
+      'Sie dienen nur der Sicherheitseinstellung.',
+      'Sie beschleunigen die Antwortzeit der KI.'
+    ],
+    correct: 1,
+    feedback: 'Custom Instructions sind das digitale Dauer-Gedächtnis. Einmal eingerichtet, musst du bei jedem Chat nicht mehr erklären, wie du klingen möchtest. Die KI trägt deine Brille ab dem ersten Wort. Das spart massiv Zeit und sorgt für konsistente Ergebnisse.'
+  },
+  {
+    q: 'Du möchtest deinen Brand Voice Guide erstellen. Was ist laut Modul der richtige erste Schritt?',
+    options: [
+      'Sofort Adjektive definieren und der KI eine Beschreibung geben.',
+      'Mindestens 3 bis 5 eigene Texte, auf die du besonders stolz bist, sammeln und die KI deinen Stil daraus extrahieren lassen.',
+      'Eine Wettbewerbsanalyse durchführen und alles anders machen.',
+      'Einen Stilberater beauftragen.'
+    ],
+    correct: 1,
+    feedback: 'Der Prozess beginnt mit Material, nicht mit Definitionen. Deine besten eigenen Texte sind das präziseste Trainingsmaterial. Erst nach der KI-Analyse weißt du wirklich, welche Muster dich ausmachen. Dann schärfst du das Ergebnis und baust die Tabu-Liste auf.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
