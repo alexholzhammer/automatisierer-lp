@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.6 Pruefungspflicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.filter-wrap { border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:14px 0; }
+.filter-item { border-bottom:1px solid var(--border); }
+.filter-item:last-child { border-bottom:none; }
+.filter-toggle { width:100%;padding:12px 16px;display:flex;align-items:center;gap:12px;background:var(--surface);border:none;cursor:pointer;text-align:left;transition:background 0.15s;font-family:'Plus Jakarta Sans',sans-serif; }
+.filter-toggle:hover { background:var(--surface-2); }
+.filter-toggle.open { background:var(--accent-light); }
+.filter-num { width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0;background:var(--border);color:var(--text-muted);transition:all 0.15s; }
+.filter-toggle.open .filter-num { background:var(--accent);color:white; }
+.filter-title { font-size:13px;font-weight:600;color:var(--text);flex:1; }
+.filter-arrow { font-size:10px;color:var(--text-subtle);transition:transform 0.2s; }
+.filter-toggle.open .filter-arrow { transform:rotate(180deg); }
+.filter-body { display:none;padding:12px 16px 16px;border-top:1px solid var(--border);background:var(--surface); }
+.filter-body.open { display:block; }
+.filter-checks { list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px; }
+.filter-check-item { display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.55;color:var(--text-muted);cursor:pointer;padding:6px 8px;border-radius:var(--radius);transition:background 0.12s; }
+.filter-check-item:hover { background:var(--surface-2); }
+.filter-check-item.done { color:var(--text-subtle);text-decoration:line-through; }
+.filter-checkbox { width:16px;height:16px;border:2px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;transition:all 0.15s; }
+.filter-check-item.done .filter-checkbox { background:var(--green);border-color:var(--green); }
+
+.lektor-wrap { border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:14px 0; }
+.lektor-toolbar { background:var(--surface-2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px; }
+.lektor-toolbar span { font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--text-subtle); }
+.lektor-body { padding:16px;display:flex;flex-direction:column;gap:12px; }
+.lektor-label { font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--text-subtle); }
+.lektor-input { padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--surface);color:var(--text);resize:vertical;min-height:80px;transition:border 0.15s; }
+.lektor-input:focus { outline:none;border-color:var(--accent); }
+.lektor-footer { background:var(--surface-2);border-top:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px; }
+.lektor-run-btn { margin-left:auto;padding:6px 16px;font-size:12px;font-weight:600;border:1px solid var(--accent-2);border-radius:var(--radius);background:var(--accent-2-light);color:var(--green);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all 0.15s; }
+.lektor-run-btn:hover { background:var(--accent-2);color:white; }
+.lektor-output-wrap { display:none;padding:0 16px 16px; }
+.lektor-output-label { font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;margin-bottom:8px; }
+.lektor-output { position:relative;background:#0D1117;border:1px solid #21262D;border-radius:var(--radius);padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:#C9D1D9;white-space:pre-wrap; }
+.lektor-copy-btn { position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:4px 10px;font-size:11px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all 0.15s; }
+.lektor-copy-btn:hover { background:rgba(255,255,255,0.15);color:white; }
+
+.lies-wrap { border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:14px 0; }
+.lies-toolbar { background:var(--surface-2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+.lies-tab { padding:5px 12px;font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-muted);cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif; }
+.lies-tab.active { background:var(--accent);border-color:var(--accent);color:white; }
+.lies-panel { display:none;padding:16px; }
+.lies-panel.active { display:block; }
+.lies-scenario { font-size:13px;line-height:1.6;margin-bottom:12px;color:var(--text-muted); }
+.lies-prompt { background:#0D1117;border:1px solid #21262D;border-radius:var(--radius);padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:#C9D1D9;margin-bottom:10px; }
+.lies-response { background:var(--red-light);border:1px solid #FFBDAD;border-radius:var(--radius);padding:12px 14px;font-size:13px;line-height:1.6;color:var(--red);margin-bottom:8px; }
+.lies-verdict { background:var(--accent-2-light);border:1px solid #ABF5D1;border-radius:var(--radius);padding:10px 12px;font-size:13px;line-height:1.55;color:var(--green); }
+
+.resp-check { border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0;text-align:center;background:var(--surface);transition:all 0.2s; }
+.resp-check.answered-yes { border-color:var(--green);background:var(--accent-2-light); }
+.resp-check.answered-no { border-color:var(--red);background:var(--red-light); }
+.resp-question { font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin-bottom:16px; }
+.resp-btn-row { display:flex;gap:10px;justify-content:center;flex-wrap:wrap; }
+.resp-btn { padding:8px 22px;font-size:13px;font-weight:600;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;background:var(--surface);color:var(--text); }
+.resp-btn.yes:hover,.resp-btn.yes.selected { background:var(--green);border-color:var(--green);color:white; }
+.resp-btn.no:hover,.resp-btn.no.selected { background:var(--red);border-color:var(--red);color:white; }
+.resp-feedback { display:none;margin-top:14px;font-size:13px;line-height:1.6;font-weight:500; }
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-content.html" class="mod-nav-back">&#8592; Uebersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">3.6 / 3.4</span>
+  <a href="module-3-7.html" class="mod-nav-next">Weiter &#8594;</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 3 &middot; Content-Produktion</div>
+    <h1>Pruefungspflicht</h1>
+    <p>Warum blindes Vertrauen in die KI dein Business ruinieren kann und wie du einen effizienten Pruefprozess etablierst, der nichts durchlaesst.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">&#128214; <span>~12 Min Lesezeit</span></div>
+      <div class="hero-meta-item">&#128295; <span>4 interaktive Tools</span></div>
+      <div class="hero-meta-item">&#129504; <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">&#129300;</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir klaeren, warum "blindes Vertrauen" in die KI dein Business ruinieren kann und wie du einen effizienten Pruefprozess etablierst. Du lernst, die KI selbst als Korrekturinstanz einzusetzen, ohne dabei die menschliche Endkontrolle aufzugeben.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">&#128640;</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende koennen?</strong>
+      <p>Du besitzt ein wasserdiches Pruefsystem, mit dem du Halluzinationen, logische Fehler und "unmenschliche" Tonalitaet entlarvst, bevor dein Publikum es tut.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die "Wahrheits-Illusion": Warum KIs so ueberzeugend luegen</h2>
+        <p>Sprachmodelle berechnen Wahrscheinlichkeiten, keine Wahrheiten</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Das Problem mit Sprachmodellen ist fundamental: Sie haben kein Bewusstsein fuer Wahrheit. Sie berechnen Wahrscheinlichkeiten. Eine KI "weiss" nicht, dass die Schwerkraft existiert. Sie weiss nur, dass das Wort "Schwerkraft" oft im Kontext von "nach unten fallen" vorkommt.</p>
+      <div class="callout yellow">
+        <div class="callout-icon">&#9888;&#65039;</div>
+        <div class="callout-text">
+          <strong>Die drei Fehlerquellen</strong>
+          <p><strong>Halluzinationen:</strong> Die KI erfindet Quellen, Statistiken oder historische Ereignisse, nur um den Satzbau logisch zu vollenden.<br><br>
+          <strong>Veraltetes Wissen:</strong> Aktuelle Gesetzesaenderungen oder Markt-Events kennt die KI oft nicht, wenn du sie ihr nicht explizit gibst.<br><br>
+          <strong>Logik-Luecken:</strong> Manchmal widerspricht sich die KI innerhalb eines Textes selbst, z.B. verspricht sie oben "5 Tipps" und liefert unten nur 4.</p>
+        </div>
+      </div>
+      <div class="callout green">
+        <div class="callout-icon">&#128296;</div>
+        <div class="callout-text">
+          <strong>Die richtige Haltung: Hochmotivierter Praktikant</strong>
+          <p>Ein KI-Entwurf ist wie der erste Entwurf eines hochmotivierten, aber schlampigen Praktikanten. Er liefert dir das Baumaterial, aber du musst pruefen, ob die Statik haelt. Erst durch deine Pruefung entscheidest du, was davon veroeffentlichungswuerdig ist.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Die Checkliste: Deine 4 Pruef-Filter</h2>
+        <p>Was du zwingend vor der Veroeffentlichung pruefen musst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Hake jeden Punkt ab, waehrend du deinen KI-Entwurf durchgehst. Oeffne die Filter der Reihe nach und arbeite sie systematisch durch.</p>
+      <div class="filter-wrap">
+        <div class="filter-item">
+          <button class="filter-toggle" onclick="toggleFilter(this,'f1')">
+            <div class="filter-num">1</div>
+            <div class="filter-title">Fakten- &amp; Wahrheits-Check</div>
+            <span class="filter-arrow">&#9660;</span>
+          </button>
+          <div class="filter-body" id="f1">
+            <ul class="filter-checks">
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Zahlen, Daten, Fakten:</strong> Jede Zahl, jedes Datum, jeden Prozentsatz markiert und in eigenen Unterlagen oder einer serioesen Quelle bestaetigt?</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Eigennamen &amp; Zitate:</strong> Namen von Experten, Buchtitel, Studien geprueft? Die KI mixt oft reale Namen mit erfundenen Inhalten.</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Taschenrechner-Falle:</strong> Berechnungen im Text selbst nachgerechnet? Sprachmodelle sind Wort-Akrobaten, keine Mathematiker.</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Links angeklickt:</strong> Generierte Links geoeffnet? In ca. 50 % der Faelle fuehren sie ins Leere oder auf fachfremde Seiten.</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="filter-item">
+          <button class="filter-toggle" onclick="toggleFilter(this,'f2')">
+            <div class="filter-num">2</div>
+            <div class="filter-title">Logik- &amp; Konsistenz-Check</div>
+            <span class="filter-arrow">&#9660;</span>
+          </button>
+          <div class="filter-body" id="f2">
+            <ul class="filter-checks">
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Widersprueche aufgeloest:</strong> Behauptet die Einleitung etwas, das im Fazit relativiert wird? (z.B. oben "kostenlos", unten "ab 10 Euro").</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Vollstaendigkeit geprueft:</strong> Wenn die KI "5 Wege" verspricht, sind es wirklich 5? Erschreckend oft endet es bei Punkt 4 oder zwei Punkte sind identisch.</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Logische Kette geschlossen:</strong> Erklaert der Text nur das Problem oder liefert er wirklich die versprochene Loesung? Keine "So-was-nun"-Luecke.</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="filter-item">
+          <button class="filter-toggle" onclick="toggleFilter(this,'f3')">
+            <div class="filter-num">3</div>
+            <div class="filter-title">Tonalitaets- &amp; Roboter-Check</div>
+            <span class="filter-arrow">&#9660;</span>
+          </button>
+          <div class="filter-body" id="f3">
+            <ul class="filter-checks">
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Floskel-Alarm:</strong> Woerter wie "umfassend", "nahtlos", "revolutionaer" oder "begib dich auf eine Reise" gefunden und entfernt?</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Satzrhythmus gebrochen:</strong> Klingen alle Saetze gleich lang? KI neigt zu monotoner Struktur. Kurze, praegnante Saetze eingebaut?</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Ich-Pruefung bestanden:</strong> Jeden Satz laut vorgelesen und geprueft: "Wuerde ich das so auch am Telefon zu einem Kunden sagen?"</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="filter-item">
+          <button class="filter-toggle" onclick="toggleFilter(this,'f4')">
+            <div class="filter-num">4</div>
+            <div class="filter-title">Sicherheits- &amp; Rechts-Check</div>
+            <span class="filter-arrow">&#9660;</span>
+          </button>
+          <div class="filter-body" id="f4">
+            <ul class="filter-checks">
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Heikle Versprechen entschaerft:</strong> Text auf Heilversprechen, Rechtsberatung oder Finanzgarantien geprueft und durch "Meiner Erfahrung nach..." abgemildert?</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>YMYL-Bereiche abgesichert:</strong> Bei Finanzen, Gesundheit, Sicherheit oder Recht: Primaerquelle verifiziert, keine KI als finale Fachquelle?</span></li>
+              <li class="filter-check-item" onclick="toggleCheck(this)"><div class="filter-checkbox"></div><span><strong>Haftungsfrage beantwortet:</strong> "Waere ich bereit, die volle Verantwortung fuer jede einzelne Behauptung zu uebernehmen?"</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="callout orange">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-text">
+          <strong>50%-Regel: Prompt neu aufsetzen statt retten</strong>
+          <p>Wenn du merkst, dass du bei einem Text mehr als 50 % korrigieren musst, war der urspruengliche Prompt meist zu vage. Es ist effizienter, den Prompt mit besseren Kontextdaten neu aufzusetzen, statt den schlechten Text muehsam zu "retten".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>AI vs. AI: Die KI als gnadenlosen Lektor einsetzen</h2>
+        <p>Der Advocatus-Diaboli-Ansatz gegen den Gefaelligkeits-Modus</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein grosser Vorteil von Sprachmodellen: Sie sind hervorragend darin, Fehler in Texten zu finden, solange man sie explizit dazu auffordert, <strong>kritisch</strong> zu sein. Wenn du die KI einfach nur fragst "Ist dieser Text gut?", antwortet sie meistens mit "Ja, er ist hervorragend." Das ist der <strong>Gefaelligkeits-Modus (Sycophancy)</strong>. Du brauchst keinen Ja-Sager, sondern einen unerbittlichen Chefredakteur.</p>
+      <div class="callout yellow">
+        <div class="callout-icon">&#127917;</div>
+        <div class="callout-text">
+          <strong>Wichtig: Frisches Chat-Fenster verwenden</strong>
+          <p>Kopiere den Text in einen neuen, frischen Chat. Damit verhinderst du, dass die KI durch den vorherigen Erstellungsprozess "voreingenommen" ist. Ein frischer Kontext zwingt sie zur neutralen Bewertung.</p>
+        </div>
+      </div>
+      <h3>Der Advocatus-Diaboli-Prompt-Generator</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Beschreibe kurz deinen Text und deine Brand Voice. Das Tool generiert den fertigen gnadenlosen Lektor-Prompt, den du in ein frisches Chat-Fenster einsetzen kannst.</p>
+      <div class="lektor-wrap">
+        <div class="lektor-toolbar"><span>&#9878;&#65039; Advocatus Diaboli Generator</span></div>
+        <div class="lektor-body">
+          <div>
+            <label class="lektor-label">Worum geht es in deinem Text? (Thema &amp; Zweck)</label>
+            <textarea class="lektor-input" id="lek-thema" placeholder="z.B. Ein LinkedIn-Post ueber die Vorteile von KI im Marketing fuer Marketing-Manager"></textarea>
+          </div>
+          <div>
+            <label class="lektor-label">Deine Brand Voice in 2-3 Worten</label>
+            <textarea class="lektor-input" id="lek-voice" placeholder="z.B. direkt, humorvoll, faktenbasiert" style="min-height:44px;"></textarea>
+          </div>
+        </div>
+        <div class="lektor-footer">
+          <span style="font-size:12px;color:var(--text-subtle);">Beide Felder ausfuellen</span>
+          <button class="lektor-run-btn" onclick="generateLektor()">&#9654; Prompt generieren</button>
+        </div>
+        <div class="lektor-output-wrap" id="lek-output-wrap">
+          <div class="lektor-output-label">Dein Advocatus-Diaboli-Prompt (in neuen Chat einsetzen)</div>
+          <div class="lektor-output" id="lek-output">
+            <button class="lektor-copy-btn" onclick="copyLektor()">Kopieren</button>
+            <span id="lek-output-text"></span>
+          </div>
+        </div>
+      </div>
+      <div class="callout green">
+        <div class="callout-icon">&#128260;</div>
+        <div class="callout-text">
+          <strong>Das 4-Augen-Prinzip: Cross-Check mit einem anderen Modell</strong>
+          <p>Jede KI hat ihre eigenen "blinden Flecken". Was ChatGPT als perfekt empfindet, findet Claude vielleicht viel zu blumig. Nutze fuer die Pruefung ein anderes Modell als fuer die Erstellung. Das ist das effektivste Qualitaetsmanagement, das du derzeit nutzen kannst.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Der Quellen-Luegendetektor</h2>
+        <p>Wie du erfundene Studien und falsche Belege enttarnst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Eine der beeindruckendsten und gefaehrlichsten Faehigkeiten der KI: Sie erfindet Quellen, die so plausibel klingen, dass man sie ungeprueft uebernimmt. Sie nennt bekannte Professoren, renommierte Institute und kombiniert sie mit Titeln wie "Studie zur digitalen Effizienz 2024". Das Problem? Diese Studien existieren oft nicht.</p>
+      <div class="lies-wrap">
+        <div class="lies-toolbar">
+          <button class="lies-tab active" onclick="showLies('ausweichen',this)">&#127787;&#65039; Das Ausweichen</button>
+          <button class="lies-tab" onclick="showLies('entschuldigung',this)">&#128565; Die Entschuldigung</button>
+          <button class="lies-tab" onclick="showLies('prompt',this)">&#9881;&#65039; Der Pruef-Prompt</button>
+        </div>
+        <div class="lies-panel active" id="lp-ausweichen">
+          <div class="lies-scenario">Die KI hat eine Studie zitiert. Du fragst nach der exakten Quelle. Statt einer DOI-Nummer antwortet sie so:</div>
+          <div class="lies-response">"Ich habe keinen direkten Zugriff auf das Live-Internet, aber diese Daten spiegeln den allgemeinen Konsens wider und basieren auf mehreren Studien aus dem Bereich der Lernpsychologie..."</div>
+          <div class="lies-verdict">&#10003; Uebersetzt: "Ich habe es mir ausgedacht." Immer wenn die KI auf eine konkrete Quellenanfrage mit "allgemeinem Konsens" antwortet, ist das eine Halluzination.</div>
+        </div>
+        <div class="lies-panel" id="lp-entschuldigung">
+          <div class="lies-scenario">Du fragst direkt nach: "Nenn mir die exakten Autoren und das Veroeffentlichungsdatum." Die KI knickt sofort ein:</div>
+          <div class="lies-response">"Es tut mir leid, ich muss eingestehen, dass ich diese spezifische Studie nicht verifizieren kann. Ich habe moeglicherweise die Quelle faelschlicherweise generiert..."</div>
+          <div class="lies-verdict">&#10003; Die direkte Konfrontation funktioniert. Wenn die KI zugibt, die Quelle "generiert" zu haben, war es erfunden. Diese Zahl darf niemals veroeffentlicht werden.</div>
+        </div>
+        <div class="lies-panel" id="lp-prompt">
+          <div class="lies-scenario">Nutze diesen Prompt, wenn die KI eine Studie oder Statistik verwendet, die du nicht sofort verifizieren kannst:</div>
+          <div class="lies-prompt">Du hast gerade die Studie <span style="color:#FFA657;">[Name der Studie]</span> zitiert.
+Ich muss diese Angabe verifizieren.
+
+1. Nenne mir die exakten Autoren und das Veroeffentlichungsdatum.
+2. Gib mir den direkten Link zur Primaerquelle (oder die DOI-Nummer).
+3. Wenn du keinen Zugriff auf die exakte Quelle hast oder sie
+   basierend auf Wahrscheinlichkeiten <span style="color:#F85149;">"geschaetzt"</span> hast,
+   gib es jetzt offen zu.</div>
+          <div class="lies-verdict">&#10003; Goldene Regel: Nutze niemals eine Quelle, die du nicht mit einer kurzen Google-Suche selbst gefunden hast. Ein einziger erfundener Beleg zerstoert deine gesamte fachliche Glaubwuerdigkeit.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Rechtliche &amp; ethische Haftung</h2>
+        <p>"Die KI hat das geschrieben" ist keine rechtliche Ausrede</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Es gibt einen entscheidenden Unterschied zwischen "Die KI hat das geschrieben" und "Ich habe das veroeffentlicht". Sobald ein Text unter deinem Namen, auf deiner Website oder in deinem Newsletter erscheint, findet eine <strong>Haftungsuebertragung</strong> statt. Rechtlich gesehen bist du der Inverkehrbringer dieser Information.</p>
+      <div class="callout yellow">
+        <div class="callout-icon">&#9878;&#65039;</div>
+        <div class="callout-text">
+          <strong>Was das bedeutet: Zwei wichtige Punkte</strong>
+          <p><strong>Zivilrechtliche Haftung:</strong> Gibst du falsche Tipps im Bereich Steuern, Recht oder Gesundheit, haftest du persoenlich. Die KI-Entwickler schliessen in ihren AGB jegliche Haftung fuer die Richtigkeit der Outputs aus.<br><br>
+          <strong>Urheberrecht:</strong> Rein KI-generierte Werke geniessen aktuell keinen Urheberrechtsschutz. Erst durch deine schoepferische Eigenleistung (Bearbeitung, Ergaenzung, Pruefung) wird daraus ein schuetzenswertes Werk.</p>
+        </div>
+      </div>
+      <div class="callout orange">
+        <div class="callout-icon">&#128680;</div>
+        <div class="callout-text">
+          <strong>Die YMYL-Regel (Your Money or Your Life)</strong>
+          <p>Google stuft Finanzen, Gesundheit, Sicherheit und Recht als besonders kritische Bereiche ein. In diesen Gebieten ist die Pruefungspflicht nicht nur eine Option, sondern ueberlebenswichtig fuer dein Ranking und deinen Ruf. Eine einzige falsche Dosierungsempfehlung oder ein falscher Paragraf kann deine Autoritaet jahrelang beschaedigen.</p>
+        </div>
+      </div>
+      <h3>Der finale Verantwortungs-Check</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Stelle dir diese Frage, bevor du das naechste Mal "Posten" klickst:</p>
+      <div class="resp-check" id="resp-check">
+        <div class="resp-question">"Waere ich bereit, vor Gericht oder gegenueber einem wuetenden Kunden die volle Verantwortung fuer jede einzelne Behauptung in diesem Text zu uebernehmen?"</div>
+        <div class="resp-btn-row">
+          <button class="resp-btn yes" onclick="answerResp('yes')">Ja, absolut &#10003;</button>
+          <button class="resp-btn no"  onclick="answerResp('no')">Nein / Unsicher &#10007;</button>
+        </div>
+        <div class="resp-feedback" id="resp-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">&#9733;</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step"><div class="chain-num">1</div><div class="chain-content"><strong>Du bist der Absender</strong> Das Tool ist niemals verantwortlich. Immer der Mensch, der den "Senden"-Button drueckt. "Die KI hat das geschrieben" ist keine rechtliche Ausrede, keine ethische Entschuldigung und kein Schutz vor Reputationsschaeden.</div></div>
+      <div class="chain-step"><div class="chain-num">2</div><div class="chain-content"><strong>KIs berechnen Wahrscheinlichkeiten, keine Wahrheiten</strong> Halluzinationen sind kein Bug, sie sind eine strukturelle Eigenschaft von Sprachmodellen. Jede Zahl, jedes Datum, jede Studie und jeder Link muss geprueft werden, egal wie ueberzeugend der Text klingt.</div></div>
+      <div class="chain-step"><div class="chain-num">3</div><div class="chain-content"><strong>Schutz durch Bearbeitung</strong> Urheberrechtsschutz entsteht erst durch deine individuelle Anpassung. Wer Texte zu 100 % von der KI schreiben laesst, kann sie nicht effektiv vor Kopieren schuetzen. Deine Schoepfungshoehe ist dein Eigentumsanspruch.</div></div>
+      <div class="chain-step"><div class="chain-num">4</div><div class="chain-content"><strong>Die KI als Gegenspieler einsetzen</strong> Der Gefaelligkeits-Modus ist die Falle. Nutze den Advocatus-Diaboli-Ansatz im frischen Chat: Die KI findet ihre eigenen Fehler erstaunlich gut, wenn du sie explizit als Kritiker einsetzt.</div></div>
+      <div class="chain-step"><div class="chain-num">5</div><div class="chain-content"><strong>Fakten-Hoheit behalten</strong> Ueberlasse der KI das "Wie" (die Formulierung), aber niemals das "Was" (die Fakten). Deine Expertise, deine verifizierten Zahlen und deine persoenlichen Erfahrungen bleiben immer unter deiner Kontrolle.</div></div>
+    </div>
+  </div>
+
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">&#128293; <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter &#8594;</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+function toggleFilter(btn, id) {
+  var body = document.getElementById(id);
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  var box = el.querySelector('.filter-checkbox');
+  box.textContent = el.classList.contains('done') ? '\u2713' : '';
+}
+
+function generateLektor() {
+  var thema = document.getElementById('lek-thema').value.trim();
+  var voice = document.getElementById('lek-voice').value.trim();
+  if (!thema) { alert('Bitte beschreibe kurz deinen Text.'); return; }
+  var lines = [
+    'Handle als erfahrener Lektor und gnadenloser Fakten-Checker.',
+    'Ich lege dir gleich einen Text vor. Deine Aufgabe ist es NICHT, ihn zu loben, sondern ihn zu zerpfluecken.',
+    '',
+    'Kontext: Es handelt sich um ' + thema + '.'
+  ];
+  if (voice) lines.push('Meine Brand Voice ist: ' + voice + '. Pruefe besonders auf Abweichungen davon.');
+  lines.push('', 'Suche gezielt nach:');
+  lines.push('1. KI-Klischees: Wo klingt der Text nach Standard-Roboter? (Floskeln wie "umfassend", "nahtlos", "Loesung")');
+  lines.push('2. Logik-Fehlern: Wo widerspricht sich die Argumentation oder fehlen Zwischenschritte?');
+  lines.push('3. Behauptungen ohne Beleg: Welche Fakten oder Zahlen wirken "erfunden"?');
+  lines.push('4. Tonalitaets-Suenden: Wo klingt der Text unbeabsichtigt steif, generisch oder unpersoenlich?');
+  lines.push('', 'Erstelle eine nummerierte Liste mit Korrekturvorschlaegen. Sei streng. Kein Lob.', '', 'Hier ist der Text: [DEINEN TEXT HIER EINSETZEN]');
+  document.getElementById('lek-output-text').textContent = lines.join('\n');
+  document.getElementById('lek-output-wrap').style.display = 'block';
+}
+
+function copyLektor() {
+  var text = document.getElementById('lek-output-text').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.lektor-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+function showLies(id, btn) {
+  document.querySelectorAll('.lies-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.lies-tab').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('lp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function answerResp(answer) {
+  var box = document.getElementById('resp-check');
+  var fb = document.getElementById('resp-feedback');
+  document.querySelectorAll('.resp-btn').forEach(function(b) { b.classList.remove('selected'); });
+  document.querySelector('.resp-btn.' + answer).classList.add('selected');
+  if (answer === 'yes') {
+    box.className = 'resp-check answered-yes';
+    fb.style.display = 'block';
+    fb.style.color = 'var(--green)';
+    fb.textContent = 'Perfekt. Dann ist die Pruefung abgeschlossen und der Text kann veroeffentlicht werden. Diese Bereitschaft ist kein Buerokratie-Akt, sondern der einzige wirksame Schutz fuer deinen Ruf.';
+  } else {
+    box.className = 'resp-check answered-no';
+    fb.style.display = 'block';
+    fb.style.color = 'var(--red)';
+    fb.textContent = 'Dann ist die Pruefung noch nicht abgeschlossen. Identifiziere den Punkt, bei dem du unsicher bist, pruefe ihn gegen eine verlaessliche Quelle. Kein Posting ist es wert, deine Glaubwuerdigkeit aufs Spiel zu setzen.';
+  }
+}
+
+const questions = [
+  { q: 'Warum "luegen" Sprachmodelle, ohne es zu merken?', options: ['Weil sie bewusst Fehlinformationen verbreiten wollen.', 'Weil sie Wahrscheinlichkeiten berechnen, nicht Wahrheiten pruefen. Sie "wissen" nichts, sie schaetzen das naechste wahrscheinliche Wort.', 'Weil ihre Trainingsdaten veraltet sind.', 'Weil sie keine Verbindung zum Internet haben.'], correct: 1, feedback: 'Sprachmodelle sind Wahrscheinlichkeitsmaschinen. Sie haben kein Bewusstsein fuer Wahrheit und koennen gar nicht "luegen" im menschlichen Sinne. Sie produzieren das statistisch wahrscheinlichste Wort, und wenn das eine falsche Zahl ist, klingt sie trotzdem ueberzeugend.' },
+  { q: 'Was ist eine "Halluzination" im Kontext von KI-Texten?', options: ['Ein Text, der zu kreativ und fantasievoll ist.', 'Eine KI, die in einen Endlosloop geraet.', 'Wenn die KI plausibel klingende, aber frei erfundene Fakten, Quellen oder Ereignisse produziert.', 'Ein Formatierungsfehler in der KI-Ausgabe.'], correct: 2, feedback: 'Halluzinationen sind strukturelle Eigenschaft von Sprachmodellen: Die KI erfindet Studientitel, Jahreszahlen, Professorennamen oder Statistiken, nur um den Satzbau logisch zu vervollstaendigen. Gefaehrlich ist, wie ueberzeugend sie klingen.' },
+  { q: 'Was beschreibt der Begriff "Sycophancy" (Gefaelligkeits-Modus) bei KIs?', options: ['Die Tendenz der KI, Texte zu lang zu machen.', 'Die Neigung der KI, auf allgemeine Fragen ("Ist das gut?") mit uebertriebener Bestaetigung zu antworten, statt kritisch zu sein.', 'Die automatische Korrektur von Grammatikfehlern.', 'Das Verhalten der KI, bei jedem Prompt nach mehr Kontext zu fragen.'], correct: 1, feedback: 'KIs sind darauf trainiert, hilfreiche und akzeptierte Antworten zu liefern. Das fuehrt zum Gefaelligkeits-Modus. Deshalb musst du sie explizit als Kritiker einsetzen, mit klarem Auftrag zur harten Pruefung.' },
+  { q: 'Warum solltest du den Lektor-Prompt in einem frischen Chat-Fenster abfeuern?', options: ['Weil KIs nach langen Gespraechen technisch langsamer werden.', 'Um Speicherplatz zu sparen.', 'Um zu verhindern, dass die KI durch den Erstellungsprozess "voreingenommen" ist und den Text unbewusst schont.', 'Weil es rechtlich vorgeschrieben ist.'], correct: 2, feedback: 'Eine KI, die einen Text selbst erstellt hat, neigt dazu, ihn im selben Chat zu verteidigen. Ein frisches Fenster ohne Kontext erzwingt eine neutrale Bewertung.' },
+  { q: 'Was ist das erste Warnsignal, dass eine von der KI zitierte Quelle erfunden sein koennte?', options: ['Die Quelle ist auf Englisch.', 'Die KI antwortet auf die Quellenanfrage mit Ausweichen: "...spiegelt den allgemeinen Konsens wider" statt mit konkreten Autoren und DOI-Nummer.', 'Die Studie ist aelter als 5 Jahre.', 'Der Studientitel klingt zu allgemein.'], correct: 1, feedback: 'Das Ausweichen ist der Code fuer "Ich habe es mir ausgedacht." Wenn die KI auf eine konkrete Quellenanfrage nicht mit Autor, Datum und Link antwortet, sondern auf "allgemeinen Konsens" verweist, handelt es sich fast immer um eine Halluzination.' },
+  { q: 'Was bedeutet die "50%-Regel" aus diesem Modul?', options: ['Mindestens 50 % des Textes muss von Menschen geschrieben werden.', 'Du solltest hoechstens 50 % des KI-Outputs verwenden.', 'Wenn du mehr als 50 % eines KI-Textes korrigieren musst, war der urspruengliche Prompt zu vage. Dann lieber neu aufsetzen.', 'Die KI sollte maximal 50 % des Workflows uebernehmen.'], correct: 2, feedback: 'Die 50%-Regel ist eine Effizienzregel: Wenn du die Haelfte des Textes korrigierst, steckst du mehr Energie in die Rettung als in eine neue Erstellung. Der bessere Weg: Den Prompt mit mehr Kontext und klarerer Struktur neu aufsetzen.' },
+  { q: 'Was ist der Unterschied zwischen Filter 3 (Tonalitaets-Check) und Filter 1 (Fakten-Check)?', options: ['Es gibt keinen Unterschied, beide pruefen dasselbe.', 'Filter 1 prueft inhaltliche Korrektheit (Zahlen, Fakten, Logik). Filter 3 prueft, ob der Text nach dir klingt oder KI-typische Floskeln enthaelt.', 'Filter 3 ist fuer rechtliche Fragen, Filter 1 fuer stilistische.', 'Filter 1 ist wichtiger als Filter 3.'], correct: 1, feedback: 'Die vier Filter pruefen verschiedene Qualitaetsdimensionen: Fakten, Logik, Stil und Recht. Ein Text kann faktisch korrekt sein und trotzdem nach einem Roboter klingen. Erst wenn alle vier Filter gruenes Licht geben, ist der Text wirklich fertig.' },
+  { q: 'Warum geniessen rein KI-generierte Texte (ohne menschliche Bearbeitung) aktuell keinen Urheberrechtsschutz?', options: ['Weil KI-Texte immer zu kurz sind.', 'Weil KI-Unternehmen alle Rechte beanspruchen.', 'Weil Urheberrecht eine schoepferische Eigenleistung eines Menschen voraussetzt. Erst durch deine Bearbeitung und Ergaenzung entsteht ein schuetzenswertes Werk.', 'Weil Texte generell keinen Urheberrechtsschutz mehr geniessen.'], correct: 2, feedback: 'Das aktuelle Urheberrecht schuetzt menschliche Schoepfungen. Ein 100 % KI-generierter Text ist rechtlich nicht dein geistiges Eigentum. Deine Bearbeitung, deine Fakten-Infusion und deine persoenliche Note erhoehen die Schoepfungshoehe.' },
+  { q: 'Was ist die YMYL-Regel und warum ist sie besonders wichtig fuer KI-Content?', options: ['Eine Google-Richtlinie, die Texte ueber Finanzen, Gesundheit, Sicherheit und Recht als besonders kritisch einstuft, wo Fehler schwere reale Konsequenzen haben.', 'Eine Methode zur Keyword-Recherche.', 'Eine interne KI-Richtlinie fuer sichereren Output.', 'Eine Regel fuer Social-Media-Content auf bestimmten Plattformen.'], correct: 0, feedback: 'YMYL steht fuer "Your Money or Your Life". Google und rechtliche Rahmenbedingungen halten Inhalte in diesen Bereichen zu hoechster Korrektheit verpflichtet. Eine falsche Dosierungsempfehlung oder ein falscher Paragraf kann nicht nur dein Ranking, sondern auch Menschen schaden.' },
+  { q: 'Was ist der "4-Augen-Prinzip"-Tipp fuer die KI-Qualitaetspruefung?', options: ['Zwei Menschen sollten jeden Text lesen.', 'Den Text zweimal laut vorlesen.', 'Fuer die Pruefung ein anderes KI-Modell als fuer die Erstellung nutzen, da jede KI eigene blinde Flecken hat.', 'Den Text in eine andere Sprache uebersetzen und zurueckuebersetzen.'], correct: 2, feedback: 'Jedes KI-Modell hat seine eigenen Staerken und Schwaechen. ChatGPT findet vielleicht einen Text perfekt, den Claude als zu blumig einschaetzt. Der Cross-Check mit einem anderen Modell im frischen Chat ist das effektivste digitale Qualitaetsmanagement, das aktuell moeglich ist.' }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+function nextQuestion() { currentQ++; if (currentQ >= questions.length) showResult(); else renderQuestion(); }
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1) { badge = '\uD83C\uDFC6'; title = 'Perfekt!'; sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!'; sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.'; sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>

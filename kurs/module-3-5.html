@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.5 SEO bei der Contenterstellung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* SEO Workflow stepper */
+.seo-flow {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.seo-flow-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.seo-step-btn {
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.seo-step-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.seo-panel { display: none; padding: 16px; }
+.seo-panel.active { display: block; }
+.seo-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.seo-panel-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.seo-prompt {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  margin-bottom: 10px;
+}
+.seo-tip {
+  font-size: 12px;
+  color: var(--text-subtle);
+  line-height: 1.55;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.seo-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.seo-nav-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-light);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.seo-nav-btn:hover { background: var(--accent); color: white; }
+.seo-nav-btn:disabled { border-color: var(--border); background: var(--surface-2); color: var(--text-subtle); cursor: default; }
+.seo-step-indicator { font-size: 12px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+
+/* Intent classifier */
+.intent-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.intent-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.intent-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.intent-body { padding: 16px; }
+.intent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+@media (max-width: 600px) { .intent-grid { grid-template-columns: 1fr; } }
+.intent-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+}
+.intent-card:hover { border-color: var(--accent); background: var(--accent-light); }
+.intent-card.selected { border-color: var(--accent); background: var(--accent-light); }
+.intent-card-type {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.intent-card-example {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.intent-card-format {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.intent-result {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--accent-2-light);
+  border: 1px solid #ABF5D1;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* Snippet preview tool */
+.snippet-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.snippet-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.snippet-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.snippet-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.snippet-row { display: flex; flex-direction: column; gap: 4px; }
+.snippet-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.snippet-input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  transition: border 0.15s;
+}
+.snippet-input:focus { outline: none; border-color: var(--accent); }
+.snippet-charcount {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+  margin-top: 2px;
+}
+.snippet-preview-box {
+  background: #fff;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: none;
+}
+.snippet-preview-url {
+  font-size: 12px;
+  color: #202124;
+  margin-bottom: 2px;
+  font-family: Arial, sans-serif;
+}
+.snippet-preview-title {
+  font-size: 18px;
+  color: #1a0dab;
+  font-family: Arial, sans-serif;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.snippet-preview-title:hover { text-decoration: underline; }
+.snippet-preview-desc {
+  font-size: 13px;
+  color: #4d5156;
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
+}
+.snippet-warn {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  display: none;
+}
+.snippet-warn.over { background: var(--red-light); color: var(--red); }
+.snippet-warn.ok { background: var(--accent-2-light); color: var(--green); }
+.snippet-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+}
+.snippet-gen-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  background: var(--accent-2-light);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.snippet-gen-btn:hover { background: var(--accent-2); color: white; }
+
+/* EEAT checklist */
+.eeat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+@media (max-width: 600px) { .eeat-grid { grid-template-columns: 1fr; } }
+.eeat-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.eeat-card-header {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  border-bottom: 1px solid var(--border);
+}
+.eeat-card-header.e1 { background: var(--accent-light); color: var(--accent); }
+.eeat-card-header.e2 { background: var(--accent-2-light); color: var(--green); }
+.eeat-card-header.a  { background: #FFF8E7; color: #B45309; }
+.eeat-card-header.t  { background: #FFF0F0; color: var(--red); }
+.eeat-card-body {
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  background: var(--surface);
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-content.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">3.5 / 3.4</span>
+  <a href="module-3-6.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 3 · Content-Produktion</div>
+    <h1>SEO bei der Contenterstellung</h1>
+    <p>Wie du die KI als strategischen Analysten nutzt, um Inhalte zu erstellen, die nicht nur gut klingen, sondern auch gefunden werden.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~18 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>4 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir schlagen die Brücke zwischen kreativem Schreiben und technischer Sichtbarkeit. Du lernst, wie du die KI als strategischen Analysten einsetzt, um Inhalte zu erstellen, die nicht nur gut klingen, sondern auch dort auftauchen, wo deine Zielgruppe sucht.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du entwickelst eine lückenlose SEO-Strategie: von der Keyword-Recherche über die Analyse des Such-Intents bis zur perfekten H-Struktur. Du baust durch fachliche Tiefe (E-E-A-T) Vertrauen auf und optimierst Inhalte für langfristigen organischen Traffic.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Grundgedanke -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Modernes SEO: Problemlösung statt Keyword-Dichte</h2>
+        <p>Warum Google heute eine semantische Verstehens-Maschine ist</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Vergiss für einen Moment alles, was du über Keyword-Dichte oder technische Tricks gehört hast. Wenn wir heute über SEO sprechen, sprechen wir eigentlich über <strong>Problemlösung</strong>. Google ist kein dummer Algorithmus mehr, der Wörter zählt. Es ist eine semantische Verstehens-Maschine, deren einziges Ziel es ist, dem Nutzer genau das zu liefern, was er im Kopf hatte, als er Enter drückte.</p>
+
+      <p>Die KI hilft dir nicht dabei, Google auszutricksen. Sie hilft dir dabei, einen Text zu entwerfen, der so hochwertig und relevant ist, dass Google ihn lieben muss.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-text">
+          <strong>Weg von Keywords, hin zur Suchintention</strong>
+          <p>Früher haben wir Texte um ein Wort herum gebaut. Heute bauen wir Texte um eine <strong>Absicht</strong> herum. Wir analysieren, was der Nutzer wirklich sucht, und bieten ihm genau das. Die KI ist dein perfektes Werkzeug, um diesen Intent zu entschlüsseln: "Was fehlt den aktuellen Top-Ergebnissen zu diesem Thema?" In Sekunden weißt du, welche Lücke du schließen kannst.</p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">⚡</div>
+        <div class="callout-text">
+          <strong>Der doppelte Effekt eines Intent-treffen Textes</strong>
+          <p><strong>Für den Nutzer:</strong> Er findet sofort, was er sucht, bleibt länger auf der Seite und interagiert mit dem Content. Das sendet positive Signale an Google.<br><br>
+          <strong>Für den Algorithmus:</strong> Klare Hierarchien, logische Themenblöcke und präzise Antworten machen es Google leicht, den Text als "hochwertige Quelle" einzustufen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Recherche & Strategie -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Recherche &amp; Strategie: Die KI als Daten-Analyst</h2>
+        <p>Topic Clusters, Search Intent und die Content-Gap-Analyse</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Heute gewinnst du bei Google nicht mehr über einzelne Keywords, sondern über <strong>Themenwelten (Topic Clusters)</strong>. Die KI hilft dir, ein Thema so umfassend zu beleuchten, dass Google dich als Autorität in deiner Nische wahrnimmt.</p>
+
+      <h3>Search Intent: Die 4 Absichten kennen</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf einen Intent-Typ und sieh, welches Inhaltsformat Google dafür erwartet. Den falschen Content für die falsche Absicht zu liefern bedeutet: Du wirst nie ranken.</p>
+
+      <div class="intent-wrap">
+        <div class="intent-toolbar">
+          <span>🔍 Search Intent Classifier</span>
+        </div>
+        <div class="intent-body">
+          <p style="font-size:13px;color:var(--text-muted);margin:0 0 8px;">Wähle einen Intent-Typ, den du verstehen möchtest:</p>
+          <div class="intent-grid">
+            <div class="intent-card" onclick="selectIntent('info', this)">
+              <div class="intent-card-type">Informational</div>
+              <div class="intent-card-example">"Warum schmerzen meine Füße beim Laufen?"</div>
+              <div class="intent-card-format">→ Ausführlicher Guide, How-To</div>
+            </div>
+            <div class="intent-card" onclick="selectIntent('nav', this)">
+              <div class="intent-card-type">Navigational</div>
+              <div class="intent-card-example">"Nike Run App Login"</div>
+              <div class="intent-card-format">→ Direkte Landingpage, keine Artikel</div>
+            </div>
+            <div class="intent-card" onclick="selectIntent('commercial', this)">
+              <div class="intent-card-type">Commercial</div>
+              <div class="intent-card-example">"Laufschuh Test 2026"</div>
+              <div class="intent-card-format">→ Vergleich, Bestenliste, Testbericht</div>
+            </div>
+            <div class="intent-card" onclick="selectIntent('trans', this)">
+              <div class="intent-card-type">Transactional</div>
+              <div class="intent-card-example">"Barfußschuhe kaufen günstig"</div>
+              <div class="intent-card-format">→ Produktseite, Shop-Listing</div>
+            </div>
+          </div>
+          <div class="intent-result" id="intent-result"></div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🔎</div>
+        <div class="callout-text">
+          <strong>Content-Gap-Analyse: Den "Information Gain" finden</strong>
+          <p>Warum sollte Google deinen Text auf Platz 1 setzen, wenn es schon zehn ähnliche Artikel gibt? Öffne die Top 4 Google-Ergebnisse zu deinem Keyword. Kopiere deren Texte. Lass die KI die Schwachstellen suchen: Welche Nutzerfragen bleiben unbeantwortet? Was ist veraltet? Wo fehlen praktische Schritt-für-Schritt-Anleitungen? Das ist deine Lücke.</p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">📌</div>
+        <div class="callout-text">
+          <strong>Topic Cluster Prompt</strong>
+          <p>Statt nach "Keywords" zu fragen: "Ich möchte als Experte für [Thema] wahrgenommen werden. Erstelle 5 Themen-Cluster, die alle relevanten Kundenfragen abdecken. Unterteile jedes Cluster in: 1. Hauptartikel (Säulen-Inhalt), 2. Drei spezifische Unterthemen für Blogartikel."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: SEO-Skelett & 5-Schritt-Workflow -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Der komplette SEO-Workflow: 5 Schritte</h2>
+        <p>Von der Lückensuche bis zum Faktencheck</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>SEO-Content entsteht nicht durch einen einzigen Prompt. Es ist ein strukturierter Prozess mit klar getrennten Phasen. Klicke dich durch alle fünf Schritte und erhalte die passenden Prompts für jede Phase.</p>
+
+      <div class="seo-flow">
+        <div class="seo-flow-toolbar">
+          <button class="seo-step-btn active" onclick="showSeoStep(0, this)">1 Lücke</button>
+          <button class="seo-step-btn" onclick="showSeoStep(1, this)">2 Skelett</button>
+          <button class="seo-step-btn" onclick="showSeoStep(2, this)">3 Inhalt</button>
+          <button class="seo-step-btn" onclick="showSeoStep(3, this)">4 On-Page</button>
+          <button class="seo-step-btn" onclick="showSeoStep(4, this)">5 Check</button>
+        </div>
+
+        <div class="seo-panel active" id="sp-0">
+          <div class="seo-panel-title">Schritt 1: Die Lückensuche (Strategie)</div>
+          <div class="seo-panel-desc">Suche dein Keyword bei Google. Kopiere die Texte der Top 3 bis 5 Ergebnisse. Lass die KI analysieren, was fehlt. Das Ergebnis: eine Liste mit Inhalten, die deinen Text einzigartig machen.</div>
+          <div class="seo-prompt">Ich möchte einen Artikel zum Thema <span style="color:#FFA657;">[Dein Thema]</span> schreiben,
+der besser ist als alles, was derzeit bei Google rankt.
+
+Hier sind die Texte meiner stärksten Konkurrenten:
+--- KONKURRENT 1: <span style="color:#3FB950;">[Text einfügen]</span> ---
+--- KONKURRENT 2: <span style="color:#3FB950;">[Text einfügen]</span> ---
+
+Analysiere tiefgreifend:
+1. Welche Nutzerfragen bleiben unbeantwortet?
+2. Welche Aspekte oder Trends (Stand 2026) fehlen oder sind veraltet?
+3. Wo fehlen praktische Beispiele, echte Zahlen, Schritt-für-Schritt-Anleitungen?
+4. Erstelle mir eine Liste von Inhalten, die mein Text enthalten muss.</div>
+          <div class="seo-tip">Achte auf: veraltete Fakten (oft ranken Texte von 2022/2023), fehlende Praxistiefe ("Was" ohne "Wie") und die "So-was-nun"-Lücke (Leser ohne Handlungsempfehlung entlassen).</div>
+          <div class="seo-nav-row">
+            <button class="seo-nav-btn" disabled>← Zurück</button>
+            <span class="seo-step-indicator">1 / 5</span>
+            <button class="seo-nav-btn" onclick="showSeoStep(1, null)">Weiter →</button>
+          </div>
+        </div>
+
+        <div class="seo-panel" id="sp-1">
+          <div class="seo-panel-title">Schritt 2: Das Skelett bauen (Architektur)</div>
+          <div class="seo-panel-desc">Stell dir Google als gestressten Professor vor, der nur das Inhaltsverzeichnis scannt. Deine H-Struktur muss auf den ersten Blick zeigen, dass dein Text die Suchanfrage vollständig beantwortet.</div>
+          <div class="seo-prompt">Ich habe die Content-Lücken analysiert.
+Basierend auf <span style="color:#FFA657;">[Dein Thema]</span> und den fehlenden Aspekten der Konkurrenz:
+
+Erstelle eine detaillierte Gliederung (H1 bis H3).
+- H1: Enthält das Haupt-Keyword, macht neugierig, ein einziger pro Text.
+- H2: Nutze psychologisch geschickte Fragen, die Nutzer bei Google stellen.
+- H3: Beantworte spezifische Unterfragen mit hoher Informationsdichte.
+- Baue die "Information Gain"-Punkte als eigene Sektionen ein.
+- Sorge für einen logischen roten Faden: vom Problem zur Lösung.</div>
+          <div class="seo-tip">Tipp: Mindestens eine H2 sollte als Featured Snippet formatierbar sein (kurze, präzise Antwort in 2 Sätzen). Nutze Synonyme und verwandte Begriffe in den Headings, keine Keyword-Wüste.</div>
+          <div class="seo-nav-row">
+            <button class="seo-nav-btn" onclick="showSeoStep(0, null)">← Zurück</button>
+            <span class="seo-step-indicator">2 / 5</span>
+            <button class="seo-nav-btn" onclick="showSeoStep(2, null)">Weiter →</button>
+          </div>
+        </div>
+
+        <div class="seo-panel" id="sp-2">
+          <div class="seo-panel-title">Schritt 3: Modulare Infusion (Erstellung)</div>
+          <div class="seo-panel-desc">Fülle das Skelett Sektion für Sektion. Nie den gesamten Text auf einmal generieren. Jede H2 bekommt ihren eigenen Prompt mit deinem Experten-Input. Google erkennt "Thin Content" sofort.</div>
+          <div class="seo-prompt">Wir schreiben jetzt den Abschnitt für die H2:
+<span style="color:#FFA657;">[Name der Überschrift]</span>
+
+Kontext: Die Konkurrenz vernachlässigt hier den Aspekt <span style="color:#FFA657;">[Lücke]</span>.
+Anweisung: Schreibe einen informativen Text, der diesen Aspekt in den Fokus rückt.
+Nutze präzise Sprache, vermeide Floskeln, hohe Informationsdichte.
+Baue diesen persönlichen Fakt von mir ein:
+<span style="color:#3FB950;">[Dein Experten-Wissen / Zahl / Erfahrung]</span></div>
+          <div class="seo-tip">E-E-A-T einbauen: Hast du eine eigene Statistik? Einen Kunden-Case? Eine konträre Meinung zum Markt-Standard? Genau das macht deinen Text für Google unkopiierbar.</div>
+          <div class="seo-nav-row">
+            <button class="seo-nav-btn" onclick="showSeoStep(1, null)">← Zurück</button>
+            <span class="seo-step-indicator">3 / 5</span>
+            <button class="seo-nav-btn" onclick="showSeoStep(3, null)">Weiter →</button>
+          </div>
+        </div>
+
+        <div class="seo-panel" id="sp-3">
+          <div class="seo-panel-title">Schritt 4: Den "Verkaufslack" auftragen (On-Page)</div>
+          <div class="seo-panel-desc">Dein Suchergebnis ist wie eine digitale Schaufensterauslage. Der Meta-Title ist das Ladenschild, die Meta-Description ist die Auslage. Wenn beides langweilig ist, geht der Kunde zur Konkurrenz.</div>
+          <div class="seo-prompt">Hier ist die Einleitung und das Haupt-Keyword meines Artikels:
+<span style="color:#FFA657;">[Text / Keyword einfügen]</span>
+
+Erstelle mir:
+- 5 verschiedene Meta-Titles (max. 60 Zeichen)
+- 5 Meta-Descriptions (max. 155 Zeichen)
+
+Anforderungen:
+1. Das Keyword muss vorkommen (idealerweise vorne im Title).
+2. Nutze psychologische Trigger wie "Schritt-für-Schritt",
+   "Aktualität 2026" oder "Häufige Fehler vermeiden".
+3. Die Description muss mit einem klaren Call-to-Action enden.</div>
+          <div class="seo-tip">URL-Regel: Nur das Haupt-Keyword, keine Zahlenkolonnen. z.B. deine-seite.de/barfussschuhe-test. Alt-Texte für Bilder nicht vergessen: Beschreibung + Keyword natürlich eingebaut.</div>
+          <div class="seo-nav-row">
+            <button class="seo-nav-btn" onclick="showSeoStep(2, null)">← Zurück</button>
+            <span class="seo-step-indicator">4 / 5</span>
+            <button class="seo-nav-btn" onclick="showSeoStep(4, null)">Weiter →</button>
+          </div>
+        </div>
+
+        <div class="seo-panel" id="sp-4">
+          <div class="seo-panel-title">Schritt 5: Der Fakten- &amp; Soul-Check (Veredelung)</div>
+          <div class="seo-panel-desc">KIs sind exzellente Lügner, nicht aus Bosheit, sondern aus statistischer Wahrscheinlichkeit. Sie erfinden Studien, verwechseln Jahreszahlen. Wer Fakten nicht prüft, verliert seine Autorität schneller als er "ChatGPT" sagen kann.</div>
+          <div class="seo-prompt">Hier ist der fertige Text.
+Identifiziere alle enthaltenen Zahlen, Fakten und Behauptungen.
+Erstelle mir eine Liste dieser Punkte, damit ich sie manuell gegenprüfen kann.
+<span style="color:#FFA657;">Markiere Stellen, bei denen du dir unsicher bist.</span></div>
+          <div class="seo-tip">Danach manuell: Persönliche Meinungen und eigene Erfahrungen einfügen. Lies den Text laut vor. Würdest du ihn einem guten Freund empfehlen oder ist er nur "SEO-Füllmaterial"?</div>
+          <div class="seo-nav-row">
+            <button class="seo-nav-btn" onclick="showSeoStep(3, null)">← Zurück</button>
+            <span class="seo-step-indicator">5 / 5</span>
+            <button class="seo-nav-btn" disabled>Fertig ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Snippet Preview Tool -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Snippet-Vorschau: Wie siehst du bei Google aus?</h2>
+        <p>Title, Description und Zeichenlimits live prüfen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Klickrate ist ein direkter Rankingfaktor. Je öfter dein Ergebnis geklickt wird, desto mehr signalisierst du Google, dass dein Inhalt relevant ist. Ein Keyword bringt dich auf Seite 1. Ein guter Teaser bringt dich auf Platz 1.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Trage deinen Meta-Title und deine Meta-Description ein und sieh sofort, wie dein Google-Snippet aussehen würde. Die Zeichenlimits werden live überwacht.</p>
+
+      <div class="snippet-wrap">
+        <div class="snippet-toolbar">
+          <span>🔍 Snippet-Vorschau</span>
+        </div>
+        <div class="snippet-body">
+          <div class="snippet-row">
+            <label class="snippet-label">URL (kurz, nur Keyword)</label>
+            <input class="snippet-input" id="snip-url" type="text" placeholder="z.B. deine-seite.de/barfussschuhe-test" oninput="updateSnippet()">
+          </div>
+          <div class="snippet-row">
+            <label class="snippet-label">Meta-Title (max. 60 Zeichen)</label>
+            <input class="snippet-input" id="snip-title" type="text" placeholder="z.B. Barfußschuhe Test 2026: Die 7 besten Modelle im Vergleich" oninput="updateSnippet()">
+            <div class="snippet-charcount" id="snip-title-count">0 / 60</div>
+            <div class="snippet-warn" id="snip-title-warn"></div>
+          </div>
+          <div class="snippet-row">
+            <label class="snippet-label">Meta-Description (max. 155 Zeichen)</label>
+            <input class="snippet-input" id="snip-desc" type="text" placeholder="z.B. Wir haben 7 Barfußschuhe 6 Wochen lang getestet. Hier sind die Sieger – und welcher Fehler die meisten beim Kauf machen. Jetzt lesen." oninput="updateSnippet()">
+            <div class="snippet-charcount" id="snip-desc-count">0 / 155</div>
+            <div class="snippet-warn" id="snip-desc-warn"></div>
+          </div>
+        </div>
+        <div class="snippet-footer">
+          <span style="font-size:12px;color:var(--text-subtle);">Vorschau aktualisiert sich live</span>
+          <button class="snippet-gen-btn" onclick="updateSnippet()">▶ Vorschau zeigen</button>
+        </div>
+        <div style="padding: 0 16px 16px;" id="snip-preview-wrap">
+          <div class="snippet-preview-box" id="snip-preview">
+            <div class="snippet-preview-url" id="snip-preview-url">deine-seite.de</div>
+            <div class="snippet-preview-title" id="snip-preview-title">Dein Meta-Title erscheint hier</div>
+            <div class="snippet-preview-desc" id="snip-preview-desc">Deine Meta-Description erscheint hier.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: E-E-A-T -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Der Faktor Mensch: E-E-A-T als Rankingvorteil</h2>
+        <p>Warum Google deine persönliche Erfahrung braucht</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Reiner KI-Content ist oft ein "Echowert": Er wiederholt nur, was er im Training gelernt hat. Er hat keine Meinung, keine Schrammen und keine echten Erfolge. Du hingegen schon. Genau das belohnt Google.</p>
+
+      <div class="eeat-grid">
+        <div class="eeat-card">
+          <div class="eeat-card-header e1">Experience (Erfahrung)</div>
+          <div class="eeat-card-body">Das neue vierte E. Hast du Barfußschuhe wirklich getragen? Dann weißt du vom Muskelkater in den ersten drei Wochen. Die KI weiß das nicht. Genau das ist deine Eintrittskarte für Top-Rankings.</div>
+        </div>
+        <div class="eeat-card">
+          <div class="eeat-card-header e2">Expertise</div>
+          <div class="eeat-card-body">Fachliches Wissen, das über Allgemeinwissen hinausgeht. Eigene Statistiken, Kundencases, konträre Meinungen zum Markt-Standard. Formuliere deine losen Gedanken, die KI macht daraus polierte Expertenabsätze.</div>
+        </div>
+        <div class="eeat-card">
+          <div class="eeat-card-header a">Authoritativeness</div>
+          <div class="eeat-card-body">Topical Authority entsteht durch Topic Clusters. Google sieht, dass du nicht nur einen Artikel schreibst, sondern ein ganzes Themen-Ökosystem aufbaust. Interne Verlinkung stärkt dieses Signal.</div>
+        </div>
+        <div class="eeat-card">
+          <div class="eeat-card-header t">Trustworthiness</div>
+          <div class="eeat-card-body">Fakten prüfen ist Pflicht. KIs erfinden Studien und verwechseln Jahreszahlen. Wer eine falsche Information veröffentlicht, verliert seine Autorität schneller als er "ChatGPT" sagen kann.</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💉</div>
+        <div class="callout-text">
+          <strong>Die Erfahrungs-Infusion</strong>
+          <p>Gehe deinen KI-Entwurf durch und suche nach theoretischen Aussagen. Ersetze oder ergänze sie durch: "In meiner Praxis habe ich oft erlebt, dass...", "Wir haben bei [Kundenname] gesehen, dass Zahl X zu Ergebnis Y führte" oder "Ich habe diesen Fehler selbst gemacht und rate dir deshalb zu...". Jeder dieser Sätze ist für Wettbewerber nicht kopierbar.</p>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🌶️</div>
+        <div class="callout-text">
+          <strong>Content mit Meinung: Die Extra Meile</strong>
+          <p>KI-Texte sind oft extrem neutral. Das ist sicher, aber langweilig. Content, den Menschen und Google lieben, bezieht Stellung. Prompt: "Ich bin der Meinung, dass der Trend [Thema] völlig überschätzt wird, weil [Grund]. Die KI-Version ist hier zu diplomatisch. Formuliere diesen Abschnitt um, sodass meine kritische Haltung klarer wird, aber bleibe professionell und fundiert."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Intention schlägt Keyword</strong>
+          Google versteht heute Absichten, keine Wörter. Wer den falschen Content für die falsche Suchintention liefert, rankt nie, egal wie gut das Keyword eingebaut ist.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Information Gain ist der Hebel</strong>
+          Warum sollte Google deinen Text auf Platz 1 setzen, wenn er dasselbe sagt wie zehn andere? Die Content-Gap-Analyse zeigt dir die Lücke. Die KI hilft, sie zu schließen.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>System vor Speed</strong>
+          Auch wenn die KI schnell ist, nimm dir die Zeit für die Analyse der Konkurrenz. Das ist der Hebel, der dich auf Platz 1 bringt. Fünf durchdachte Schritte schlagen einen improvisierten Prompt jedes Mal.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>KI ist der Assistent, du bist der Experte</strong>
+          Die Maschine liefert die Rohdaten und die Formulierungen. Du lieferst die Einordnung, die Story und die persönlichen Erfahrungen, die kein Wettbewerber mit einem besseren Prompt kopieren kann.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Nutzer zuerst, Google folgt</strong>
+          Wenn du zwischen "für Google optimieren" und "für den Nutzer hilfreich sein" schwankst, entscheide dich immer für den Nutzer. Google ist gut genug geworden, um echten Mehrwert von SEO-Füllmaterial zu unterscheiden.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// SEO WORKFLOW STEPPER
+var currentSeoStep = 0;
+function showSeoStep(idx, btn) {
+  currentSeoStep = idx;
+  document.querySelectorAll('.seo-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.seo-step-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('sp-' + idx).classList.add('active');
+  var btns = document.querySelectorAll('.seo-step-btn');
+  if (btns[idx]) btns[idx].classList.add('active');
+}
+
+// INTENT CLASSIFIER
+var intentData = {
+  info: {
+    title: 'Informational Intent',
+    text: 'Der Nutzer will lernen oder ein Problem lösen. Er ist noch weit von einem Kauf entfernt. Passendes Format: ausführlicher Guide, How-To-Artikel, FAQ-Seite. Keyword-Muster: "Wie...", "Was ist...", "Warum...", "Tipps für...". Ziel des Textes: vollständige Antwort auf eine Frage liefern.'
+  },
+  nav: {
+    title: 'Navigational Intent',
+    text: 'Der Nutzer sucht eine bestimmte Website oder Seite. Er weiß bereits, wohin er will. Passendes Format: keine langen Artikel, sondern direkte Landingpages. Content-Strategie: für diese Keywords rankt ohnehin die Zielwebsite selbst am besten. Fokus stattdessen auf die anderen drei Intent-Typen.'
+  },
+  commercial: {
+    title: 'Commercial Investigation Intent',
+    text: 'Der Nutzer will vergleichen und eine Kaufentscheidung vorbereiten. Er ist kurz vor dem Kauf. Passendes Format: Testbericht, Bestenliste, Vergleichsartikel, "X vs. Y". Keyword-Muster: "Test", "Vergleich", "Beste", "Empfehlung". Ziel des Textes: dem Leser die Entscheidung so leicht wie möglich machen.'
+  },
+  trans: {
+    title: 'Transactional Intent',
+    text: 'Der Nutzer ist kaufbereit. Er sucht nach dem besten Angebot oder wo er kaufen kann. Passendes Format: Produktseite, Shop-Listing, Preisvergleich. Keyword-Muster: "kaufen", "bestellen", "günstig", "Angebot", "Preis". Ziel: Conversion, kein langer Informationstext. Kurze, überzeugende Copy mit klarem CTA.'
+  }
+};
+
+function selectIntent(id, el) {
+  document.querySelectorAll('.intent-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  var data = intentData[id];
+  var result = document.getElementById('intent-result');
+  result.innerHTML = '<strong>' + data.title + '</strong><br>' + data.text;
+  result.style.display = 'block';
+}
+
+// SNIPPET PREVIEW
+function updateSnippet() {
+  var url = document.getElementById('snip-url').value || 'deine-seite.de';
+  var title = document.getElementById('snip-title').value || 'Dein Meta-Title erscheint hier';
+  var desc = document.getElementById('snip-desc').value || 'Deine Meta-Description erscheint hier.';
+
+  var titleLen = document.getElementById('snip-title').value.length;
+  var descLen = document.getElementById('snip-desc').value.length;
+
+  var titleCount = document.getElementById('snip-title-count');
+  var descCount = document.getElementById('snip-desc-count');
+  var titleWarn = document.getElementById('snip-title-warn');
+  var descWarn = document.getElementById('snip-desc-warn');
+
+  titleCount.textContent = titleLen + ' / 60';
+  descCount.textContent = descLen + ' / 155';
+
+  titleCount.style.color = titleLen > 60 ? 'var(--red)' : titleLen > 50 ? '#B45309' : 'var(--green)';
+  descCount.style.color = descLen > 155 ? 'var(--red)' : descLen > 140 ? '#B45309' : 'var(--green)';
+
+  if (titleLen > 60) {
+    titleWarn.textContent = 'Zu lang! Google kürzt ab ca. 60 Zeichen. Aktuell: ' + titleLen + ' Zeichen.';
+    titleWarn.className = 'snippet-warn over';
+    titleWarn.style.display = 'block';
+  } else if (titleLen > 0) {
+    titleWarn.textContent = 'Gut! ' + (60 - titleLen) + ' Zeichen verbleiben.';
+    titleWarn.className = 'snippet-warn ok';
+    titleWarn.style.display = 'block';
+  } else {
+    titleWarn.style.display = 'none';
+  }
+
+  if (descLen > 155) {
+    descWarn.textContent = 'Zu lang! Google kürzt ab ca. 155 Zeichen. Aktuell: ' + descLen + ' Zeichen.';
+    descWarn.className = 'snippet-warn over';
+    descWarn.style.display = 'block';
+  } else if (descLen > 0) {
+    descWarn.textContent = 'Gut! ' + (155 - descLen) + ' Zeichen verbleiben.';
+    descWarn.className = 'snippet-warn ok';
+    descWarn.style.display = 'block';
+  } else {
+    descWarn.style.display = 'none';
+  }
+
+  document.getElementById('snip-preview-url').textContent = url;
+  document.getElementById('snip-preview-title').textContent = title;
+  document.getElementById('snip-preview-desc').textContent = desc;
+  document.getElementById('snip-preview').style.display = 'block';
+}
+
+// QUIZ
+const questions = [
+  {
+    q: 'Was ist heute das eigentliche Ziel von modernem SEO laut diesem Modul?',
+    options: [
+      'Das Keyword möglichst oft im Text zu wiederholen.',
+      'Google auszutricksen mit technischen Tricks.',
+      'Einen Text zu schreiben, der so hochwertig und relevant ist, dass Google ihn lieben muss, weil er Nutzerprobleme löst.',
+      'Möglichst viele Backlinks aufzubauen.'
+    ],
+    correct: 2,
+    feedback: 'Google ist heute eine semantische Verstehens-Maschine. Ihr einziges Ziel ist es, dem Nutzer genau das zu liefern, was er im Kopf hatte. Wer Problemlösung in den Mittelpunkt stellt, arbeitet mit Google, nicht gegen es.'
+  },
+  {
+    q: 'Was versteht man unter "Search Intent" im SEO-Kontext?',
+    options: [
+      'Die Suchhistorie eines Nutzers.',
+      'Die wahre Absicht hinter einer Suchanfrage: Was will der Nutzer wirklich finden oder tun?',
+      'Die technische Geschwindigkeit einer Suchanfrage.',
+      'Das Suchvolumen eines Keywords.'
+    ],
+    correct: 1,
+    feedback: 'Search Intent beschreibt die eigentliche Motivation hinter einer Suchanfrage. "Laufschuh Test" ist commercial (vergleichen), "Warum schmerzen meine Füße?" ist informational (verstehen). Den falschen Content für die falsche Intention zu liefern bedeutet: Du rankst nicht.'
+  },
+  {
+    q: 'Warum ist die Content-Gap-Analyse so wichtig?',
+    options: [
+      'Sie zeigt dir, welche Keywords deine Konkurrenz nutzt.',
+      'Sie hilft dir, herauszufinden, welche Informationen, Perspektiven oder Daten fehlen, damit dein Text einen echten "Information Gain" bietet.',
+      'Sie misst die Ladezeit deiner Website.',
+      'Sie analysiert die Backlink-Struktur deiner Konkurrenz.'
+    ],
+    correct: 1,
+    feedback: 'Information Gain ist der entscheidende Hebel: Warum sollte Google deinen Text auf Platz 1 setzen, wenn er dasselbe sagt wie zehn andere? Die Gap-Analyse zeigt dir genau, was die Konkurrenz nicht hat, und das ist deine Chance.'
+  },
+  {
+    q: 'Was ist ein "Topic Cluster" und warum ist er wichtig für SEO?',
+    options: [
+      'Eine Sammlung von Keywords mit ähnlichem Suchvolumen.',
+      'Ein Netzwerk aus thematisch verwandten Inhalten, das Google signalisiert, dass du eine Autorität in deiner Nische bist.',
+      'Ein technisches Plugin für WordPress.',
+      'Eine Methode, um Texte in Abschnitte aufzuteilen.'
+    ],
+    correct: 1,
+    feedback: 'Topic Clusters sind Themenwelten: ein Hauptartikel (Pillar Content) und mehrere spezifische Unterthemen-Artikel, die intern verlinkt sind. Google erkennt, dass du ein Thema ganzheitlich abdeckst, und belohnt das mit Topical Authority.'
+  },
+  {
+    q: 'Was bedeutet das neue vierte "E" in E-E-A-T?',
+    options: [
+      'Efficiency (Effizienz)',
+      'Engagement',
+      'Experience (persönliche Erfahrung mit dem Thema)',
+      'Exclusivity'
+    ],
+    correct: 2,
+    feedback: 'Google ergänzte E-A-T um ein E für Experience: der Ersteller muss bewiesen haben, das Thema wirklich erlebt zu haben. Die KI weiß, dass Barfußschuhe die Fußmuskulatur stärken. Du weißt, dass man in den ersten drei Wochen furchtbaren Muskelkater bekommt. Genau das ist deine Eintrittskarte.'
+  },
+  {
+    q: 'Welche Regel gilt für die H1-Überschrift eines SEO-Artikels?',
+    options: [
+      'Je länger die H1, desto besser für SEO.',
+      'Es darf beliebig viele H1-Überschriften geben.',
+      'Nur eine einzige H1 pro Text. Sie muss das Haupt-Keyword enthalten und neugierig machen.',
+      'Die H1 braucht kein Keyword, das kommt in die H2.'
+    ],
+    correct: 2,
+    feedback: 'Nur eine H1 pro Seite ist die technische Grundregel. Sie signalisiert Google und dem Leser, worum es im Text geht. Das Haupt-Keyword muss enthalten sein, idealerweise vorne. Gleichzeitig muss sie so formuliert sein, dass ein Nutzer bei Google klicken würde.'
+  },
+  {
+    q: 'Warum ist modulares Schreiben (Sektion für Sektion) bei SEO-Texten besonders wichtig?',
+    options: [
+      'Weil KI nur kurze Texte generieren kann.',
+      'Weil Google kurze Texte bevorzugt.',
+      'Weil die KI bei freiem langen Schreiben zu "Thin Content" neigt und Google dünne Inhalte sofort erkennt. Modulares Schreiben erhöht die Informationsdichte.',
+      'Weil es SEO-technisch besser ist, viele kleine Artikel zu schreiben.'
+    ],
+    correct: 2,
+    feedback: 'Wenn die KI frei schreibt, neigt sie zu allgemeinen Formulierungen und Fülltext. Im SEO ist das tödlich: Google erkennt "Thin Content" sofort. Indem du jede H2 einzeln mit Kontext, deiner Gap-Analyse und deinem Experten-Input fütterst, entsteht eine hohe Informationsdichte.'
+  },
+  {
+    q: 'Welche Zeichenlängen gelten für Meta-Title und Meta-Description?',
+    options: [
+      'Meta-Title max. 100 Zeichen, Description max. 200 Zeichen.',
+      'Meta-Title max. 60 Zeichen, Description max. 155 Zeichen.',
+      'Meta-Title max. 30 Zeichen, Description max. 100 Zeichen.',
+      'Es gibt keine Zeichenlimits, Google kürzt automatisch sinnvoll.'
+    ],
+    correct: 1,
+    feedback: 'Meta-Title: maximal 60 Zeichen, Keyword idealerweise vorne. Meta-Description: maximal 155 Zeichen, mit einem Call-to-Action am Ende. Wer diese Limits überschreitet, sieht in den Suchergebnissen "..." statt der vollständigen Aussage.'
+  },
+  {
+    q: 'Was ist der "Halluzinations-Check" im SEO-Kontext?',
+    options: [
+      'Ein KI-Tool, das prüft, ob Inhalte zu kreativ sind.',
+      'Das manuelle Gegenprüfen aller Zahlen, Fakten und Behauptungen im KI-generierten Text, weil KIs Studien erfinden und Jahreszahlen verwechseln.',
+      'Eine Methode, um KI-Texte von menschlichen Texten zu unterscheiden.',
+      'Ein Google-Algorithm-Update.'
+    ],
+    correct: 1,
+    feedback: 'KIs sind statistisch optimiert, nicht faktentreu. Sie erfinden plausibel klingende Studien, verwechseln Jahreszahlen und dichten Experten Zitate an. Wer falsche Informationen veröffentlicht, verliert Autorität und Rankings. Der Faktencheck ist deshalb Pflicht, nicht Option.'
+  },
+  {
+    q: 'Was ist der Unterschied zwischen "für Google optimieren" und "für den Nutzer hilfreich sein"?',
+    options: [
+      'Sie sind völlig gegensätzlich und man muss sich entscheiden.',
+      'Für Google zu optimieren ist wichtiger als für den Nutzer.',
+      'Laut Modul sollte man immer für den Nutzer entscheiden. Google ist gut genug geworden, echten Mehrwert von SEO-Füllmaterial zu unterscheiden und dem Nutzer zu folgen.',
+      'Beide Ziele sind irrelevant, solange man die richtigen Backlinks hat.'
+    ],
+    correct: 2,
+    feedback: 'Das ist das Grundprinzip des modernen SEO: Google hat sich zur semantischen Verstehens-Maschine entwickelt, deren Ziel Nutzerbefriedigung ist. Wer den Nutzer zuerst bedient, spielt Googles eigenem Ziel in die Hände. Content für den Algorithmus ist kurzfristiges Denken.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
