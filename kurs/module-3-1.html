@@ -317,13 +317,6 @@
 </head>
 <body>
 
-<div id="progress-bar-wrap">
-  <a href="topic-content.html" class="mod-nav-back">← Übersicht</a>
-  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
-  <div id="progress-label">0% gelesen</div>
-  <span class="mod-nav-indicator">3.1 / 3.4</span>
-  <a href="module-3-2.html" class="mod-nav-next">Weiter →</a>
-</div>
 
 <div class="container">
 
@@ -719,21 +712,6 @@ Baue genau dieses Bild in die Einleitung ein.</span></div>
 </div>
 
 <script>
-// PROGRESS BAR
-(function() {
-  var fill = document.getElementById('progress-bar-fill');
-  var label = document.getElementById('progress-label');
-  function update() {
-    var scrollTop = window.scrollY || document.documentElement.scrollTop;
-    var docH = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
-    fill.style.width = pct + '%';
-    label.textContent = pct + '% gelesen';
-  }
-  window.addEventListener('scroll', update, { passive: true });
-  update();
-})();
-
 // QUALITY COMPARE TABS
 function showQuality(id, btn) {
   document.querySelectorAll('.quality-panel').forEach(function(p) { p.classList.remove('active'); });
@@ -1004,5 +982,8 @@ document.querySelectorAll('.tooltip-word').forEach(function(el) {
   el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
 });
 </script>
+<script>var MODULE_ID = "module-3-1";</script>
+<script src="data/course.js"></script>
+<script src="js/module-nav.js"></script>
 </body>
 </html>

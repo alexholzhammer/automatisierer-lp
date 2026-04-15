@@ -356,13 +356,6 @@
 </head>
 <body>
 
-<div id="progress-bar-wrap">
-  <a href="topic-content.html" class="mod-nav-back">← Übersicht</a>
-  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
-  <div id="progress-label">0% gelesen</div>
-  <span class="mod-nav-indicator">3.4 / 3.4</span>
-  <a href="topic-content.html" class="mod-nav-next">Weiter →</a>
-</div>
 
 <div class="container">
 
@@ -853,21 +846,6 @@ Nutze höchstens einen Aufzählungspunkt pro Seite.</div>
 </div>
 
 <script>
-// PROGRESS BAR
-(function() {
-  var fill = document.getElementById('progress-bar-fill');
-  var label = document.getElementById('progress-label');
-  function update() {
-    var scrollTop = window.scrollY || document.documentElement.scrollTop;
-    var docH = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
-    fill.style.width = pct + '%';
-    label.textContent = pct + '% gelesen';
-  }
-  window.addEventListener('scroll', update, { passive: true });
-  update();
-})();
-
 // VOICE COMPARE TABS
 function showVc(id, btn) {
   document.querySelectorAll('.vc-panel').forEach(function(p) { p.classList.remove('active'); });
@@ -1143,5 +1121,8 @@ function restartQuiz() {
 
 renderQuestion();
 </script>
+<script>var MODULE_ID = "module-3-4";</script>
+<script src="data/course.js"></script>
+<script src="js/module-nav.js"></script>
 </body>
 </html>
