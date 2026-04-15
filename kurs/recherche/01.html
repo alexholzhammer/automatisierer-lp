@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dein neuer 24/7-Analyst: Vom Suchen zum Verstehen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Mindset shift comparison cards */
+.mindset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 14px 0;
+}
+.mindset-card {
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.mindset-card.old {
+  background: var(--red-light);
+  border: 1px solid #FFBDAD;
+}
+.mindset-card.new {
+  background: var(--accent-2-light);
+  border: 1px solid #ABF5D1;
+}
+.mindset-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.mindset-card.old .mindset-label { color: var(--red); }
+.mindset-card.new .mindset-label { color: var(--green); }
+.mindset-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+  color: var(--text);
+}
+
+/* Superpower table variant */
+.power-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.power-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--surface);
+}
+.power-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.power-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.power-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Analyst simulator */
+.analyst-sim {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.analyst-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.analyst-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.analyst-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.analyst-run-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  background: var(--accent-2-light);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.analyst-run-btn:hover {
+  background: var(--accent-2);
+  color: white;
+}
+.analyst-body {
+  padding: 14px;
+}
+.analyst-input-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 6px;
+}
+.analyst-task-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.analyst-output {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  min-height: 110px;
+  position: relative;
+  white-space: pre-wrap;
+}
+.analyst-output-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 6px;
+}
+.analyst-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.analyst-copy-btn:hover {
+  background: rgba(255,255,255,0.14);
+  color: white;
+}
+
+/* Fahrplan step list */
+.fahrplan-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.fahrplan-item:last-child {
+  border-bottom: none;
+}
+.fahrplan-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+.fahrplan-content strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.fahrplan-content span {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .mindset-grid { grid-template-columns: 1fr; }
+  .power-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 6 · Recherche &amp; Analyse</div>
+    <h1>Dein neuer 24/7-Analyst: Vom Suchen zum Verstehen</h1>
+    <p>Warum KI kein besseres Google ist, sondern ein völlig anderes Werkzeug zum Verarbeiten von Wissen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~10 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>2 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir verwandeln dich vom passiven Sucher zum aktiven Analysten. KI übernimmt das Durchforsten riesiger Informationsmengen, damit du dich auf das Wesentliche konzentrieren kannst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du nutzt KI nicht mehr als Suchmaschine, sondern als Analyst: Sie filtert, bewertet und destilliert Informationen, damit du dich auf Strategie konzentrieren kannst.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Mindset Shift -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Der Mindset-Shift: Recherche neu denken</h2>
+        <p>Von "einen Artikel suchen" zu "50 Artikel analysieren lassen"</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Um KI im Bereich Recherche richtig zu nutzen, musst du ein altes Muster ablegen. Die meisten Menschen nutzen KI wie ein besseres Google: Sie stellen eine Frage und lesen die Antwort. Das ist wie einen Formel-1-Boliden im Stadtverkehr zu fahren.</p>
+
+      <p>Der eigentliche Hebel liegt woanders. Die KI ist dein
+        <span class="tooltip-word">"Pre-Reader"
+          <span class="tooltip-popup">Der Pre-Reader ist eine Metapher für die KI als Vorfilter: Sie liest und kategorisiert Texte in deinem Auftrag, bevor du selbst auch nur eine Zeile gesehen hast.</span>
+        </span>. Ihr Job ist es, den Heuhaufen so weit zu verkleinern, dass du nur noch die Nadeln aufheben musst. Sie arbeitet 24 Stunden am Tag, wird nie müde und beschwert sich nicht über 500-seitige PDF-Dokumente.</p>
+
+      <p>Vergleich die beiden Denkweisen direkt miteinander:</p>
+
+      <div class="mindset-grid">
+        <div class="mindset-card old">
+          <div class="mindset-label">❌ Altes Denken</div>
+          <p>"Ich suche nach einem Artikel über Thema X und lese ihn mir durch."</p>
+        </div>
+        <div class="mindset-card new">
+          <div class="mindset-label">✓ Neues Denken</div>
+          <p>"Ich lasse die KI 50 Artikel über Thema X scannen und mir die drei entscheidenden Marktlücken nennen."</p>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Der Kernunterschied</strong>
+          <p>Beim alten Denken bist du der Analyst. Beim neuen Denken ist die KI dein Analyst, und du bist der Entscheider. Das ist keine kleine Nuance, sondern ein fundamentaler Rollentausch.</p>
+        </div>
+      </div>
+
+      <p>Dieser Rollentausch ist das Fundament des gesamten Moduls. Alle Tools und Methoden, die folgen, bauen auf dieser einen Idee auf: Du delegierst das Durchforsten. Du behältst das Urteilen.</p>
+    </div>
+  </div>
+
+  <!-- Section 2: Superpowers -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Was ein KI-Analyst wirklich kann</h2>
+        <p>Drei Fähigkeiten, die menschliche Recherche überflügeln</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Damit du die richtigen Erwartungen entwickelst, lohnt es sich, die konkreten Stärken eines KI-Analysten zu verstehen. Es sind nicht einfach "mehr" oder "schnellere" Versionen menschlicher Fähigkeiten. Es sind strukturell andere Fähigkeiten.</p>
+
+      <div class="power-grid">
+        <div class="power-card">
+          <div class="power-icon">⚡</div>
+          <div class="power-title">Geschwindigkeit</div>
+          <div class="power-desc">Was dich drei Tage Recherche kostet, erledigt die KI in drei Minuten. Keine Übertreibung.</div>
+        </div>
+        <div class="power-card">
+          <div class="power-icon">🔗</div>
+          <div class="power-title">Mustererkennung</div>
+          <div class="power-desc">Die KI sieht Verbindungen zwischen Datenpunkten, die uns Menschen oft entgehen, weil wir sequenziell lesen.</div>
+        </div>
+        <div class="power-card">
+          <div class="power-icon">⚖️</div>
+          <div class="power-title">Objektivität (mit Vorbehalt)</div>
+          <div class="power-desc">Die KI hat keine "Lieblings-Theorie". Sie wertet Daten basierend auf Fakten aus, nicht auf Bauchgefühl.</div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Der Vorbehalt zur Objektivität</strong>
+          <p>KI ist nicht neutral. Sie kann
+            <span class="tooltip-word">halluzinieren
+              <span class="tooltip-popup">Halluzinieren bedeutet, dass die KI Fakten erfindet oder falsche Informationen als korrekt darstellt. Das passiert besonders bei sehr spezifischen Zahlen, Daten oder Zitaten.</span>
+            </span>, hat Wissensgrenzen und kann von schlechten Quelltexten beeinflusst werden. Objektivität ist eine Tendenz, keine Garantie. Der Faktencheck bleibt bei dir.</p>
+        </div>
+      </div>
+
+      <p>Der Schlüssel liegt darin, die Stärken gezielt einzusetzen und die Schwächen zu kennen. Ein Analyst, der schlecht im Erzählen von Geschichten ist, aber brillant darin, Muster in Zahlen zu erkennen, wird falsch eingesetzt, wenn du ihn bittest, eine PR-Kampagne zu schreiben. Setze die KI dort ein, wo sie glänzt: große Mengen, schnelle Muster, erste Synthese.</p>
+    </div>
+  </div>
+
+  <!-- Section 3: Fahrplan / Simulator -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Dein Fahrplan durch dieses Modul</h2>
+        <p>Vier Lektionen, ein klares Ziel</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Dieses Modul ist so aufgebaut, dass du schrittweise vom Konzept zur Praxis gelangst. Jede Lektion baut auf der vorherigen auf. Hier ein Überblick:</p>
+
+      <div class="fahrplan-item">
+        <div class="fahrplan-num">6.1</div>
+        <div class="fahrplan-content">
+          <strong>Einleitung (diese Lektion)</strong>
+          <span>Der Mindset-Shift: Was ein KI-Analyst ist und was ihn von einer Suchmaschine unterscheidet.</span>
+        </div>
+      </div>
+      <div class="fahrplan-item">
+        <div class="fahrplan-num">6.2</div>
+        <div class="fahrplan-content">
+          <strong>Live-Suche nutzen</strong>
+          <span>Echtes Wissen statt veralteter Daten: Wie du mit der Live-Suche aktuelle Informationen analysierst.</span>
+        </div>
+      </div>
+      <div class="fahrplan-item">
+        <div class="fahrplan-num">6.3</div>
+        <div class="fahrplan-content">
+          <strong>Eigene Dokumente analysieren</strong>
+          <span>PDFs, Reports, Datensätze: Wie du eigene Unterlagen analysieren lässt, bis nur noch die Essenz übrig bleibt.</span>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🏆</div>
+        <div class="callout-text">
+          <strong>Die goldene Regel der Recherche</strong>
+          <p>Die KI ist ein genialer Assistent, aber ein lausiger Zeuge. Sie erledigt 90 % der Arbeit. Die finale Entscheidung und der Faktencheck bleiben in deinem Hoheitsgebiet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Interactive Analyst Simulator -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Den Analyst-Modus erleben</h2>
+        <p>So klingt eine Aufgabe für einen KI-Analysten</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Der größte Unterschied zwischen "KI als Suchmaschine" und "KI als Analyst" liegt in der Art, wie du die Aufgabe formulierst. Unten siehst du drei typische Marketing-Recherche-Szenarien. Wähle eines aus und schau, wie sich die Aufgabenformulierung ändert, wenn du im Analyst-Modus denkst.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle ein Szenario und klicke auf "Analyst-Modus zeigen", um die Aufgabe im richtigen Mindset zu sehen.</p>
+
+      <div class="analyst-sim">
+        <div class="analyst-toolbar">
+          <button class="analyst-tab active" onclick="setScenario(0, this)">Wettbewerber</button>
+          <button class="analyst-tab" onclick="setScenario(1, this)">Zielgruppe</button>
+          <button class="analyst-tab" onclick="setScenario(2, this)">Content-Trends</button>
+          <button class="analyst-run-btn" onclick="runAnalyst()">▶ Analyst-Modus zeigen</button>
+        </div>
+        <div class="analyst-body">
+          <div class="analyst-input-label">Such-Modus (alt)</div>
+          <div class="analyst-task-text" id="sim-old-task">Lade...</div>
+          <div class="analyst-input-label">Analyst-Modus (neu)</div>
+          <div class="analyst-task-text" id="sim-new-task" style="border-color: var(--accent-2); background: var(--accent-2-light); color: var(--text);">Klicke auf "Analyst-Modus zeigen"...</div>
+          <div class="analyst-output-label" style="margin-top:12px;">KI-Analyst Antwort</div>
+          <div class="analyst-output" id="sim-output">Noch keine Antwort. Klicke auf "Analyst-Modus zeigen".</div>
+          <button class="analyst-copy-btn" id="copy-btn" onclick="copyOutput()">Kopieren</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Analyse schlägt Suche</strong>
+          <p>Nutze die KI, um Informationen zu verarbeiten und zu bewerten, nicht nur um sie aufzulisten. Das ist der fundamentale Unterschied zwischen einer Suchmaschine und einem Analysten.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Du bist der Pilot</strong>
+          <p>Dein KI-Analyst liefert die aufbereiteten Daten, aber du triffst die strategische Entscheidung. Delegiere das Durchforsten, behalte das Urteilen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Drei Kernstärken kennen und nutzen</strong>
+          <p>Geschwindigkeit, Mustererkennung und relative Objektivität sind die echten Stärken der KI im Recherche-Kontext. Setze sie gezielt ein, wo diese Stärken relevant sind.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Faktencheck bleibt bei dir</strong>
+          <p>Die goldene Regel gilt immer: 90 % erledigt die KI, aber die finale Verifikation und die strategische Entscheidung liegen in deiner Verantwortung. Halluzinationen passieren.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Zeit ist deine Währung</strong>
+          <p>Jeder Recherche-Schritt, den du an die KI delegierst, ist Zeit, die du in Kreativität und Strategie investieren kannst. Das ist der eigentliche ROI des Analyst-Mindsets.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ANALYST SIMULATOR
+var scenarios = [
+  {
+    label: 'Wettbewerber',
+    old: 'Ich suche nach Informationen zu Wettbewerber X und lese ihre Website durch.',
+    newTask: 'Analysiere die letzten 20 Blog-Artikel von Wettbewerber X und nenne mir: (1) die drei haeufigsten Themencluster, (2) Inhalte, die sie nicht abdecken (Luecken), und (3) welche Artikel die meisten Shares haben.',
+    output: 'Analyse abgeschlossen. Hier sind meine Erkenntnisse:\n\n[1] TOP-THEMENCLUSTER\n\u2022 \u001b[38;5;117mKI-Tools fuer Social Media\u001b[0m (8 von 20 Artikeln)\n\u2022 \u001b[38;5;117mMarketing-Automatisierung\u001b[0m (6 von 20 Artikeln)\n\u2022 \u001b[38;5;117mSEO-Strategien 2025\u001b[0m (4 von 20 Artikeln)\n\n[2] LUECKEN IDENTIFIZIERT\n\u2022 Kein Content zu B2B-spezifischen KI-Tools\n\u2022 Keine Case Studies mit ROI-Daten\n\u2022 Fehlend: Video-Marketing mit KI\n\n[3] MEISTGETEILTE ARTIKEL\n\u2022 "10 KI-Tools fuer Marketer" \u2014 4.200 Shares\n\u2022 "ChatGPT-Prompts fuer Ads" \u2014 3.800 Shares'
+  },
+  {
+    label: 'Zielgruppe',
+    old: 'Ich suche nach dem typischen Marketingmanager und lese einen Artikel dazu.',
+    newTask: 'Analysiere 30 Reddit-Posts aus r/marketing und r/digitalmarketing der letzten 3 Monate. Nenne die fuenf haeufigsten Schmerzpunkte, die Marketer beschreiben, und sortiere sie nach Dringlichkeit.',
+    output: 'Zielgruppen-Analyse abgeschlossen:\n\n[SCHMERZPUNKTE nach Dringlichkeit]\n\n01 \u001b[38;5;83mROI-Nachweis fuer KI-Tools\u001b[0m\n   "Mein Chef will Zahlen sehen" \u2014 sehr haeufig\n\n02 \u001b[38;5;83mZeit fuer Content-Produktion\u001b[0m\n   Zu wenig Ressourcen, zu viele Kanaele\n\n03 \u001b[38;5;214mQualitaet vs. Geschwindigkeit\u001b[0m\n   KI-Content wirkt generisch\n\n04 \u001b[38;5;214mDatenschutz und Compliance\u001b[0m\n   Unsicherheit bei DSGVO-Konformitaet\n\n05 \u001b[38;5;197mTeam-Adoption von KI-Tools\u001b[0m\n   Widerstand bei aelteren Kollegen'
+  },
+  {
+    label: 'Content-Trends',
+    old: 'Ich suche nach aktuellen Content-Trends und lese einen Bericht durch.',
+    newTask: 'Scanne die letzten 50 Artikel aus den Top-10-Marketing-Blogs. Identifiziere: welche Themen im Aufstieg sind (Momentum), welche ihren Hoehepunkt ueberschritten haben (gesaettigt), und wo eine Luecke zwischen Interesse und verfuegbarem Content besteht.',
+    output: 'Trend-Analyse: 50 Artikel ausgewertet\n\n[IM AUFSTIEG]\n\u001b[38;5;83m\u2191\u001b[0m KI-generierte Personalisierung (+340% Erwaehnung)\n\u001b[38;5;83m\u2191\u001b[0m Agentic Marketing (+210% Erwaehnung)\n\u001b[38;5;83m\u2191\u001b[0m Zero-Click Search-Strategien (+180%)\n\n[GESAETTIGT]\n\u001b[38;5;214m\u2192\u001b[0m ChatGPT-Grundlagen (stagniert, sehr viel Content)\n\u001b[38;5;214m\u2192\u001b[0m Prompt-Grundlagen (Peak ueberschritten)\n\n[LUECKEN]\n\u001b[38;5;117m!\u001b[0m Hohes Interesse, wenig Content: "KI-Audits fuer Marketingabteilungen"'
+  }
+];
+
+var currentScenario = 0;
+
+function setScenario(idx, btn) {
+  currentScenario = idx;
+  document.querySelectorAll('.analyst-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('sim-old-task').textContent = scenarios[idx].old;
+  document.getElementById('sim-new-task').textContent = 'Klicke auf "Analyst-Modus zeigen"...';
+  document.getElementById('sim-output').textContent = 'Noch keine Antwort. Klicke auf "Analyst-Modus zeigen".';
+}
+
+function runAnalyst() {
+  var s = scenarios[currentScenario];
+  document.getElementById('sim-new-task').textContent = s.newTask;
+  var out = document.getElementById('sim-output');
+  out.textContent = '';
+  out.classList.add('loading');
+  var text = s.output;
+  var i = 0;
+  var interval = setInterval(function() {
+    if (i < text.length) {
+      out.textContent += text[i];
+      i++;
+    } else {
+      clearInterval(interval);
+      out.classList.remove('loading');
+    }
+  }, 12);
+}
+
+function copyOutput() {
+  var text = document.getElementById('sim-output').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// init first scenario
+setScenario(0, document.querySelector('.analyst-tab'));
+
+// QUIZ
+var questions = [
+  {
+    q: 'Was ist der fundamentale Unterschied zwischen "KI als Suchmaschine" und "KI als Analyst"?',
+    options: [
+      'Der Analyst gibt laengere Antworten als eine Suchmaschine.',
+      'Als Analyst verarbeitest und bewertest du Informationen, statt sie nur aufzulisten.',
+      'Suchmaschinen sind kostenlos, Analysten kosten Geld.',
+      'Der Analyst kann nur bei schriftlichen Fragen helfen.'
+    ],
+    correct: 1,
+    feedback: 'Genau. Die Suchmaschine listet, der Analyst filtert und bewertet. Das ist der Kern des Mindset-Shifts in diesem Modul.'
+  },
+  {
+    q: 'Was meint die Metapher "Pre-Reader" im Kontext dieses Moduls?',
+    options: [
+      'Ein Assistent, der Texte fuer dich vorliest.',
+      'Die KI liest und kategorisiert Inhalte als Vorfilter, bevor du selbst eingreifst.',
+      'Ein Tool, das Texte zusammenfasst, bevor sie veroffentlicht werden.',
+      'Ein Lesekurs als Vorbereitung fuer KI-Nutzung.'
+    ],
+    correct: 1,
+    feedback: 'Die KI als "Pre-Reader" verkleinert den Heuhaufen, damit du nur noch die Nadeln aufheben musst. Du liest nicht mehr alles, sondern nur noch das Wichtigste.'
+  },
+  {
+    q: 'Welche der drei Superkraefte des KI-Analysten ist mit einem ausdruecklichen Vorbehalt versehen?',
+    options: [
+      'Geschwindigkeit',
+      'Mustererkennung',
+      'Objektivitaet',
+      'Datenmenge'
+    ],
+    correct: 2,
+    feedback: 'Objektivitaet klingt attraktiv, aber die KI kann halluzinieren und von schlechten Quellen beeinflusst werden. Objektivitaet ist eine Tendenz, keine Garantie.'
+  },
+  {
+    q: 'Wofuer steht "Halluzinieren" im KI-Kontext?',
+    options: [
+      'Die KI antwortet in einer anderen Sprache als erwartet.',
+      'Die KI liefert sehr kreative, ungewoehnliche Ideen.',
+      'Die KI erfindet Fakten oder stellt falsche Informationen als korrekt dar.',
+      'Die KI antwortet zu langsam wegen Serverauslastung.'
+    ],
+    correct: 2,
+    feedback: 'Halluzinieren bedeutet, dass die KI Dinge erfindet: Zahlen, Quellen, Zitate oder Fakten, die nicht korrekt sind. Genau deshalb bleibt der Faktencheck bei dir.'
+  },
+  {
+    q: 'Welche Aufgabe delegierst du an den KI-Analysten, und welche behaehlst du selbst?',
+    options: [
+      'Delegiert: Entscheidungen. Behalten: Dateneingabe.',
+      'Delegiert: Formatierung. Behalten: Recherche.',
+      'Delegiert: das Durchforsten von Informationen. Behalten: das strategische Urteilen.',
+      'Delegiert: die Praesentation. Behalten: die Analyse.'
+    ],
+    correct: 2,
+    feedback: 'Du bist der Pilot, die KI ist dein Analyst. Das Durchforsten grosser Informationsmengen uebernimmt die KI, aber die finale Einschaetzung und Entscheidung bleibt bei dir.'
+  },
+  {
+    q: 'Warum ist Mustererkennung eine besondere Staerke der KI gegenueber Menschen?',
+    options: [
+      'KI kann Bilder schneller rendern als das menschliche Auge.',
+      'Menschen lesen sequenziell, KI sieht Verbindungen quer durch grosse Datenmengen.',
+      'KI hat einen groesseren Arbeitsspeicher als das menschliche Gehirn.',
+      'Mustererkennung ist nur bei Zahlen relevant, nicht bei Texten.'
+    ],
+    correct: 1,
+    feedback: 'Menschen lesen einen Text nach dem anderen. KI kann gleichzeitig Verbindungen zwischen vielen Datenpunkten erkennen, die wir beim sequenziellen Lesen leicht uebersehen.'
+  },
+  {
+    q: 'Was ist laut diesem Modul die "goldene Regel der Recherche"?',
+    options: [
+      'Immer mehrere KI-Modelle vergleichen, bevor du eine Antwort annimmst.',
+      'Die KI erledigt 90 % der Arbeit, aber Faktencheck und Entscheidung bleiben bei dir.',
+      'Nur offizielle Quellen akzeptieren, die die KI direkt verlinkt.',
+      'Jede KI-Antwort muss manuell neu formuliert werden, bevor man sie nutzt.'
+    ],
+    correct: 1,
+    feedback: 'Genau diese Regel zieht sich durch alle Lektionen des Moduls: Die KI ist ein genialer Assistent, aber die finale Verantwortung liegt immer beim Menschen.'
+  },
+  {
+    q: 'Welche Lektion dieses Moduls behandelt den Umgang mit eigenen Dokumenten und PDFs?',
+    options: [
+      '6.1 Einleitung',
+      '6.2 Live-Suche nutzen',
+      '6.3 Eigene Dokumente analysieren',
+      'Dazu gibt es keine Lektion in diesem Modul.'
+    ],
+    correct: 2,
+    feedback: 'Lektion 6.3 fokussiert auf das Analysieren eigener Unterlagen: PDFs, Datensaetze, Reports. Ziel ist es, die KI so lange destillieren zu lassen, bis nur noch die Essenz uebrig bleibt.'
+  },
+  {
+    q: 'Wenn jemand KI im "alten Denken" nutzt, was ist das typische Verhalten?',
+    options: [
+      'Er fragt die KI nach einer Meinung zu einem Thema.',
+      'Er laesst 50 Artikel analysieren und filtert Marktluecken heraus.',
+      'Er sucht nach einem Artikel und liest ihn selbst durch.',
+      'Er nutzt die KI nur als Rechtschreibpruefung.'
+    ],
+    correct: 2,
+    feedback: 'Das "alte Denken" behandelt KI wie Google: Ein Artikel wird gesucht, dann selbst gelesen. Der Mindset-Shift dreht das um: Die KI liest, du entscheidest.'
+  },
+  {
+    q: 'Was ist der eigentliche ROI des Analyst-Mindsets laut diesem Modul?',
+    options: [
+      'Kostenersparnis, weil man keine Researcher einstellen muss.',
+      'Die gewonnene Zeit laesst sich in Kreativitaet und Strategie investieren.',
+      'Schnellere Abgabefristen fuer Berichte an den Chef.',
+      'Bessere Google-Rankings durch mehr Content.'
+    ],
+    correct: 1,
+    feedback: 'Jeder Recherche-Schritt, den du delegierst, gibt dir Zeit zurueck. Diese Zeit kannst du in das investieren, was Menschen besonders gut koennen: strategisches Denken und Kreativitaet.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "recherche-01";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

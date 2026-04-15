@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSGVO &amp; Datenschutz: Die rote Linie für KI-Nutzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Daten-Klassifikation interaktiv */
+.daten-classifier {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.daten-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.daten-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.daten-body { padding: 14px; }
+.daten-input-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.daten-examples {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+}
+.daten-example {
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); cursor: pointer; transition: all 0.15s;
+  font-size: 12px; color: var(--text-muted);
+}
+.daten-example:hover { border-color: var(--accent); }
+.daten-example.selected { border-color: var(--accent); background: var(--accent-light); color: var(--text); }
+.daten-result {
+  padding: 12px 14px; border-radius: var(--radius);
+  font-size: 12px; line-height: 1.65; display: none;
+}
+.daten-result.visible { display: block; }
+.daten-result.danger { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.daten-result.warning { background: #FFF8E1; border: 1px solid #FFE082; color: #92400E; }
+.daten-result.safe { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+
+/* Platzhalter-Transformer */
+.transform-sim {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.transform-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.transform-tab {
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.transform-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.transform-run-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.transform-run-btn:hover { background: var(--accent-2); color: white; }
+.transform-body { padding: 14px; }
+.transform-col-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.transform-original {
+  background: var(--red-light); border: 1px solid #FFBDAD; border-radius: var(--radius);
+  padding: 10px 12px; font-size: 12px; color: var(--text);
+  line-height: 1.65; margin-bottom: 12px; white-space: pre-wrap;
+}
+.transform-result {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.75; color: #C9D1D9;
+  min-height: 80px; white-space: pre-wrap; position: relative;
+}
+.transform-copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 3px 9px; font-size: 10px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.transform-copy-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+.transform-verdict {
+  margin-top: 10px; padding: 9px 12px; border-radius: var(--radius);
+  font-size: 11px; line-height: 1.55; display: none;
+}
+.transform-verdict.ok  { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.transform-verdict.bad { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+
+/* 5-Punkte Plan interaktiv */
+.punkte-plan {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.punkte-header {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.punkte-header span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.punkte-reset {
+  padding: 4px 12px; font-size: 11px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface); color: var(--text-muted);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace;
+}
+.punkte-body { padding: 12px 14px; }
+.punkte-item {
+  display: flex; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+}
+.punkte-item:last-child { border-bottom: none; }
+.punkte-box {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 4px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: all 0.15s; margin-top: 2px;
+}
+.punkte-item.done .punkte-box { background: var(--accent-2); border-color: var(--accent-2); color: white; }
+.punkte-item.done .punkte-content strong { text-decoration: line-through; color: var(--text-muted); }
+.punkte-num {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent-light); border: 1px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  font-family: 'JetBrains Mono', monospace; margin-top: 2px;
+}
+.punkte-content strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; transition: all 0.15s; }
+.punkte-content p { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin: 0; }
+.punkte-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+}
+.punkte-bar { flex: 1; height: 6px; background: var(--surface); border-radius: 4px; overflow: hidden; }
+.punkte-bar-fill { height: 6px; background: var(--accent-2); border-radius: 4px; transition: width 0.3s ease; }
+.punkte-score { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); white-space: nowrap; }
+
+/* Drittstaaten-Karte */
+.dritt-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+.dritt-card {
+  border-radius: var(--radius); padding: 14px 16px;
+  border: 1px solid transparent;
+}
+.dritt-card.risk    { background: var(--red-light); border-color: #FFBDAD; }
+.dritt-card.bridge  { background: #FFF8E1; border-color: #FFE082; }
+.dritt-card.safe    { background: var(--accent-2-light); border-color: #ABF5D1; }
+.dritt-icon { font-size: 20px; margin-bottom: 6px; }
+.dritt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+.dritt-card.risk .dritt-label    { color: var(--red); }
+.dritt-card.bridge .dritt-label  { color: #92400E; }
+.dritt-card.safe .dritt-label    { color: var(--green); }
+.dritt-card strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.dritt-card p { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin: 0; }
+
+@media (max-width: 600px) {
+  .daten-examples { grid-template-columns: 1fr; }
+  .dritt-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 11 · Rechtliches</div>
+    <h1>DSGVO &amp; Datenschutz: Die rote Linie für KI-Nutzer</h1>
+    <p>Welche Daten dürfen in die KI, was ist der AVV, und wie stellst du dich rechtssicher auf, ohne zum Anwalt zu werden.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~20 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>In Deutschland ist Datenschutz oft das Zünglein an der Waage zwischen Erfolg und Abmahnung. Wir klären, welche Daten überhaupt in eine KI dürfen, was der AVV bedeutet und wie du dich rechtssicher aufstellst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du kennst die rote Linie bei personenbezogenen Daten, weißt wie du einen AVV aktivierst, verstehst das Drittstaaten-Problem und hast einen 5-Punkte-Plan für den datenschutzkonformen KI-Einsatz.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Rote Linie / Personenbezogene Daten -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die rote Linie: Personenbezogene Daten im Prompt</h2>
+        <p>Was die DSGVO als "personenbezogen" definiert, ist breiter als du denkst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Das Herzstück der DSGVO ist der Schutz natürlicher Personen. Sobald eine Information dazu genutzt werden kann, einen Menschen zu identifizieren, greifen strenge Schutzmechanismen. Für KI bedeutet das: <strong>Vorsicht beim Input.</strong></p>
+
+      <p>Viele Nutzer glauben, nur Name und Adresse seien kritisch. Doch die DSGVO definiert
+        <span class="tooltip-word">personenbezogene Daten
+          <span class="tooltip-popup">Personenbezogene Daten sind alle Informationen, die sich auf eine identifizierte oder identifizierbare natürliche Person beziehen. Das ist deutlich breiter als viele denken: auch Kundennummern, IP-Adressen und Fotos können darunter fallen.</span>
+        </span> wesentlich weiter. In der EU gilt außerdem das "Verbot mit Erlaubnisvorbehalt": Die Verarbeitung personenbezogener Daten ist grundsätzlich verboten, es sei denn, eine ausdrückliche gesetzliche Erlaubnis liegt vor.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf ein Datenelement und sieh, wie es eingestuft wird und was das für den KI-Einsatz bedeutet.</p>
+
+      <div class="daten-classifier">
+        <div class="daten-toolbar">
+          <span>🔍 Daten-Klassifikator</span>
+        </div>
+        <div class="daten-body">
+          <div class="daten-input-label">Wähle ein Datenelement:</div>
+          <div class="daten-examples" id="daten-grid">
+            <div class="daten-example" onclick="classifyData(0, this)">👤 Vollständiger Name + Adresse</div>
+            <div class="daten-example" onclick="classifyData(1, this)">🔢 Kundennummer "KD-4912"</div>
+            <div class="daten-example" onclick="classifyData(2, this)">💊 Gesundheitsstatus eines Kunden</div>
+            <div class="daten-example" onclick="classifyData(3, this)">📊 Anonymisierte Verkaufszahlen</div>
+            <div class="daten-example" onclick="classifyData(4, this)">📷 Mitarbeiterfoto</div>
+            <div class="daten-example" onclick="classifyData(5, this)">📝 Allgemeine Produktbeschreibung</div>
+            <div class="daten-example" onclick="classifyData(6, this)">🌐 IP-Adresse eines Nutzers</div>
+            <div class="daten-example" onclick="classifyData(7, this)">💬 E-Mail einer Privatperson</div>
+          </div>
+          <div class="daten-result" id="daten-result"></div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Die Lösung: Platzhalter-Strategie</strong>
+          <p>Anstatt echte Kundendaten einzugeben, arbeitest du mit generischen Platzhaltern. Die KI versteht die Logik eines Falls auch ohne Klarnamen. Du fütterst sie mit dem <strong>Problem</strong>, aber nicht mit dem <strong>Menschen</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Platzhalter-Transformer -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Anonymisierung in der Praxis</h2>
+        <p>Wie du Kundendaten "wäschst", bevor sie in den Prompt gehen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die Lösung ist nicht, die KI gar nicht zu nutzen, sondern smart zu nutzen. Anonymisierung und die Platzhalter-Strategie ermöglichen dir alle Vorteile der KI, ohne die Datenschutzlinie zu überschreiten.</p>
+
+      <p><strong>Anonymisierung</strong> (Goldstandard) bedeutet: Daten werden so verändert, dass sie nie wieder einer Person zugeordnet werden können. Das Ergebnis fällt komplett aus der DSGVO heraus. <strong>Pseudonymisierung</strong> (Name durch Code ersetzen) ist dagegen riskant, weil du als Listeninhaber den Code noch entschlüsseln kannst.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle einen Szenario-Typ und sieh, wie du den Prompt datenschutzkonform umformulierst.</p>
+
+      <div class="transform-sim">
+        <div class="transform-toolbar">
+          <button class="transform-tab active" onclick="setTransform(0, this)">📩 Kunden-E-Mail</button>
+          <button class="transform-tab" onclick="setTransform(1, this)">📊 HR-Analyse</button>
+          <button class="transform-tab" onclick="setTransform(2, this)">💼 Verkaufsdaten</button>
+          <button class="transform-run-btn" onclick="runTransform()">▶ Sicheren Prompt zeigen</button>
+        </div>
+        <div class="transform-body">
+          <div class="transform-col-label">❌ Unsicherer Prompt (so nicht!)</div>
+          <div class="transform-original" id="tr-original">Wähle oben ein Szenario...</div>
+          <div class="transform-col-label">✓ Datenschutzkonformer Prompt</div>
+          <div class="transform-result" id="tr-result">Klicke auf "Sicheren Prompt zeigen"...
+            <button class="transform-copy-btn" onclick="copyTransform()">Kopieren</button>
+          </div>
+          <div class="transform-verdict" id="tr-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: AVV -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Das rechtliche Fundament: Der AVV</h2>
+        <p>Der Sicherheitsgurt für deine Datenübertragung</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Nach Artikel 28 DSGVO bist du gesetzlich verpflichtet, einen
+        <span class="tooltip-word">Auftragsverarbeitungsvertrag (AVV)
+          <span class="tooltip-popup">Der AVV regelt, wie ein Dienstleister (z. B. OpenAI) personenbezogene Daten in deinem Auftrag verarbeiten darf. Ohne ihn haftest du bei einem Datenleck voll. Mit ihm verpflichtest du den Anbieter auf deine Weisungen.</span>
+        </span> abzuschließen, wenn ein Dienstleister personenbezogene Daten in deinem Auftrag verarbeitet. Ohne AVV handelst du rechtswidrig, und im Falle eines Datenlecks beim Anbieter bist du voll haftbar.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Privat-Accounts: Kein AVV, kein Schutz</strong>
+          <p>Free/Plus-Accounts bieten oft keinen AVV, der deutschen Anforderungen genügt. Die Daten werden häufig zum Training der KI genutzt. Geschäftliche Daten hier einzugeben ist rechtlich heikel.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Business-/Enterprise-Tarife: Hier beginnt die Sicherheit</strong>
+          <p>Erst hier bieten Anbieter wie OpenAI (ChatGPT Team/Enterprise), Microsoft (Copilot für M365) oder Google (Gemini für Workspace) rechtssichere AVVs an.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>So aktivierst du den AVV</strong>
+          <p>OpenAI: Settings > Data Controls > Data Processing Addendum (DPA). Microsoft/Google: meist Teil der AGB für Unternehmenskunden. Wichtig: Als PDF abspeichern mit Bestätigungsdatum. Das ist dein Nachweis.</p>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Was im AVV stehen muss</strong>
+          <p><strong>Zweckbindung:</strong> Daten nur für deine spezifische Anfrage.<br>
+          <strong>Löschpflicht:</strong> Anbieter löscht Daten nach Ende der Verarbeitung.<br>
+          <strong>Kontrollrechte:</strong> Du (oder ein Prüfer) darf Sicherheitsstandards prüfen.<br>
+          <strong>Sub-Unternehmer:</strong> Anbieter legt offen, welche weiteren Firmen beteiligt sind.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Drittstaaten -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Das Drittstaaten-Problem: Wenn Daten die EU verlassen</h2>
+        <p>US-Server, CLOUD Act und wie du dich absicherst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Selbst mit wasserdichtem AVV bleibt ein Stolperstein: der Serverstandort. Sobald Daten die EU verlassen, verlassen sie den unmittelbaren DSGVO-Schutzbereich. US-Sicherheitsbehörden können durch Gesetze wie
+        <span class="tooltip-word">FISA und CLOUD Act
+          <span class="tooltip-popup">Der FISA (Foreign Intelligence Surveillance Act) und der CLOUD Act erlauben US-Behörden, unter bestimmten Umständen Zugriff auf Daten zu verlangen, die auf Servern amerikanischer Unternehmen liegen, auch wenn diese Server in Europa stehen.</span>
+        </span> theoretisch Zugriff auf Daten auf US-Servern verlangen.</p>
+
+      <div class="dritt-grid">
+        <div class="dritt-card risk">
+          <div class="dritt-icon">🔴</div>
+          <div class="dritt-label">Risiko</div>
+          <strong>US-Anbieter ohne DPF</strong>
+          <p>Kein Angemessenheitsbeschluss, kein Framework. Transfer ist rechtlich unsicher. Finger weg für geschäftliche Daten.</p>
+        </div>
+        <div class="dritt-card bridge">
+          <div class="dritt-icon">🟡</div>
+          <div class="dritt-label">Brücke</div>
+          <strong>EU-U.S. Data Privacy Framework</strong>
+          <p>US-Anbieter mit DPF-Zertifikat verpflichten sich auf EU-Standards. Prüfe, ob dein Tool auf der offiziellen DPF-Liste steht.</p>
+        </div>
+        <div class="dritt-card safe">
+          <div class="dritt-icon">🟢</div>
+          <div class="dritt-label">Sicher</div>
+          <strong>Europäische Anbieter / EU-Server</strong>
+          <p>Anbieter wie Aleph Alpha (DE) oder Mistral (FR) auf EU-Servern. Kein Drittstaatentransfer, keine US-Überwachungsgesetze.</p>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Merksatz</strong>
+          <p>Der Serverstandort ist das "Territorium" deines Wissens. Bei US-Tools: DPF-Zertifizierung prüfen. Bei absoluter Sicherheit: Partner mit Servern in Frankfurt, Paris oder Dublin wählen. Anonymisierte Daten verursachen keine Probleme beim Drittstaatentransfer.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: 5-Punkte-Plan -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Dein 5-Punkte-Plan für datenschutzkonformen KI-Einsatz</h2>
+        <p>Gehe diese Schritte durch, bevor du geschäftliche Daten in KI gibst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Datenschutz ist kein bürokratisches Hindernis, sondern eine Frage der korrekten Konfiguration. Hake diese fünf Schritte ab und du bewegst dich sicher innerhalb des erlaubten Rahmens.</p>
+
+      <div class="punkte-plan">
+        <div class="punkte-header">
+          <span>✅ DSGVO-Compliance Checkliste</span>
+          <button class="punkte-reset" onclick="resetPunkte()">Zurücksetzen</button>
+        </div>
+        <div class="punkte-body">
+          <div class="punkte-item" onclick="togglePunkte(this, 0)">
+            <div class="punkte-box" id="pb-0"></div>
+            <div class="punkte-num">1</div>
+            <div class="punkte-content">
+              <strong>Bestandsaufnahme: Welche Tools nutzt dein Team?</strong>
+              <p>Liste alle KI-Tools auf, in die geschäftliche Daten fließen. Jedes Tool auf dieser Liste braucht eine Berechtigung. Ohne Transparenz keine Kontrolle.</p>
+            </div>
+          </div>
+          <div class="punkte-item" onclick="togglePunkte(this, 1)">
+            <div class="punkte-box" id="pb-1"></div>
+            <div class="punkte-num">2</div>
+            <div class="punkte-content">
+              <strong>AVV-Check: Die "Lizenz zum Prompten"</strong>
+              <p>Suche in den Einstellungen nach "Data Processing Addendum" (DPA) oder AVV. Digital bestätigen, als PDF speichern. Dokumentiere Datum und Anbieter.</p>
+            </div>
+          </div>
+          <div class="punkte-item" onclick="togglePunkte(this, 2)">
+            <div class="punkte-box" id="pb-2"></div>
+            <div class="punkte-num">3</div>
+            <div class="punkte-content">
+              <strong>Training-Bremse ziehen: Opt-Out aktivieren</strong>
+              <p>Deaktiviere die Option "Daten zum Training der Modelle nutzen". In Business-Tarifen oft voreingestellt, aber manuelle Prüfung ist Pflicht. Das schützt dein Wissen vor dem Allgemeingut.</p>
+            </div>
+          </div>
+          <div class="punkte-item" onclick="togglePunkte(this, 3)">
+            <div class="punkte-box" id="pb-3"></div>
+            <div class="punkte-num">4</div>
+            <div class="punkte-content">
+              <strong>Goldene Regel kommunizieren: Mitarbeiter-Guide</strong>
+              <p>Schreibe fest: "Keine Klarnamen von Kunden, keine Passwörter, keine sensiblen Finanzdaten in die KI." Platzhalter-Strategie als Standard einführen. Ein Seite, klar, verbindlich.</p>
+            </div>
+          </div>
+          <div class="punkte-item" onclick="togglePunkte(this, 4)">
+            <div class="punkte-box" id="pb-4"></div>
+            <div class="punkte-num">5</div>
+            <div class="punkte-content">
+              <strong>VVT aktualisieren: Das Gedächtnis protokollieren</strong>
+              <p>Ergänze dein Verzeichnis von Verarbeitungstätigkeiten (VVT) um "KI-gestützte Datenanalyse". Tool, anonymisierte Datentypen, AVV-Status. Das ist deine Lebensversicherung bei einer Behördenprüfung.</p>
+            </div>
+          </div>
+        </div>
+        <div class="punkte-footer">
+          <div class="punkte-bar"><div class="punkte-bar-fill" id="punkte-fill" style="width:0%"></div></div>
+          <div class="punkte-score" id="punkte-score">0 / 5 erledigt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Personenbezogene Daten sind breiter als Name und Adresse</strong>
+          <p>Kundennummern, IP-Adressen, Fotos, Gesundheitsdaten: Alles, womit ein Mensch identifiziert werden kann, fällt unter die DSGVO. Im Zweifel: anonymisieren, bevor es in den Prompt geht.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Kein AVV = volle Haftung</strong>
+          <p>Ohne AVV handelst du im geschäftlichen Kontext rechtswidrig. Der AVV ist nicht optional, er ist die Grundvoraussetzung für jeden weiteren Sicherheitsschritt.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Training-Opt-Out ist der wichtigste technische Schritt</strong>
+          <p>Was einmal in das Training eines Modells eingeflossen ist, kann nicht mehr herausgelöscht werden. Die Vermeidung von Training ist der einzige Weg, das "Vergessen-Problem" zu umgehen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Anonymisierung schlägt Pseudonymisierung</strong>
+          <p>Anonyme Daten fallen komplett aus der DSGVO heraus. Pseudonymisierte Daten (Name = Code) bleiben rechtlich personenbezogen, solange du die Entschlüsselungsliste hast.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Der menschliche Faktor ist das größte Risiko</strong>
+          <p>Technik ist gut, der Mensch am Prompt entscheidet. Eine einfache Ein-Seiten-Richtlinie für dein Team verhindert die meisten Datenschutzvorfälle, bevor sie entstehen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// DATEN KLASSIFIKATOR
+var datenItems = [
+  { text: 'Vollstaendiger Name + Adresse', level: 'danger', label: 'DIREKT PERSONENBEZOGEN',
+    msg: 'Name und Adresse sind klassische direkte Identifikatoren. In eine oeffentliche KI (Free-Account) eingeben = DSGVO-Verstoß. Nur in Business-Accounts mit AVV, anonymisiert oder als Platzhalter (Kunde_A) verwenden.' },
+  { text: 'Kundennummer "KD-4912"', level: 'warning', label: 'INDIREKT PERSONENBEZOGEN',
+    msg: 'Eine Kundennummer ist ein indirekter Identifikator: Du als Listeninhaber kannst damit die Person identifizieren. Damit gilt DSGVO. Ohne AVV: nicht in oeffentliche KI eingeben. Mit AVV im Business-Kontext: erlaubt.' },
+  { text: 'Gesundheitsstatus eines Kunden', level: 'danger', label: 'BESONDERE KATEGORIE (Art. 9 DSGVO)',
+    msg: 'Gesundheitsdaten sind "besondere Kategorien" nach Art. 9 DSGVO und stehen unter dem hoechsten Schutzniveau. Fuer diese Daten gelten extrem strenge Bedingungen. Im Zweifelsfall: nie in eine KI eingeben, niemals nicht.' },
+  { text: 'Anonymisierte Verkaufszahlen', level: 'safe', label: 'KEIN PERSONENBEZUG',
+    msg: 'Anonymisierte Zahlen (z. B. "Produkt A: 243 Einheiten, Region Sued") koennen keiner Person zugeordnet werden. Sie fallen nicht unter die DSGVO. Sorglos in jede KI eingeben, das ist echter Nutzen ohne Risiko.' },
+  { text: 'Mitarbeiterfoto', level: 'danger', label: 'BIOMETRISCHE DATEN',
+    msg: 'Fotos, durch die eine Person eindeutig erkennbar ist, sind biometrische Daten. Das gilt auch fuer Bewerbungsfotos oder Team-Seiten-Bilder. In KI-Bildgeneratoren oder Analysesysteme nur mit expliziter Einwilligung der Person.' },
+  { text: 'Allgemeine Produktbeschreibung', level: 'safe', label: 'KEIN PERSONENBEZUG',
+    msg: 'Eine Produktbeschreibung ohne Kundenbezug ist kein personenbezogenes Datum. Sie darf uneingeschraenkt in jede KI eingegeben werden. Das ist der Kern sinnvoller KI-Nutzung: Sachinfos ohne Personenbezug.' },
+  { text: 'IP-Adresse eines Nutzers', level: 'warning', label: 'INDIREKT PERSONENBEZOGEN',
+    msg: 'IP-Adressen gelten in der EU als personenbezogene Daten, weil ein Internet-Provider sie eindeutig einer Person zuordnen kann. Ohne AVV und klaren Zweck: nie in eine KI eingeben. Bei Analyseaufgaben immer anonymisieren.' },
+  { text: 'E-Mail einer Privatperson', level: 'danger', label: 'DIREKT PERSONENBEZOGEN',
+    msg: 'Eine E-Mail-Adresse identifiziert eine Person direkt. In oeffentliche KI (Free-Accounts) absolut verboten. In Business-KI mit AVV erlaubt, aber kritisch. Besser: generischen Kontext beschreiben statt echte Adressen eingeben.' }
+];
+
+function classifyData(idx, el) {
+  document.querySelectorAll('.daten-example').forEach(function(e) { e.classList.remove('selected'); });
+  el.classList.add('selected');
+  var d = datenItems[idx];
+  var res = document.getElementById('daten-result');
+  res.className = 'daten-result visible ' + d.level;
+  res.innerHTML = '<strong>' + d.label + ':</strong> ' + d.msg;
+}
+
+// PLATZHALTER TRANSFORMER
+var transformScenarios = [
+  {
+    original: 'Analysiere folgende E-Mail:\n"Lieber Herr Müller,\nIch, Maria Schmidt (maria@schmidt.de),\nbin sehr unzufrieden mit Ihrer Lieferung\nfür Bestellung #89234 vom 12. April.\nBitte rufen Sie mich unter 0176-12345678 an."',
+    result: 'Analysiere folgende E-Mail eines Kunden\n(nennen wir ihn Kunde_A) und erstelle\neinen Antwortentwurf:\n\nKunde_A beschwert sich ueber eine\nLieferverzoegerung bei Bestellung_B.\nAchte auf eine hoefliche Tonalitaet und\nbiete eine klare Loesung an.',
+    verdict: 'ok',
+    verdictText: 'Das Problem ist vollstaendig beschrieben, kein Mensch ist identifizierbar. Die KI versteht den Fall und kann eine nuetzliche Antwort generieren, ohne dass eine Datenschutzverletzung vorliegt.'
+  },
+  {
+    original: 'Schreibe eine Performance-Bewertung\nfuer:\nName: Thomas Becker\nAbteilung: Marketing\nGehalt: 68.000 EUR\nGeburtstag: 14.03.1985\nAufgaben: Social Media, E-Mail-Marketing\nSchwaechen: zu langsam bei Deadlines',
+    result: 'Schreibe eine Performance-Bewertung\nfuer einen Mitarbeiter mit folgendem Profil:\n\nRolle: Marketing-Spezialist (Mitarbeiter_X)\nSchwerpunkte: Social Media und E-Mail-Marketing\nEntwicklungsfeld: Deadline-Management\n\nStil: konstruktiv, motivierend, loesungsorientiert.',
+    verdict: 'ok',
+    verdictText: 'Name, Gehalt, Geburtsdatum und andere personenbezogene Daten wurden entfernt. Die KI bekommt die Aufgabe, ohne die Identitaet der Person zu kennen. Ergebnis: datenschutzkonform und ebenso nuetzlich.'
+  },
+  {
+    original: 'Analysiere unsere Kundenliste:\nFrau Anna Hofer, Muenchen, 42 J., kauft\nregelmaessig Bio-Produkte, zahlt spaet.\nHerr Kai Wulf, Berlin, 35 J., Premium-Kunde,\nhat 2023 fast kuendigt.\nFrau Lisa Dorn, Hamburg, 28 J., neu,\nhoher Warenkorbwert.',
+    result: 'Analysiere folgende anonymisierte\nKundensegmente und gib Empfehlungen:\n\nSegment A (>40 J., regelmaessige Kaeufer,\nzahlungsverzoegerungen): Welche Massnahmen\nsenken das Zahlungsrisiko?\n\nSegment B (35-50 J., Premium, Churn-Risiko):\nWas bindet diese Kunden langfristig?\n\nSegment C (<30 J., neu, hohes Potential):\nWie maximieren wir den LTV?',
+    verdict: 'ok',
+    verdictText: 'Aus echten Kundennamen wurden anonymisierte Segmente. Die strategisch relevante Information (Altersgruppe, Verhalten, Risiko) ist vollstaendig erhalten, aber keine Person ist mehr identifizierbar. DSGVO-sicher.'
+  }
+];
+
+var currentTransform = 0;
+
+function setTransform(idx, btn) {
+  currentTransform = idx;
+  document.querySelectorAll('.transform-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('tr-original').textContent = transformScenarios[idx].original;
+  document.getElementById('tr-result').innerHTML = 'Klicke auf "Sicheren Prompt zeigen"...<button class="transform-copy-btn" onclick="copyTransform()">Kopieren</button>';
+  document.getElementById('tr-verdict').style.display = 'none';
+}
+
+function runTransform() {
+  var s = transformScenarios[currentTransform];
+  var out = document.getElementById('tr-result');
+  out.innerHTML = '<button class="transform-copy-btn" onclick="copyTransform()">Kopieren</button>';
+  var text = s.result;
+  var i = 0;
+  var interval = setInterval(function() {
+    if (i < text.length) {
+      out.innerHTML = text.substring(0, i + 1) + '<button class="transform-copy-btn" onclick="copyTransform()">Kopieren</button>';
+      i++;
+    } else {
+      clearInterval(interval);
+      var v = document.getElementById('tr-verdict');
+      v.className = 'transform-verdict ' + s.verdict;
+      v.innerHTML = '\u2713 ' + s.verdictText;
+      v.style.display = 'block';
+    }
+  }, 12);
+}
+
+function copyTransform() {
+  var text = document.getElementById('tr-result').textContent.replace('Kopieren', '').trim();
+  navigator.clipboard.writeText(text);
+}
+
+// init
+setTransform(0, document.querySelector('.transform-tab'));
+
+// 5-PUNKTE-PLAN
+var punkteState = [false,false,false,false,false];
+
+function togglePunkte(item, idx) {
+  punkteState[idx] = !punkteState[idx];
+  item.classList.toggle('done', punkteState[idx]);
+  document.getElementById('pb-' + idx).textContent = punkteState[idx] ? '\u2713' : '';
+  var done = punkteState.filter(Boolean).length;
+  document.getElementById('punkte-fill').style.width = (done / 5 * 100) + '%';
+  document.getElementById('punkte-score').textContent = done + ' / 5 erledigt';
+}
+
+function resetPunkte() {
+  punkteState = [false,false,false,false,false];
+  for (var i = 0; i < 5; i++) {
+    var item = document.getElementById('pb-' + i).parentElement;
+    item.classList.remove('done');
+    document.getElementById('pb-' + i).textContent = '';
+  }
+  document.getElementById('punkte-fill').style.width = '0%';
+  document.getElementById('punkte-score').textContent = '0 / 5 erledigt';
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'Was beschreibt das "Verbot mit Erlaubnisvorbehalt" in der DSGVO?',
+    options: [
+      'Personenbezogene Daten duerfen nur von zertifizierten Unternehmen verarbeitet werden.',
+      'Die Verarbeitung personenbezogener Daten ist grundsaetzlich verboten, es sei denn, es gibt eine gesetzliche Erlaubnis.',
+      'Nur Verbote, die explizit im Gesetz stehen, gelten fuer KI-Systeme.',
+      'Unternehmen duerfen Daten verarbeiten, wenn sie einen Datenschutzbeauftragten haben.'
+    ],
+    correct: 1,
+    feedback: 'Das ist das Kernprinzip der DSGVO: Datenverarbeitung ist verboten, AUSSER es gibt eine Rechtsgrundlage (z.B. Einwilligung, Vertrag, legitimes Interesse). Ohne Erlaubnis gibt es keine Datenverarbeitung.'
+  },
+  {
+    q: 'Warum ist Pseudonymisierung (Name durch Code ersetzen) keine vollstaendige DSGVO-Loesung?',
+    options: [
+      'Weil verschluesselte Namen technisch leicht hackbar sind.',
+      'Weil du als Listeninhaber den Code noch entschluesseln kannst und die Daten damit weiterhin personenbezogen bleiben.',
+      'Weil die DSGVO nur echte Klarnamen schuetzt, keine Codes.',
+      'Weil Pseudonymisierung nur fuer medizinische Daten gilt.'
+    ],
+    correct: 1,
+    feedback: 'Pseudonymisierte Daten sind weiterhin personenbezogen, solange die Entschluesselungsliste existiert. Erst echte Anonymisierung (niemals mehr rueckfuehrbar) fallt aus der DSGVO heraus.'
+  },
+  {
+    q: 'Was schreibt Artikel 28 DSGVO fuer den KI-Einsatz vor?',
+    options: [
+      'Alle KI-Tools muessen beim Bundesamt registriert werden.',
+      'Bei der Verarbeitung personenbezogener Daten durch einen Dienstleister muss ein Auftragsverarbeitungsvertrag (AVV) geschlossen werden.',
+      'KI-generierte Inhalte muessen als solche gekennzeichnet werden.',
+      'Jeder Mitarbeiter muss eine DSGVO-Schulung absolvieren, bevor er KI nutzt.'
+    ],
+    correct: 1,
+    feedback: 'Artikel 28 DSGVO verpflichtet zur Unterzeichnung eines AVV, wenn ein Dienstleister (z.B. OpenAI) personenbezogene Daten in deinem Auftrag verarbeitet. Ohne AVV: volle Haftung im Schadensfall.'
+  },
+  {
+    q: 'Welcher Unterschied zwischen Free- und Business-Accounts bei KI-Tools ist datenschutzrechtlich entscheidend?',
+    options: [
+      'Business-Accounts sind schneller und haben groessere Kontextfenster.',
+      'Business-Accounts bieten rechtssichere AVVs und garantieren oft, dass Daten nicht fuer das Training genutzt werden.',
+      'Nur Business-Accounts erlauben die Nutzung auf mehreren Geraeten.',
+      'Free-Accounts werden staerker ueberwacht als Business-Accounts.'
+    ],
+    correct: 1,
+    feedback: 'Business-/Enterprise-Tarife sind nicht nur ein Feature-Upgrade, sondern die rechtliche Grundvoraussetzung fuer den geschaeftlichen Einsatz mit personenbezogenen Daten: AVV, kein Training mit deinen Daten, Speicherort-Kontrolle.'
+  },
+  {
+    q: 'Was ist die "Platzhalter-Strategie" und warum ist sie effektiv?',
+    options: [
+      'Das Ersetzen aller Texte durch Template-Texte, damit keine Fehler entstehen.',
+      'Das Ersetzen echter Personendaten durch generische Bezeichnungen wie "Kunde_A", sodass die KI das Problem versteht, aber keine Person identifizieren kann.',
+      'Das Hochladen von Beispieldaten statt echter Daten fuer das Training.',
+      'Eine Methode, um KI-Outputs als Platzhalter in Dokumente einzufuegen.'
+    ],
+    correct: 1,
+    feedback: 'Die Platzhalter-Strategie gibt der KI das Problem, nicht den Menschen. "Kunde_A beschwert sich ueber Lieferung" beschreibt denselben Fall wie mit echtem Namen, aber ohne jeden Personenbezug.'
+  },
+  {
+    q: 'Warum ist das EU-U.S. Data Privacy Framework (DPF) fuer den KI-Einsatz relevant?',
+    options: [
+      'Es erlaubt europaeischen Unternehmen, US-KI-Tools kostenlos zu nutzen.',
+      'Es stellt die rechtliche Bruecke fuer Datentransfers in die USA dar: US-Anbieter mit DPF-Zertifikat verpflichten sich auf EU-Standards.',
+      'Es verpflichtet alle KI-Anbieter, Server in Europa zu betreiben.',
+      'Es ersetzt den AVV fuer kleine Unternehmen mit weniger als 50 Mitarbeitern.'
+    ],
+    correct: 1,
+    feedback: 'Das DPF ist der Angemessenheitsbeschluss fuer die USA: Zertifizierte US-Unternehmen (pruefen auf der offiziellen DPF-Liste!) verpflichten sich auf EU-Datenschutzstandards. Ohne Zertifikat ist der Transfer riskant.'
+  },
+  {
+    q: 'Warum ist das Recht auf Loeschung (Vergessen-Recht) bei KI-Modellen so problematisch?',
+    options: [
+      'Weil die DSGVO das Loeschen von KI-generierten Inhalten nicht vorsieht.',
+      'Weil Daten, die in das Training eines Modells eingeflossen sind, in den Modellgewichten verbacken sind und technisch kaum gezielt herausgeloescht werden koennen.',
+      'Weil Loeschantraege in der EU nur von Behoerden gestellt werden duerfen.',
+      'Weil KI-Anbieter in den USA nicht an das Vergessen-Recht gebunden sind.'
+    ],
+    correct: 1,
+    feedback: 'Machine Unlearning ist technologisch noch kaum realisierbar. Deshalb ist das Training-Opt-Out so entscheidend: Was nie in das Training eingeflossen ist, muss auch nicht herausgeloescht werden.'
+  },
+  {
+    q: 'Was muss im Verzeichnis von Verarbeitungstaetigkeiten (VVT) bei KI-Nutzung notiert werden?',
+    options: [
+      'Alle Prompts, die in einer Woche eingegeben wurden.',
+      'Tool-Name, verarbeitete Datentypen (anonymisiert), Zweck und dass ein AVV vorliegt.',
+      'Der Volltext des AVV mit allen Anhangen.',
+      'Die Anzahl der monatlich verarbeiteten Datensaetze mit exakten Zahlen.'
+    ],
+    correct: 1,
+    feedback: 'Das VVT ist dein Nachweis bei einer Behoerdenpruefung. Es muss nicht jeder Prompt dokumentiert sein, aber du musst zeigen koennen: Welches Tool, welche Datenkategorien, welcher Zweck, liegt AVV vor? Das reicht.'
+  },
+  {
+    q: 'Was sind die "besonderen Kategorien" personenbezogener Daten nach Art. 9 DSGVO?',
+    options: [
+      'Alle Daten, die eine Person direkt identifizieren.',
+      'Sensible Daten wie Religion, Gesundheit, politische Meinung oder Gewerkschaftszugehoerigkeit, fuer die das hoechste Schutzniveau gilt.',
+      'Daten von Minderjahrigen unter 16 Jahren.',
+      'Daten, die innerhalb der letzten 6 Monate erhoben wurden.'
+    ],
+    correct: 1,
+    feedback: 'Art. 9 DSGVO definiert besondere Kategorien: Gesundheit, Religion, politische Meinung, Gewerkschaft, Sexualleben u.a. Fuer diese Daten gelten noch strengere Bedingungen als fuer normale personenbezogene Daten.'
+  },
+  {
+    q: 'Welchen Vorteil hat das Einhalten des 5-Punkte-Plans uber blosse Absicherung hinaus?',
+    options: [
+      'Es erlaubt den Einsatz von KI auch ohne Business-Abo.',
+      'Es spart Kosten, weil man keine Datenschutzbeauftragte mehr braucht.',
+      'Gut geschulte Mitarbeiter erzielen durch besseres Prompting qualitativ hochwertigere Ergebnisse und erkennen Risiken fruehzeitig.',
+      'Der Plan erfuellt automatisch alle EU AI Act Anforderungen.'
+    ],
+    correct: 2,
+    feedback: 'Datenschutz-Compliance ist nicht nur Pflicht, sondern Effizienz-Invest: Wer die Regeln kennt, prompts besser (keine unnoetige Selbstzensur), erkennt Risiken frueher und kann KI voller ausschoepfen.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "rechtliches-01";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

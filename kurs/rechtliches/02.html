@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urheberrecht &amp; Geistiges Eigentum: Was dir KI-Output wirklich gehört</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Schöpfungshöhe Spektrum */
+.schoepfung-spectrum {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.spectrum-header {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 8px 14px; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+}
+.spectrum-items {
+  display: flex; flex-direction: column; gap: 0;
+}
+.spectrum-item {
+  display: flex; align-items: flex-start; gap: 0;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.12s;
+}
+.spectrum-item:last-child { border-bottom: none; }
+.spectrum-item:hover { background: var(--surface-2); }
+.spectrum-item.active { background: var(--accent-light); }
+.spectrum-level {
+  flex-shrink: 0; width: 90px; padding: 14px 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; font-family: 'JetBrains Mono', monospace;
+  text-align: center; border-right: 1px solid var(--border);
+}
+.level-none    { background: var(--red-light); color: var(--red); }
+.level-partial { background: #FFF8E1; color: #92400E; }
+.level-full    { background: var(--accent-2-light); color: var(--green); }
+.spectrum-content { padding: 14px 16px; flex: 1; }
+.spectrum-content strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.spectrum-content p { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin: 0; }
+.spectrum-detail {
+  padding: 12px 14px; background: var(--accent-light);
+  border-top: 1px solid var(--accent); border-left: 3px solid var(--accent);
+  font-size: 12px; color: var(--text); line-height: 1.65;
+  display: none;
+}
+.spectrum-detail.active { display: block; }
+
+/* Nutzungsrechte Vergleich */
+.nutzung-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.nutzung-col { }
+.nutzung-col:first-child { border-right: 1px solid var(--border); }
+.nutzung-col-head {
+  padding: 10px 14px; background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 700; color: var(--text); text-align: center;
+}
+.nutzung-row {
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted); line-height: 1.55;
+}
+.nutzung-row:last-child { border-bottom: none; }
+.nutzung-row strong { display: block; font-size: 10px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+.nutzung-row.ok  { background: var(--accent-2-light); }
+.nutzung-row.bad { background: var(--red-light); }
+
+/* Vertragsformulierung Builder */
+.vertrag-builder {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.vertrag-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+}
+.vertrag-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.vertrag-gen-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.vertrag-gen-btn:hover { background: var(--accent-2); color: white; }
+.vertrag-body { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.vertrag-left { display: flex; flex-direction: column; gap: 10px; }
+.vertrag-field label {
+  display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+}
+.vertrag-field select, .vertrag-field input {
+  width: 100%; padding: 7px 10px; font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;
+}
+.vertrag-field select:focus, .vertrag-field input:focus {
+  outline: none; border-color: var(--accent);
+}
+.vertrag-preview {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; font-size: 12px; color: var(--text); line-height: 1.75;
+  min-height: 160px; white-space: pre-wrap; font-style: italic;
+}
+.vertrag-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.vertrag-copy-btn {
+  margin-top: 8px; padding: 6px 14px; font-size: 11px; font-weight: 500;
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  background: var(--accent-light); color: var(--accent);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.vertrag-copy-btn:hover { background: var(--accent); color: white; }
+
+/* Schutz-Strategien Cards */
+.schutz-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+.schutz-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; background: var(--surface);
+}
+.schutz-icon { font-size: 20px; margin-bottom: 8px; }
+.schutz-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.schutz-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-bottom: 6px; }
+.schutz-tag {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+}
+.tag-strong { background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1; }
+.tag-medium { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+.tag-limited { background: #FFF8E1; color: #92400E; border: 1px solid #FFE082; }
+
+@media (max-width: 600px) {
+  .nutzung-grid { grid-template-columns: 1fr; }
+  .nutzung-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .vertrag-body { grid-template-columns: 1fr; }
+  .schutz-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 11 · Rechtliches</div>
+    <h1>Urheberrecht &amp; Geistiges Eigentum: Was dir wirklich gehört</h1>
+    <p>Warum KI-Output in Deutschland oft kein Urheberrecht genießt, was Nutzungsrechte bedeuten und wie du deine Assets trotzdem schützt.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~20 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wer einen Prompt schreibt, fühlt sich oft als Urheber des Ergebnisses. Rein rechtlich sieht die Lage in Deutschland jedoch anders aus. Wir klären, wem KI-Output gehört, was Nutzungsrechte bedeuten und wie du dich absichern kannst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du verstehst die Schöpfungshöhe, kennst den Unterschied zwischen Urheber- und Nutzungsrechten, weißt wie du KI-Assets über das Markenrecht schützt und passt deine Kundenverträge rechtssicher an.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Schöpfungshöhe -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die Schöpfungshöhe: Warum die KI kein Urheber sein kann</h2>
+        <p>Ab wann ein Werk als "menschlich genug" gilt</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Nach deutschem Recht ist ein Urheber stets eine natürliche Person. Ein Werk muss das Ergebnis menschlichen Wollens und Gestaltens sein. Die KI hat kein Bewusstsein und keinen eigenen Gestaltungswillen. Sie ist rechtlich ein Werkzeug, ähnlich wie ein Pinsel oder eine Kamera.</p>
+
+      <p>Der entscheidende Begriff ist die
+        <span class="tooltip-word">persönliche geistige Schöpfung
+          <span class="tooltip-popup">Die "persönliche geistige Schöpfung" ist der Kern des Urheberrechtsgesetzes (UrhG). Ein Werk muss die Persönlichkeit seines Schöpfers widerspiegeln und durch menschlichen Gestaltungswillen entstanden sein. KI-Output erfüllt das meist nicht.</span>
+        </span>. Bei KI-Output scheitert dieser Schutz meist an zwei Hürden: Ideen sind frei (nur die Ausformung ist geschützt), und die KI trifft eigene Entscheidungen über Wörter, Stil und Struktur ohne deinen direkten Einfluss.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf eine Stufe und sieh, wann Urheberrecht entsteht und wann nicht.</p>
+
+      <div class="schoepfung-spectrum">
+        <div class="spectrum-header">Schutz-Spektrum: Von "gemeinfrei" bis "geschützt"</div>
+        <div class="spectrum-items">
+          <div class="spectrum-item" onclick="toggleSpectrum(0, this)">
+            <div class="spectrum-level level-none">❌ Kein Schutz</div>
+            <div class="spectrum-content">
+              <strong>One-Click-Output: Direkt heruntergeladen, unverändert genutzt</strong>
+              <p>Bild generieren, herunterladen, in Anzeige einsetzen. Kein menschlicher Schöpfungsanteil.</p>
+            </div>
+          </div>
+          <div class="spectrum-detail" id="sd-0">
+            Rechtliche Folge: Dieser Output ist gemeinfrei. Konkurrenten dürfen ihn theoretisch ebenfalls nutzen, da kein rechtlicher Besitzer existiert. Für einmalige Kampagnen-Assets ist das oft ausreichend, für dein Markenlogo jedoch riskant.
+          </div>
+          <div class="spectrum-item" onclick="toggleSpectrum(1, this)">
+            <div class="spectrum-level level-partial">⚠ Möglicher Schutz</div>
+            <div class="spectrum-content">
+              <strong>Massiv überarbeitet: KI als Rohentwurf, Mensch als Fertigsteller</strong>
+              <p>KI schreibt ersten Entwurf, du strukturierst stark um, ergänzt Erfahrungen, schreibst Passagen neu.</p>
+            </div>
+          </div>
+          <div class="spectrum-detail" id="sd-1">
+            Hier entsteht ein möglicher Schutz: Das finale Produkt ist deine eigene Leistung, die KI war nur das Werkzeug für den Rohentwurf. Wie stark muss die Überarbeitung sein? Es gibt keine Prozentregel. Als Faustregel gilt: Je mehr das Ergebnis deine Persönlichkeit widerspiegelt, desto sicherer der Schutz.
+          </div>
+          <div class="spectrum-item" onclick="toggleSpectrum(2, this)">
+            <div class="spectrum-level level-full">✓ Sicherer Schutz</div>
+            <div class="spectrum-content">
+              <strong>Hybrid-Ansatz: KI liefert Rohmaterial, Mensch erschafft Neues</strong>
+              <p>KI-Fragmente werden in einem komplexen Prozess zu einem völlig neuen Werk zusammengesetzt.</p>
+            </div>
+          </div>
+          <div class="spectrum-detail" id="sd-2">
+            Sicherer Schutz entsteht, wenn du KI-generierte Bildfragmente in Photoshop mit eigenen Texturen kombinierst, manuell retuschierst und in ein komplexes Layout einbettest. Dokumentiere die Zwischenstufen. Im Streitfall ist die Versionsgeschichte dein wichtigster Beweis für den eigenen Schöpfungsanteil.
+          </div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Faustregel für die Praxis</strong>
+          <p>Je weniger du am Ergebnis noch änderst, desto unsicherer ist dein rechtlicher Besitzanspruch. Betrachte direkten KI-Output immer als <strong>gemeinfreies Rohmaterial</strong>, nicht als dein Eigentum.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Nutzungsrechte -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Nutzungsrechte: Was Tool-Anbieter dir wirklich übertragen</h2>
+        <p>AGB-Check, Exklusivitäts-Problem und die Lizenz zurück</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Da das Urheberrecht KI-Output meist nicht schützt, rückt die vertragliche Ebene in den Fokus: die AGB der Tool-Anbieter. Wichtig: Nur weil ein Anbieter dir "alle Rechte" überträgt, bedeutet das nicht, dass diese Rechte gegenüber Dritten auch durchsetzbar sind.</p>
+
+      <div class="nutzung-grid">
+        <div class="nutzung-col">
+          <div class="nutzung-col-head">🆓 Free/Plus-Account</div>
+          <div class="nutzung-row bad"><strong>Kommerzielle Nutzung</strong>Oft eingeschränkt oder unklar. Anbieter behält sich das Recht vor, deine Inhalte selbst zu nutzen.</div>
+          <div class="nutzung-row bad"><strong>Exklusivität</strong>Keine. Andere Nutzer mit ähnlichem Prompt erhalten dieselben Rechte am nahezu identischen Output.</div>
+          <div class="nutzung-row bad"><strong>AVV / Datenschutz</strong>Meist kein rechtskonformer AVV. Daten werden häufig für das Training genutzt.</div>
+          <div class="nutzung-row bad"><strong>Für Kundenprojekte</strong>Rechtlich riskant. Du kannst keine belastbaren Nutzungsrechte übertragen.</div>
+        </div>
+        <div class="nutzung-col">
+          <div class="nutzung-col-head">💼 Pro/Enterprise-Account</div>
+          <div class="nutzung-row ok"><strong>Kommerzielle Nutzung</strong>Volle kommerzielle Nutzungsfreiheit in der Regel enthalten. Grundvoraussetzung für Kundenprojekte.</div>
+          <div class="nutzung-row ok"><strong>Exklusivität</strong>Weiterhin nicht exklusiv. Das ist die systemische Schwachstelle: Markenlogos bleiben riskant.</div>
+          <div class="nutzung-row ok"><strong>AVV / Datenschutz</strong>Rechtssichere AVVs vorhanden. Kein Training mit deinen Daten (Opt-Out meist aktiv).</div>
+          <div class="nutzung-row ok"><strong>Für Kundenprojekte</strong>Rechtlich sicherer. Nutzungsrechte können übertragen werden (aber kein Urheberrechtsschutz!).</div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Das Exklusivitäts-Problem</strong>
+          <p>Die meisten Anbieter übertragen Nutzungsrechte <strong>nicht exklusiv</strong>. Ein anderer Nutzer mit ähnlichem Prompt bekommt dieselben Rechte am nahezu identischen Output. Für Hauptlogos und Kernmarken-Assets ist das ein kritisches Risiko.</p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">🔄</div>
+        <div class="callout-text">
+          <strong>Die "Lizenz zurück" an den Anbieter</strong>
+          <p>Mit der Nutzung des Tools gewinnst du Rechte am Output, gibst dem Anbieter aber gleichzeitig eine weltweite Lizenz, deine Prompts und Ergebnisse für die Verbesserung des Dienstes zu nutzen. In Business-/Enterprise-Tarifen kann dieser Rückfluss deaktiviert werden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Schutz-Strategien -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Strategien zur Absicherung deines geistigen Eigentums</h2>
+        <p>Wenn das Urheberrecht wegfällt, müssen andere Register gezogen werden</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Das Urheberrecht schützt die Kunst. Wenn es für KI-Output nicht greift, gibt es alternative Wege, um deine Investition zu sichern.</p>
+
+      <div class="schutz-grid">
+        <div class="schutz-card">
+          <div class="schutz-icon">™️</div>
+          <div class="schutz-name">Markenrecht (DPMA/EUIPO)</div>
+          <div class="schutz-desc">Das Markenrecht fragt nicht danach, wie ein Logo entstanden ist. Es schützt die Funktion als Herkunftshinweis. KI-generiertes Logo anmelden: exklusives Nutzungsrecht für deine Branche.</div>
+          <span class="schutz-tag tag-strong">Stärkster Schutz für Logos</span>
+        </div>
+        <div class="schutz-card">
+          <div class="schutz-icon">🔨</div>
+          <div class="schutz-name">Hybrid-Ansatz (Mensch-Maschine)</div>
+          <div class="schutz-desc">KI liefert Grundgerüst, Mensch führt das Finale aus. KI-Bild + eigene Texturen + manuelle Retusche + komplexes Layout = neues schützenswertes Gesamtwerk. Versionen dokumentieren!</div>
+          <span class="schutz-tag tag-medium">Für Kampagnen-Visuals</span>
+        </div>
+        <div class="schutz-card">
+          <div class="schutz-icon">⚖️</div>
+          <div class="schutz-name">Wettbewerbsrecht (UWG)</div>
+          <div class="schutz-desc">Wenn Konkurrenten deine gesamte KI-generierte Bildsprache oder Texte 1:1 übernehmen, kann das wettbewerbswidrig sein, wenn das Produkt eine "wettbewerbliche Eigenart" hat.</div>
+          <span class="schutz-tag tag-limited">Bedingungsabhängig</span>
+        </div>
+        <div class="schutz-card">
+          <div class="schutz-icon">🤝</div>
+          <div class="schutz-name">Vertraglicher Schutz (NDA)</div>
+          <div class="schutz-desc">Verpflichte Partner zur Vertraulichkeit über deine Prompts und Ergebnisse. Für Freelancer: Dokumentationspflicht für KI-Einsatz und Haftungsfreistellung für Output-Prüfung einbauen.</div>
+          <span class="schutz-tag tag-limited">Für Interne Assets</span>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Zeitstempel-Dienste als Prioritätsnachweis</strong>
+          <p>Nutze Zeitstempel- oder Blockchain-basierte Registrierungen für deine Prompts und Entwürfe. Im Streitfall zeigst du damit, dass du der Erste warst. Das kostet wenig und kann viel wert sein.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Vertragsformulierung Builder -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Verträge mit Kunden und Freelancern anpassen</h2>
+        <p>Alte Klauseln funktionieren nicht mehr, diese schon</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die meisten klassischen Verträge versprechen die "Übertragung sämtlicher Urheberrechte". Wie wir gelernt haben, entstehen diese bei reinem KI-Output aber gar nicht erst. Das ist ein Vertragsbruch in der Entstehung.</p>
+
+      <p>Die Anpassung: Von "Übertragung des Urheberrechts" hin zu "Einräumung der umfassenden Nutzungs- und Verwertungsrechte". Ergänze außerdem einen Hinweis, dass für reine KI-Anteile kein urheberrechtlicher Schutz garantiert werden kann.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Passe die Vertragsklausel für deinen spezifischen Kontext an.</p>
+
+      <div class="vertrag-builder">
+        <div class="vertrag-toolbar">
+          <span>📄 Vertragsklausel-Generator</span>
+          <button class="vertrag-gen-btn" onclick="buildVertrag()">▶ Klausel generieren</button>
+        </div>
+        <div class="vertrag-body">
+          <div class="vertrag-left">
+            <div class="vertrag-field">
+              <label>Vertragstyp</label>
+              <select id="vt-type">
+                <option value="dienstleister">Dienstleister an Kunden</option>
+                <option value="freelancer">Agentur an Freelancer</option>
+                <option value="arbeitgeber">Arbeitgeber an Mitarbeiter</option>
+              </select>
+            </div>
+            <div class="vertrag-field">
+              <label>KI-Einsatz-Umfang</label>
+              <select id="vt-umfang">
+                <option value="gelegentlich">Gelegentlich als Hilfsmittel</option>
+                <option value="regelmaessig">Regelmäßig für Entwürfe</option>
+                <option value="umfangreich">Umfangreich als Kernwerkzeug</option>
+              </select>
+            </div>
+            <div class="vertrag-field">
+              <label>Haftungsregelung</label>
+              <select id="vt-haftung">
+                <option value="standard">Standard (Ausschluss für KI-Anteile)</option>
+                <option value="geprueft">Geprüft (Plagiat-Check zugesichert)</option>
+                <option value="versichert">Versichert (Copyright Shield vorhanden)</option>
+              </select>
+            </div>
+            <div class="vertrag-field">
+              <label>Dein Unternehmensname (optional)</label>
+              <input type="text" id="vt-name" placeholder="z. B. Mustermann GmbH">
+            </div>
+          </div>
+          <div>
+            <div class="vertrag-preview-label">Deine angepasste Vertragsklausel</div>
+            <div class="vertrag-preview" id="vt-preview">Felder auswählen und auf "Klausel generieren" klicken...</div>
+            <button class="vertrag-copy-btn" onclick="copyVertrag()">Klausel kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Wichtig für Dienstleister</strong>
+          <p>Wenn du für Kunden arbeitest und ein "urheberrechtlich geschütztes Logo" versprichst, ohne darauf hinzuweisen, dass es KI-generiert ist, riskierst du Haftung wegen Rechtsmängeln. Erwartungsmanagement vor dem Auftrag ist billiger als ein Rechtsstreit danach.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>KI-Output ist kein Urheberrecht</strong>
+          <p>Ein One-Click-Output ist gemeinfrei. Je mehr du überarbeitest, desto mehr eigener Schöpfungsanteil entsteht. Die Faustregel: KI-Output ist Rohmaterial, nicht Endprodukt.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Nutzungsrechte ≠ Urheberrecht</strong>
+          <p>Anbieter übertragen dir Nutzungsrechte (du darfst es nutzen), aber kein Urheberrecht (du kannst es nicht exklusiv besitzen). Das ist ein grundlegender Unterschied mit erheblichen praktischen Folgen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Logos über Markenrecht schützen</strong>
+          <p>DPMA-Anmeldung eines KI-generierten Logos gibt exklusives Nutzungsrecht für deine Branche, auch ohne Urheberrechtsschutz. Das ist der einzig sichere Weg für Marken-Assets.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Verträge von Besitz auf Nutzung umstellen</strong>
+          <p>"Übertragung sämtlicher Urheberrechte" ist bei KI-Output ein leeres Versprechen. Die richtige Formulierung ist "Einräumung der Nutzungs- und Verwertungsrechte" mit ausdrücklichem Vorbehalt für KI-Anteile.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Dokumentation ist dein wichtigster Schutz</strong>
+          <p>Versionsstände, Zeitstempel, Prompts dokumentieren. Im Streitfall zeigst du damit deinen Schöpfungsanteil. Was nicht dokumentiert ist, existiert vor Gericht nicht.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// SCHÖPFUNGSHÖHE SPEKTRUM
+function toggleSpectrum(idx, item) {
+  var allItems = document.querySelectorAll('.spectrum-item');
+  var allDetails = document.querySelectorAll('.spectrum-detail');
+  var isOpen = item.classList.contains('active');
+  allItems.forEach(function(i) { i.classList.remove('active'); });
+  allDetails.forEach(function(d) { d.classList.remove('active'); });
+  if (!isOpen) {
+    item.classList.add('active');
+    document.getElementById('sd-' + idx).classList.add('active');
+  }
+}
+
+// VERTRAGSKLAUSEL BUILDER
+function buildVertrag() {
+  var type    = document.getElementById('vt-type').value;
+  var umfang  = document.getElementById('vt-umfang').value;
+  var haftung = document.getElementById('vt-haftung').value;
+  var name    = document.getElementById('vt-name').value.trim() || 'der Dienstleister';
+
+  var typeMap = {
+    dienstleister: 'Dem Auftraggeber ist bekannt,',
+    freelancer:    'Der Auftragnehmer bestaetigt hiermit,',
+    arbeitgeber:   'Der Arbeitnehmer bestaetigt, zur Kenntnis genommen zu haben,'
+  };
+  var umfangMap = {
+    gelegentlich: 'dass im Rahmen der Leistungserbringung generative Kuenstliche Intelligenz gelegentlich als ergaenzendes Hilfsmittel eingesetzt werden kann.',
+    regelmaessig: 'dass im Rahmen der Leistungserbringung generative Kuenstliche Intelligenz regelmaessig fuer die Erstellung von Entwuerfen eingesetzt wird.',
+    umfangreich:  'dass im Rahmen der Leistungserbringung generative Kuenstliche Intelligenz als zentrales Werkzeug eingesetzt wird.'
+  };
+  var haftungMap = {
+    standard: 'Eine Garantie fuer den Bestand eines urheberrechtlichen Schutzes fuer rein KI-generierte Anteile wird ausdruecklich nicht uebernommen.',
+    geprueft:  'Saemtliche KI-generierten Inhalte wurden vor Ubergabe auf potenzielle Urheberrechtsverletzungen Dritter geprueft (Reverse Search). Eine Garantie bleibt ausgeschlossen.',
+    versichert:'Soweit verfuegbar, werden Tools mit aktiven "Copyright Indemnification"-Programmen eingesetzt. Eine vollstaendige Haftungsuebernahme fuer urheberrechtliche Ansprueche Dritter bleibt ausgeschlossen.'
+  };
+
+  var lines = [
+    typeMap[type] + ' ' + umfangMap[umfang],
+    '',
+    'Soweit die Arbeitsergebnisse auf KI-generierten Inhalten basieren, raeumt ' + name + ' dem Auftraggeber alle ihm zustehenden Nutzungs- und Verwertungsrechte in dem vertraglich vereinbarten Umfang ein.',
+    '',
+    haftungMap[haftung],
+    '',
+    'Der Auftraggeber wurde ueber die urheberrechtliche Besonderheit von KI-generierten Inhalten informiert und erkennt an, dass diese Inhalte moeglicherweise keinen urheberrechtlichen Schutz nach dem UrhG geniessen.'
+  ];
+
+  document.getElementById('vt-preview').textContent = lines.join('\n');
+}
+
+function copyVertrag() {
+  navigator.clipboard.writeText(document.getElementById('vt-preview').textContent).then(function() {
+    var btn = document.querySelector('.vertrag-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Klausel kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'Warum kann eine KI nach deutschem Recht kein Urheber sein?',
+    options: [
+      'Weil KI-Modelle noch nicht ausreichend intelligent sind.',
+      'Weil ein Urheber eine natuerliche Person sein muss und ein Werk das Ergebnis menschlichen Wollens und Gestaltens sein muss.',
+      'Weil KI-Tools im Ausland entwickelt werden und deutsches Recht nicht gilt.',
+      'Weil das Urheberrecht erst 2025 auf KI erweitert wird.'
+    ],
+    correct: 1,
+    feedback: 'Das deutsche UrhG setzt eine "natuerliche Person" als Urheber voraus. Die KI hat kein Bewusstsein, keinen Gestaltungswillen und keine Persoenlichkeit. Sie ist rechtlich ein Werkzeug, wie ein Pinsel.'
+  },
+  {
+    q: 'Was bedeutet "gemeinfrei" im Kontext von KI-Output?',
+    options: [
+      'Der Output darf kostenlos im Internet veroeffentlicht werden.',
+      'Der Output hat keinen rechtlichen Besitzer, jeder kann ihn theoretisch nutzen.',
+      'Der Output gehoert dem KI-Anbieter, der ihn gemeinfrei stellen kann.',
+      'Der Output ist lizenzfrei, aber weiterhin urheberrechtlich geschuetzt.'
+    ],
+    correct: 1,
+    feedback: 'Gemeinfrei bedeutet: kein Urheberrechtsschutz, kein rechtlicher Besitzer. Bei reinem One-Click-KI-Output ist das die haeufige rechtliche Folge in Deutschland. Das ist kein Vorteil, sondern ein Risiko.'
+  },
+  {
+    q: 'Wann entsteht moeglicherweise ein Urheberrechtsschutz bei KI-unterstuetzten Werken?',
+    options: [
+      'Wenn der Prompt mehr als 100 Woerter lang ist.',
+      'Wenn der Nutzer das Premium-Abo des KI-Tools hat.',
+      'Wenn der Mensch den KI-Output massiv ueberarbeitet, sodass das Ergebnis seinen persoenlichen Ausdruck widerspiegelt.',
+      'Wenn das fertige Werk beim DPMA angemeldet wird.'
+    ],
+    correct: 2,
+    feedback: 'Kein moeglicherweise entsteht Schutz durch die menschliche Ueberarbeitung. Je mehr du strukturierst, umschreibst und eigene Erfahrungen einbaust, desto mehr wird die KI zum Werkzeug und du zum Schoepfer.'
+  },
+  {
+    q: 'Was ist das "Exklusivitaets-Problem" bei KI-generierten Inhalten?',
+    options: [
+      'KI-Anbieter duerfen die Inhalte nicht exklusiv veroeffentlichen.',
+      'Ein anderer Nutzer mit aehnlichem Prompt erhaelt dieselben Nutzungsrechte am nahezu identischen Output.',
+      'Exklusivitaet kostet bei allen Anbietern extra.',
+      'KI-Output kann nur einmal pro Tag generiert werden.'
+    ],
+    correct: 1,
+    feedback: 'Das Exklusivitaetsproblem ist systemisch: Da kein Urheberrecht besteht und Anbieter nicht exklusiv uebertragen, hat jeder Nutzer mit aehnlichem Prompt dieselben Rechte. Markenlogos aus KI sind deshalb riskant.'
+  },
+  {
+    q: 'Warum ist die Anmeldung eines KI-Logos als Marke beim DPMA wichtig?',
+    options: [
+      'Weil das DPMA sonst KI-generierte Logos verbieten kann.',
+      'Weil das Markenrecht exklusives Nutzungsrecht fuer die Branche schuetzt, auch wenn kein Urheberrecht besteht.',
+      'Weil nur DPMA-registrierte Logos von KI erstellt werden duerfen.',
+      'Weil die Anmeldung das Urheberrecht nachtraeglich begruendet.'
+    ],
+    correct: 1,
+    feedback: 'Das Markenrecht fragt nicht danach, WIE ein Logo entstanden ist. Es schuetzt die Funktion als Herkunftshinweis. Einmal eingetragen: exklusives Recht fuer deine Branche, auch ohne Urheberschutz.'
+  },
+  {
+    q: 'Was bedeutet "Copyright Indemnification" bei manchen KI-Anbietern?',
+    options: [
+      'Das Copyright wird vollstaendig auf den Nutzer uebertragen.',
+      'Der Anbieter uebernimmt die Kosten, wenn es wegen des Outputs zu einer Abmahnung kommt.',
+      'Der Nutzer darf den Output unter dem Namen des Anbieters veroeffentlichen.',
+      'Der Output ist automatisch urheberrechtlich in der EU geschuetzt.'
+    ],
+    correct: 1,
+    feedback: 'Copyright Indemnification bedeutet: Anbieter wie Adobe Firefly oder Microsoft Copilot (Enterprise) uebernehmen Rechtskosten, wenn ihr Output wegen Urheberrechtsverletzung abgemahnt wird. Das ist ein wichtiges Auswahlkriterium.'
+  },
+  {
+    q: 'Warum ist die Vertragsklausel "Uebertragung saemtlicher Urheberrechte" fuer KI-Dienstleister problematisch?',
+    options: [
+      'Weil sie AGB-rechtlich unwirksam ist.',
+      'Weil bei reinem KI-Output gar kein Urheberrecht entsteht, das uebertragen werden koennte, wodurch die Klausel ein leeres Versprechen ist.',
+      'Weil europaeisches Recht solche Uebertragungen grundsaetzlich verbietet.',
+      'Weil Kunden dann das Werk zurueck an den Dienstleister uebereignen koennen.'
+    ],
+    correct: 1,
+    feedback: 'Du kannst keine Rechte uebertragen, die nicht existieren. Wenn du "alle Urheberrechte" versprichst und rein KI-generierte Anteile enthalten sind, ist das ein Vertragsbruch, auch wenn du es nicht beabsichtigt hast.'
+  },
+  {
+    q: 'Was unterscheidet "Nutzungsrechte" von "Urheberrecht"?',
+    options: [
+      'Nutzungsrechte sind staerker als Urheberrechte, weil sie vertraglich vereinbart werden.',
+      'Urheberrecht begruendet Schoepferschaft (exklusiver Schutz), Nutzungsrechte regeln die Erlaubnis zur Verwendung ohne Eigentumsanspruch.',
+      'Nutzungsrechte gelten nur fuer physische Produkte, Urheberrechte fuer digitale.',
+      'Es gibt keinen wesentlichen Unterschied, beide Begriffe sind synonym.'
+    ],
+    correct: 1,
+    feedback: 'Urheberrecht = du bist der Schoepfer, das Werk "gehoert" dir exklusiv. Nutzungsrechte = du darfst etwas benutzen, es gehoert dir aber nicht im urheberrechtlichen Sinne. Dieser Unterschied ist fuer KI-Output fundamental.'
+  },
+  {
+    q: 'Wofuer braucht man beim "Memorization"-Problem des KI-Modells Reverse Image Search?',
+    options: [
+      'Um zu pruefen, ob das eigene Bild bereits online gestohlen wurde.',
+      'Um zu pruefen, ob ein KI-generiertes Bild einem bekannten Werk zu aehnlich ist und damit eine Urheberrechtsverletzung vorliegen koennte.',
+      'Um die Qualitaet des KI-Bildes zu bewerten.',
+      'Um den Schriftprompter zu verifizieren.'
+    ],
+    correct: 1,
+    feedback: 'KI-Modelle koennen gelegentlich Fragmente aus dem Training reproduzieren. Reverse Image Search prueft, ob ein KI-Bild einem bekannten Foto oder Kunstwerk zu aehnlich ist, bevor du es kommerziell einsetzt.'
+  },
+  {
+    q: 'Was sollte in Freelancer-Vertraegen zusaetzlich vereinbart werden, wenn KI eingesetzt wird?',
+    options: [
+      'Ein Verbot des KI-Einsatzes, um rechtliche Risiken zu vermeiden.',
+      'Eine Dokumentationspflicht fuer den KI-Einsatz sowie Haftungsfreistellung dafuer, dass der Freelancer den Output auf Rechtsverletzungen Dritter geprueft hat.',
+      'Eine Klausel, die besagt, dass KI-Inhalte urheberrechtlich dem Freelancer gehoeren.',
+      'Eine Vereinbarung ueber die maximale Anzahl an Prompts pro Projekt.'
+    ],
+    correct: 1,
+    feedback: 'Freelancer muessen offenlegen, wenn sie KI nutzen, und zusichern, dass sie den Output auf moegliche Plagiate geprueft haben. So kannst du als Auftraggeber im Schadensfall auf den Freelancer verweisen statt selbst zu haften.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "rechtliches-02";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

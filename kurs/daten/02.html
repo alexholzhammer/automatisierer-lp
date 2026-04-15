@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Base erstellen: Dein Second Brain aufbauen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Tool-Auswahl Karten */
+.tool-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.tool-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tool-card:hover { border-color: var(--accent); }
+.tool-card.selected { border-color: var(--accent); background: var(--accent-light); }
+.tool-card-icon { font-size: 20px; margin-bottom: 8px; }
+.tool-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.tool-card-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+.tool-recommendation {
+  margin-top: 10px; padding: 12px 14px; border-radius: var(--radius);
+  background: var(--accent-light); border: 1px solid var(--accent);
+  font-size: 12px; line-height: 1.6; color: var(--text);
+  display: none;
+}
+.tool-recommendation strong { color: var(--accent); }
+
+/* Daten-Hygiene Checkliste interaktiv */
+.hygiene-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.hygiene-header {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.hygiene-header span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.hygiene-reset {
+  padding: 4px 12px; font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.hygiene-reset:hover { border-color: var(--accent); color: var(--accent); }
+.hygiene-body { padding: 12px 14px; }
+.hygiene-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: all 0.1s;
+}
+.hygiene-item:last-child { border-bottom: none; }
+.hygiene-box {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 4px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: all 0.15s; margin-top: 2px;
+}
+.hygiene-item.done .hygiene-box { background: var(--accent-2); border-color: var(--accent-2); color: white; }
+.hygiene-item.done .hygiene-content strong { text-decoration: line-through; color: var(--text-muted); }
+.hygiene-content strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; transition: all 0.15s; }
+.hygiene-content p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+.hygiene-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+}
+.hygiene-bar { flex: 1; height: 6px; background: var(--surface); border-radius: 4px; overflow: hidden; }
+.hygiene-bar-fill { height: 6px; background: var(--accent-2); border-radius: 4px; transition: width 0.3s ease; }
+.hygiene-score { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); white-space: nowrap; }
+
+/* 4-Schritte Ingestion Process */
+.ingestion-steps {
+  margin: 14px 0;
+}
+.ingestion-step {
+  display: flex; gap: 0; margin-bottom: 0;
+}
+.ingestion-step-left {
+  display: flex; flex-direction: column; align-items: center;
+  width: 40px; flex-shrink: 0;
+}
+.ingestion-step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--accent); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0; z-index: 1;
+}
+.ingestion-step-line {
+  width: 2px; flex: 1; background: var(--border); margin: 4px 0;
+  min-height: 20px;
+}
+.ingestion-step:last-child .ingestion-step-line { display: none; }
+.ingestion-step-content {
+  padding: 4px 0 24px 16px; flex: 1;
+}
+.ingestion-step-content strong {
+  display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+}
+.ingestion-step-content p {
+  font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0 0 8px;
+}
+.ingestion-step-prompt {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 10px 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px; line-height: 1.7; color: #C9D1D9; white-space: pre-wrap;
+}
+
+/* 5 Basis-Dokumente */
+.basis-docs {
+  display: flex; flex-direction: column; gap: 8px; margin: 14px 0;
+}
+.basis-doc {
+  display: flex; align-items: flex-start; gap: 14px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; background: var(--surface);
+}
+.basis-doc-num {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent-light); border: 1px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+.basis-doc-content strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.basis-doc-content p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+.basis-doc-tag {
+  flex-shrink: 0; margin-left: auto; align-self: center;
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1;
+}
+
+/* Datenschutz-Ampel */
+.privacy-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+.privacy-card {
+  border-radius: var(--radius); padding: 14px 16px; border: 1px solid transparent;
+}
+.privacy-card.green-card { background: var(--accent-2-light); border-color: #ABF5D1; }
+.privacy-card.yellow-card { background: #FFF8E1; border-color: #FFE082; }
+.privacy-card.red-card { background: var(--red-light); border-color: #FFBDAD; }
+.privacy-dot { font-size: 18px; margin-bottom: 6px; }
+.privacy-stufe { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+.privacy-card.green-card .privacy-stufe { color: var(--green); }
+.privacy-card.yellow-card .privacy-stufe { color: #F59E0B; }
+.privacy-card.red-card .privacy-stufe { color: var(--red); }
+.privacy-examples { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-bottom: 6px; }
+.privacy-rule { font-size: 11px; font-weight: 600; color: var(--text); }
+
+@media (max-width: 600px) {
+  .tool-cards { grid-template-columns: 1fr; }
+  .privacy-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 7 · Daten-Management</div>
+    <h1>Knowledge Base erstellen: Dein Second Brain aufbauen</h1>
+    <p>Vom Daten-Chaos zum strategischen Asset: welches Tool passt, wie du Dokumente KI-gerecht aufbereitest und mit welchen 5 Basis-Dokumenten du heute startest.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~20 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir bauen dein "Second Brain". Du lernst, welches Tool für welche Daten geeignet ist, wie du Dokumente KI-gerecht aufbereitest und wie du dein Wissen sicher und strukturiert einspeicherst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du verwandelst dein Daten-Chaos in ein strategisches Asset: eine lebendige Knowledgebase, die die KI dazu bringt, nicht mehr zu raten, wie du arbeitest, sondern es zu wissen.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Tool-Landschaft -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die Tool-Landschaft: Wo soll dein Wissen wohnen?</h2>
+        <p>Drei Kategorien, ein Entscheidungsprinzip</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die Wahl des richtigen "Heimathafens" für deine Daten ist entscheidend. Es geht nicht um den Markennamen des Tools, sondern darum, wie die KI mit deinen Informationen arbeitet. Wähle dein Tool nicht nach dem aktuellen Hype, sondern nach der <strong>Verlässlichkeit der Quellenarbeit</strong>.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf dein Ziel und sieh, welcher Tool-Typ die beste Wahl ist.</p>
+
+      <div class="tool-cards" id="tool-cards">
+        <div class="tool-card" onclick="selectTool(0, this)">
+          <div class="tool-card-icon">✍️</div>
+          <div class="tool-card-name">Alltags-Assistent</div>
+          <div class="tool-card-desc">"Schreib so wie ich!" Deine Arbeitsweise, dein Tonfall, deine Briefings.</div>
+        </div>
+        <div class="tool-card" onclick="selectTool(1, this)">
+          <div class="tool-card-icon">🔬</div>
+          <div class="tool-card-name">Quellen-Forscher</div>
+          <div class="tool-card-desc">"Finde Fakten in 50 PDFs!" Maximale Fakten-Treue mit Belegpflicht.</div>
+        </div>
+        <div class="tool-card" onclick="selectTool(2, this)">
+          <div class="tool-card-icon">🏗️</div>
+          <div class="tool-card-name">Struktur-Profi</div>
+          <div class="tool-card-desc">"Baue ein Team-Wiki auf!" Lebendige, editierbare Wissensdatenbanken.</div>
+        </div>
+        <div class="tool-card" onclick="selectTool(3, this)">
+          <div class="tool-card-icon">🔒</div>
+          <div class="tool-card-name">Lokale Lösung</div>
+          <div class="tool-card-desc">Maximale Datensicherheit: nichts verlässt dein System.</div>
+        </div>
+      </div>
+
+      <div class="tool-recommendation" id="tool-rec"></div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Die Profi-Regel</strong>
+          <p>Betrachte das Tool als den <strong>Hammer</strong> und deine Daten als das <strong>Haus</strong>. Den Hammer kannst du jederzeit austauschen, solange die Statik deines Hauses (deine Datenstruktur) solide ist. Speichere dein Wissen in portablen Formaten, dann bist du nie an ein Tool gebunden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Universelle Prinzipien -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Universelle Prinzipien des Daten-Managements</h2>
+        <p>Drei Säulen, die bei jedem Tool funktionieren</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Das KI-Feld bewegt sich rasend schnell. Dein "Second Brain" ist jedoch nicht an eine bestimmte Software gebunden. Wenn du die zugrundeliegenden Prinzipien verstehst, kannst du dein Wissen jederzeit umziehen.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Format-Agnostik: Portabilität sichern</strong>
+          <p>Speichere dein Wissen so einfach wie möglich. Dokumente im
+            <span class="tooltip-word">Markdown-Format (.md)
+              <span class="tooltip-popup">Markdown ist eine einfache Textauszeichnungssprache. Mit Zeichen wie # für Überschriften und * für Listen gibst du Struktur vor, die jede KI weltweit lesen kann. Im Gegensatz zu PDFs oder Word-Dateien gibt es keinen gestalterischen Ballast.</span>
+            </span> oder als Reintext (.txt) sind die "Universal-Blutgruppe" der IT. Sie können von fast jeder KI gelesen und problemlos von Tool zu Tool kopiert werden.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Qualität vor Quantität: GIGO konsequent vermeiden</strong>
+          <p>Eine neue, schnellere KI wird mit schlecht strukturierten Daten nicht besser funktionieren. Die Arbeit, die du in die Aufbereitung deiner Daten steckst, ist eine Investition, die in jedem zukünftigen Tool Früchte trägt.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Hoheit und Datenschutz: Prüfe vor jedem Upload</strong>
+          <p>Bevor du auf das nächste Tool aufspringst: Werden meine Daten zum Training des öffentlichen Modells genutzt? Ein Tool-Wechsel sollte niemals auf Kosten deiner Datensicherheit gehen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Daten-Hygiene Checkliste -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Daten-Hygiene: Die GIGO-Kur für deine Dokumente</h2>
+        <p>Was rein muss, was raus muss, was umgebaut werden muss</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Bevor eine Datei in dein "Second Brain" wandert, sollte sie eine kurze Reinigung durchlaufen. PDFs sind für Menschen gemacht (Layout-Treue), für KIs aber oft ein Albtraum. Versteckte Zeilenumbrüche oder zweispaltige Layouts verwirren die Texterkennung.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Gehe die Hygiene-Checkliste für dein nächstes Dokument durch. Klicke jeden Schritt ab, wenn erledigt.</p>
+
+      <div class="hygiene-wrap">
+        <div class="hygiene-header">
+          <span>🧹 Daten-Hygiene-Checkliste</span>
+          <button class="hygiene-reset" onclick="resetHygiene()">Zurücksetzen</button>
+        </div>
+        <div class="hygiene-body">
+          <div class="hygiene-item" onclick="toggleHygiene(this, 0)">
+            <div class="hygiene-box" id="hb-0"></div>
+            <div class="hygiene-content">
+              <strong>Format prüfen: PDF zu Markdown konvertieren</strong>
+              <p>Kopiere den Text aus komplexen Layouts heraus oder nutze ein Tool zur PDF-zu-Text-Konvertierung. Ziel: .md oder .txt ohne gestalterischen Ballast.</p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 1)">
+            <div class="hygiene-box" id="hb-1"></div>
+            <div class="hygiene-content">
+              <strong>Header und Footer entfernen</strong>
+              <p>Seitenannotationen wie "Vertraulich – Entwurf 1.2" auf jeder Seite werden von der KI als inhaltlich relevant behandelt. Löschen.</p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 2)">
+            <div class="hygiene-box" id="hb-2"></div>
+            <div class="hygiene-content">
+              <strong>Seitenzahlen und Inhaltsverzeichnis löschen</strong>
+              <p>Seitenzahlen unterbrechen Sätze. In einer digitalen Knowledgebase navigiert die KI selbst, kein klassisches Verzeichnis nötig.</p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 3)">
+            <div class="hygiene-box" id="hb-3"></div>
+            <div class="hygiene-content">
+              <strong>Klare Überschriften-Hierarchie setzen</strong>
+              <p>Statt "Infos zum Projekt" lieber: <span style="font-family:monospace">## Projekt Alpha: Budgetplanung Q3</span>. KIs lieben Hierarchien und ordnen Kontext sofort zu.</p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 4)">
+            <div class="hygiene-box" id="hb-4"></div>
+            <div class="hygiene-content">
+              <strong>Kontext-Anker an den Anfang setzen</strong>
+              <p>Erste Zeile des Dokuments: "Dieses Dokument enthält die Branding-Richtlinien für 'Outdoor-Equipment', Stand Juli 2025." Das gibt der KI sofortigen Kontext.</p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 5)">
+            <div class="hygiene-box" id="hb-5"></div>
+            <div class="hygiene-content">
+              <strong>Mammut-Dokumente chunken</strong>
+              <p>Zerlege thematisch gemischte Dokumente in abgeschlossene Einheiten. Faustregel: Eine Datei, ein Thema. Verhindert "Lost in the Middle".</p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 6)">
+            <div class="hygiene-box" id="hb-6"></div>
+            <div class="hygiene-content">
+              <strong>Dateinamen-Konvention einhalten</strong>
+              <p>Schlecht: <span style="font-family:monospace">Dokument1_final_v2_neu.pdf</span><br>Gut: <span style="font-family:monospace">GUIDE_Marken-Tonalitaet_Social.md</span></p>
+            </div>
+          </div>
+          <div class="hygiene-item" onclick="toggleHygiene(this, 7)">
+            <div class="hygiene-box" id="hb-7"></div>
+            <div class="hygiene-content">
+              <strong>Sensible Daten anonymisieren</strong>
+              <p>Namen von Privatkunden, Bankverbindungen, Passwörter entfernen. Platzhalter nutzen: "Kunde_A" statt "Max Mustermann". Die KI braucht die Logik, nicht die Identität.</p>
+            </div>
+          </div>
+        </div>
+        <div class="hygiene-footer">
+          <div class="hygiene-bar"><div class="hygiene-bar-fill" id="hygiene-fill" style="width:0%"></div></div>
+          <div class="hygiene-score" id="hygiene-score">0 / 8 erledigt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Ingestion-Prozess -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Der Ingestion-Prozess: Sammeln, Reinigen, Einspeisen, Testen</h2>
+        <p>Vier Schritte vom losen Dokument zum vertrauenswürdigen Second Brain</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Dieser Prozess folgt einer klaren Logik. Wenn du hier schlampst, rächt sich das später durch unpräzise Antworten.</p>
+
+      <div class="ingestion-steps">
+        <div class="ingestion-step">
+          <div class="ingestion-step-left">
+            <div class="ingestion-step-num">1</div>
+            <div class="ingestion-step-line"></div>
+          </div>
+          <div class="ingestion-step-content">
+            <strong>Wissens-Audit: Sammeln</strong>
+            <p>Wissen liegt in Unternehmen wie digitaler Staub herum. Identifiziere die wertvollsten Quellen: alte Slack-Verläufe (Essenz kopieren), PDFs und Präsentationen, Strategie-Meeting-Transkripte. Frage dich: Was würde ein neuer Mitarbeiter unbedingt wissen müssen?</p>
+          </div>
+        </div>
+        <div class="ingestion-step">
+          <div class="ingestion-step-left">
+            <div class="ingestion-step-num">2</div>
+            <div class="ingestion-step-line"></div>
+          </div>
+          <div class="ingestion-step-content">
+            <strong>Konvertierung: Reinigen und Veredeln</strong>
+            <p>PDF zu Text, Markdown-Veredelung mit # und *, logische Dateinamen. Kontext-Anker setzen. Die Qualität dieser Phase bestimmt die Qualität aller künftigen Antworten.</p>
+          </div>
+        </div>
+        <div class="ingestion-step">
+          <div class="ingestion-step-left">
+            <div class="ingestion-step-num">3</div>
+            <div class="ingestion-step-line"></div>
+          </div>
+          <div class="ingestion-step-content">
+            <strong>Upload: Einspeisen</strong>
+            <p>Lade nicht 100 Dateien auf einmal hoch. Beginne mit den fünf wichtigsten Basis-Dokumenten (dein "Core-Wissen"). So behältst du die Kontrolle darüber, wie die KI auf dieser Grundlage antwortet.</p>
+          </div>
+        </div>
+        <div class="ingestion-step">
+          <div class="ingestion-step-left">
+            <div class="ingestion-step-num">4</div>
+            <div class="ingestion-step-line"></div>
+          </div>
+          <div class="ingestion-step-content">
+            <strong>Stress-Test: Validieren</strong>
+            <p>Stelle der KI Fragen, auf die du die Antwort kennst. Prüfe, ob sie spezifische Details aus deinen Dokumenten nutzt und Quellen nennt.</p>
+            <div class="ingestion-step-prompt">Basierend auf meiner hochgeladenen Preisliste: Welchen Rabatt bekommt ein Neukunde im Bereich X, wenn er mehr als 10 Einheiten bestellt? Nenne mir die genaue Seite im Dokument als Beleg.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">⏰</div>
+        <div class="callout-text">
+          <strong>Der Delta-Check</strong>
+          <p>Wissen veraltet. Mache einmal im Monat einen Delta-Check: Was hat sich geändert? Welche Datei in der Knowledgebase ist jetzt eine Lüge? Lösche das Alte konsequent, <em>bevor</em> du das Neue hochlädst. Zwei widersprüchliche Wahrheiten sind für eine KI eine Einladung zur Halluzination.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: 5 Basis-Dokumente -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Dein Minimum Viable Brain: Die 5 Basis-Dokumente</h2>
+        <p>Damit startest du heute, noch vor dem Kaffee</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn du nur diese fünf Dokumente sauber aufbereitest, wird deine KI bereits klüger antworten als 90 % aller Standard-Bots. Du weißt, dass deine Knowledgebase bereit ist, wenn die KI nicht mehr rät, Quellen nennt und Lücken zugibt.</p>
+
+      <div class="basis-docs">
+        <div class="basis-doc">
+          <div class="basis-doc-num">1</div>
+          <div class="basis-doc-content">
+            <strong>Brand-Voice-Guide</strong>
+            <p>Deine Tonalität (du/Sie), verbotene Wörter, dein Humor, dein "Warum". Alle KI-Texte klingen sofort nach dir und nicht nach einer Maschine.</p>
+          </div>
+          <div class="basis-doc-tag">Prio 1</div>
+        </div>
+        <div class="basis-doc">
+          <div class="basis-doc-num">2</div>
+          <div class="basis-doc-content">
+            <strong>Produkt-Lexikon</strong>
+            <p>Eine saubere Liste deiner Angebote, Preise, Features und USPs. Schluss mit dem Erfinden von Features. Die KI liefert exakte Fakten.</p>
+          </div>
+          <div class="basis-doc-tag">Prio 1</div>
+        </div>
+        <div class="basis-doc">
+          <div class="basis-doc-num">3</div>
+          <div class="basis-doc-content">
+            <strong>Zielgruppen-Avatar</strong>
+            <p>Wer ist dein Wunschkunde? Was sind seine Ängste und Träume? Die KI schreibt keine Texte mehr für "jeden", sondern für deinen spezifischen Kunden.</p>
+          </div>
+          <div class="basis-doc-tag">Prio 2</div>
+        </div>
+        <div class="basis-doc">
+          <div class="basis-doc-num">4</div>
+          <div class="basis-doc-content">
+            <strong>Internal FAQ</strong>
+            <p>Antworten auf die 20 Fragen, die dir Kunden oder Kollegen ständig stellen. E-Mails und Support-Anfragen in Sekunden beantworten lassen.</p>
+          </div>
+          <div class="basis-doc-tag">Prio 2</div>
+        </div>
+        <div class="basis-doc">
+          <div class="basis-doc-num">5</div>
+          <div class="basis-doc-content">
+            <strong>Case-Study-Sammlung</strong>
+            <p>2 bis 3 Beispiele von Projekten, auf die du stolz bist (Ergebnisse und Methoden). Die KI versteht deine Arbeitsweise und kann Referenzen in Pitches einbauen.</p>
+          </div>
+          <div class="basis-doc-tag">Prio 3</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">🚀</div>
+        <div class="callout-text">
+          <strong>Action-Step für heute</strong>
+          <p>Nimm dir jetzt ein Dokument aus der Liste oben. Kopiere es in ein neues Textfile, lösche Seitenzahlen und Logo, speichere es als <span style="font-family:monospace">.md</span>. Lade es hoch. Glückwunsch: Dein Second Brain lebt!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Datenschutz -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <h2>Datenschutz und Compliance</h2>
+        <p>Drei Sensibilitätsstufen und was du vor jedem Upload prüfen musst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Das größte Risiko ist nicht die Nutzung der KI, sondern das Training. Viele Anbieter nutzen Nutzereingaben standardmäßig, um ihre Modelle zu verbessern. Für deine Knowledgebase ist das ein absolutes No-Go.</p>
+
+      <div class="privacy-grid">
+        <div class="privacy-card green-card">
+          <div class="privacy-dot">🟢</div>
+          <div class="privacy-stufe">Öffentlich</div>
+          <div class="privacy-examples">Broschüren, Blogposts, FAQs, öffentliche Preislisten</div>
+          <div class="privacy-rule">Unbedenklich für alle Cloud-Tools</div>
+        </div>
+        <div class="privacy-card yellow-card">
+          <div class="privacy-dot">🟡</div>
+          <div class="privacy-stufe">Intern</div>
+          <div class="privacy-examples">Prozessbeschreibungen, Styleguides, interne Protokolle</div>
+          <div class="privacy-rule">Cloud-KI nur mit aktivem Opt-Out vom Training</div>
+        </div>
+        <div class="privacy-card red-card">
+          <div class="privacy-dot">🔴</div>
+          <div class="privacy-stufe">Geheim</div>
+          <div class="privacy-examples">Patente, unveröffentlichte Bilanzen, Personaldaten</div>
+          <div class="privacy-rule">Nur Enterprise-Umgebungen oder lokale Offline-Modelle</div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>3 Fragen vor jedem Upload</strong>
+          <p><strong>1. Muss die KI diesen Namen wissen?</strong> Wenn nein: löschen oder durch "Kunde_A" ersetzen.<br>
+          <strong>2. Habe ich das Training in den Einstellungen deaktiviert?</strong> Prüfe die Privacy-Settings.<br>
+          <strong>3. Ist das Dokument wirklich aktuell?</strong> Veraltete sensible Daten nicht unnötig speichern.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Tool nach Verlässlichkeit wählen, nicht nach Hype</strong>
+          <p>Ein gutes Tool sagt dir jederzeit: "Diese Information habe ich von Seite 12 deines Strategiepapiers." Quellenarbeit ist das Kriterium.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Daten sind portabler als Tools</strong>
+          <p>Markdown und .txt sind die Universal-Blutgruppe der KI. Tools kommen und gehen. Deine sauber strukturierten Daten kannst du immer mitnehmen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Hygiene vor Upload ist Pflicht</strong>
+          <p>PDF-Ballast entfernen, Überschriften-Hierarchie setzen, Kontext-Anker einfügen, Mammut-Dokumente chunken. Dieser Aufwand zahlt sich bei jeder Abfrage zurück.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Mit 5 Dokumenten starten</strong>
+          <p>Brand Voice, Produkt-Lexikon, Avatar, FAQ, Case Studies. Diese fünf Dokumente machen 90 % des Unterschieds. Nicht 100 Dateien auf einmal hochladen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Training deaktivieren, Stufen kennen</strong>
+          <p>Öffentlich, intern, geheim: Jede Datei hat eine Sensibilitätsstufe. Das Training-Opt-Out ist bei internen Daten keine Option, sondern Pflicht.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// TOOL SELECTOR
+var toolRecs = [
+  {
+    name: 'Alltags-Assistent (z. B. Custom GPTs)',
+    ideal: 'Kurze Briefings, E-Mail-Entwuerfe, allgemeine Rueckfragen zur Marke',
+    pro: 'Nahtlose Integration in den Chat-Alltag. Die Dokumente dienen als dauerhafter Kontext.',
+    watch: 'Quellenangaben sind weniger praezise als bei Quellen-Forschern.',
+    example: 'Styleguide, FAQ, Brand-Voice-Dokument hochladen'
+  },
+  {
+    name: 'Quellen-Forscher (z. B. NotebookLM)',
+    ideal: 'Wissenschaftliche Arbeiten, technische Dokumentationen, komplexe Analysen',
+    pro: 'Maximale Sicherheit durch Belegpflicht. Jede Antwort wird mit einer Quellenangabe aus deinen Dateien belegt.',
+    watch: 'Weniger kreative Freiheit. Die KI antwortet nur auf Basis des Hochgeladenen.',
+    example: 'Vertraege, Studien, grosse Berichte analysieren'
+  },
+  {
+    name: 'Struktur-Profi (z. B. Notion, Perplexity Pages)',
+    ideal: 'Wikis, Team-Wissen, langfristige Wissenssammlungen',
+    pro: 'Wissen lebt in einer editierbaren Datenbank. Die KI hilft dir, Zusammenhaenge zwischen verschiedenen Notizen zu finden.',
+    watch: 'Hoehere Einrichtungszeit. Benoetigte Disziplin bei der Pflege.',
+    example: 'Team-Wiki, Projekt-Wissensdatenbank, Onboarding-Material'
+  },
+  {
+    name: 'Lokale Loesung (z. B. offline Open-Source-Modelle)',
+    ideal: 'Hochsensible Daten: Patente, Bilanzen, Personaldaten',
+    pro: 'Maximale Datensicherheit. Nichts verlaesst dein System. Kein Training-Risiko.',
+    watch: 'Technische Einrichtungsaufwand. Meist schwaechere Modell-Qualitaet als Cloud-Loesungen.',
+    example: 'Geheime Strategiepapiere, unvereoeffentlichte Finanzdaten'
+  }
+];
+
+function selectTool(idx, card) {
+  document.querySelectorAll('.tool-card').forEach(function(c) { c.classList.remove('selected'); });
+  card.classList.add('selected');
+  var r = toolRecs[idx];
+  var rec = document.getElementById('tool-rec');
+  rec.innerHTML = '<strong>' + r.name + '</strong><br>' +
+    '<span style="color:var(--text-muted);font-size:11px;font-family:JetBrains Mono,monospace;text-transform:uppercase;letter-spacing:0.07em;">Ideal fuer</span><br>' +
+    r.ideal + '<br><br>' +
+    '<span style="color:var(--green);">+ ' + r.pro + '</span><br>' +
+    '<span style="color:var(--text-muted);">Achtung: ' + r.watch + '</span><br><br>' +
+    '<span style="color:var(--text-subtle);font-size:11px;">Beispiel: ' + r.example + '</span>';
+  rec.style.display = 'block';
+}
+
+// HYGIENE CHECKLISTE
+var hygieneState = new Array(8).fill(false);
+
+function toggleHygiene(item, idx) {
+  hygieneState[idx] = !hygieneState[idx];
+  item.classList.toggle('done', hygieneState[idx]);
+  document.getElementById('hb-' + idx).textContent = hygieneState[idx] ? '\u2713' : '';
+  var done = hygieneState.filter(Boolean).length;
+  document.getElementById('hygiene-fill').style.width = (done / 8 * 100) + '%';
+  document.getElementById('hygiene-score').textContent = done + ' / 8 erledigt';
+}
+
+function resetHygiene() {
+  hygieneState = new Array(8).fill(false);
+  for (var i = 0; i < 8; i++) {
+    var el = document.getElementById('hb-' + i);
+    el.textContent = '';
+    el.parentElement.classList.remove('done');
+  }
+  document.getElementById('hygiene-fill').style.width = '0%';
+  document.getElementById('hygiene-score').textContent = '0 / 8 erledigt';
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'Wofuer sind "Quellen-Forscher" wie NotebookLM besonders geeignet?',
+    options: [
+      'Schnelles Schreiben von E-Mails und Social-Media-Posts.',
+      'Analyse von Dokumenten mit maximaler Fakten-Treue und Belegpflicht.',
+      'Aufbau lebendiger, editierbarer Team-Wikis.',
+      'Verarbeitung von hochsensiblen Patenten ohne Cloud-Verbindung.'
+    ],
+    correct: 1,
+    feedback: 'Quellen-Forscher minimieren Halluzinationen, indem sie jede Antwort direkt mit einer Quellenangabe aus den hochgeladenen Dokumenten belegen. Ideal fuer technische Dokus und komplexe Analysen.'
+  },
+  {
+    q: 'Was meint die Metapher "Hammer und Haus" in Bezug auf Tools und Daten?',
+    options: [
+      'Tools sind schwer zu bedienen, Daten sind leicht verständlich.',
+      'Das Tool ist der Hammer (austauschbar), die Datenstruktur ist das Haus (bleibt bestehen).',
+      'Du brauchst teure Tools (Hammer), um gute Daten (Haus) zu bauen.',
+      'Daten sind die Grundlage, aber ohne das richtige Tool (Hammer) nutzlos.'
+    ],
+    correct: 1,
+    feedback: 'Den Hammer (das Tool) kannst du jederzeit austauschen, wenn ein besseres kommt. Das Haus (deine sauber strukturierten Daten) bleibt. Portabler Datenstandard schuetzt dich vor Tool-Lock-in.'
+  },
+  {
+    q: 'Warum sind PDFs als Format fuer Knowledgebases problematisch?',
+    options: [
+      'PDFs koennen nicht mehr als 100 Seiten enthalten.',
+      'PDFs sind urheberrechtlich geschuetzt und duerfen nicht hochgeladen werden.',
+      'Versteckte Zeilenumbrueche und komplexe Layouts verwirren die Texterkennung der KI.',
+      'PDFs sind zu langsam beim Hochladen und blockieren das System.'
+    ],
+    correct: 2,
+    feedback: 'PDFs sind fuer Menschen (Layout-Treue) gemacht, nicht fuer Maschinen. Zweispaltige Layouts, Header/Footer auf jeder Seite und versteckte Formatierungen stoeren die KI-Texterkennung erheblich.'
+  },
+  {
+    q: 'Was ist ein "Kontext-Anker" und wo setzt man ihn ein?',
+    options: [
+      'Ein Inhaltsverzeichnis am Ende des Dokuments.',
+      'Eine kurze Zusammenfassung ganz oben im Dokument, die der KI sofort sagt, was das Dokument enthaelt.',
+      'Ein Wasserzeichen, das die Vertraulichkeit des Dokuments markiert.',
+      'Ein Link zu verwandten Dokumenten in der Knowledgebase.'
+    ],
+    correct: 1,
+    feedback: 'Ein Kontext-Anker an erster Stelle (z.B. "Dieses Dokument enthaelt die Branding-Richtlinien fuer Outdoor-Equipment, Stand Juli 2025") gibt der KI sofortigen Kontext fuer alle folgenden Inhalte.'
+  },
+  {
+    q: 'Was ist die "Haeppchen-Strategie" (Chunking)?',
+    options: [
+      'Dateien in kleine Bilder-Ausschnitte aufzuteilen, damit die KI sie verarbeiten kann.',
+      'Mammut-Dokumente in thematisch abgeschlossene Einzel-Dateien aufzuteilen.',
+      'Den Upload in mehreren kleinen Schritten durchzufuehren, um Fehler zu vermeiden.',
+      'Prompts in kuerze Teilfragen aufzuteilen.'
+    ],
+    correct: 1,
+    feedback: 'Chunking bekaempft das "Lost in the Middle"-Problem: Eine Datei mit einem klar abgegrenzten Thema wird praeziser verarbeitet als ein 200-Seiten-Mammut-Dokument mit allen Themen gemischt.'
+  },
+  {
+    q: 'Welches Format ist der "Goldstandard" fuer Dokumente in einer Knowledgebase?',
+    options: [
+      'DOCX (Word), weil es das weitverbreitetste Format ist.',
+      'PDF, weil es Layout-treu und unveraenderbar ist.',
+      'Markdown (.md) oder Reintext (.txt), weil sie keine gestalterischen Ballast enthalten.',
+      'HTML, weil Webbrowser es universell lesen koennen.'
+    ],
+    correct: 2,
+    feedback: 'Markdown und .txt sind die Universal-Blutgruppe der KI. Jede KI weltweit liest sie, sie haben keinen Layout-Ballast und koennen problemlos von Tool zu Tool kopiert werden.'
+  },
+  {
+    q: 'Warum solltest du beim Upload in eine Knowledgebase mit nur 5 Dokumenten beginnen?',
+    options: [
+      'Weil die meisten Tools eine harte Begrenzung auf fuenf Dokumente haben.',
+      'Um die Kontrolle darueber zu behalten, wie die KI auf dieser Grundlage antwortet, bevor man mehr hinzufuegt.',
+      'Weil mehr Dokumente die KI verlangsamen und zu Abstuerzern fuehren.',
+      'Weil Datenschutzrichtlinien nur fuenf Dokumente pro Upload erlauben.'
+    ],
+    correct: 1,
+    feedback: 'Mit 5 Kern-Dokumenten startest du kontrolliert. Du validierst, wie die KI antwortet, bevor du sie mit 100 Dateien flutst. Masse ohne Kontrolle ist GIGO in Aktion.'
+  },
+  {
+    q: 'Was ist das groesste Risiko beim Einsatz von Cloud-KI mit internen Firmendaten?',
+    options: [
+      'Dass die KI die Dokumente falsch interpretiert.',
+      'Dass die Dateinamen oeffentlich sichtbar werden.',
+      'Dass der Anbieter die Daten standardmaessig fuer das Training seines oeffentlichen Modells nutzt.',
+      'Dass die Dokumente nach dem Upload nicht mehr bearbeitet werden koennen.'
+    ],
+    correct: 2,
+    feedback: 'Das Training-Risiko ist das kritischste: Wenn der "Daten fuer Training nutzen"-Schalter aktiv ist, koennen deine internen Daten in das oeffentliche Modell einfliessen und damit fuer alle zugaenglich werden.'
+  },
+  {
+    q: 'Fuer welche Daten sind lokale Offline-Loesungen die einzige sinnvolle Option?',
+    options: [
+      'Alle Firmendaten, egal wie sensitiv.',
+      'Nur Kundendaten aus der EU (DSGVO).',
+      'Patente, unvereoeffentlichte Bilanzen und Personaldaten (geheime Stufe).',
+      'Alle Daten ab einer Dateimenge von mehr als 100 Dokumenten.'
+    ],
+    correct: 2,
+    feedback: 'Geheime Daten (Patente, Bilanzen, Personaldaten) gehoeren nur in hochsichere Enterprise-Umgebungen oder lokale Offline-Modelle. Nur dort ist garantiert, dass nichts die eigene Infrastruktur verlaesst.'
+  },
+  {
+    q: 'Woran erkennst du, dass deine Knowledgebase wirklich funktioniert?',
+    options: [
+      'Wenn die KI immer sehr lange Antworten mit viel Detail produziert.',
+      'Wenn die KI keine Fragen mehr zurueckstellt und immer eine Antwort liefert.',
+      'Wenn die KI spezifische Details aus deinen Dokumenten nutzt, Quellen nennt und Luecken zugibt statt zu raten.',
+      'Wenn alle fuenf Basis-Dokumente ohne Fehlermeldung hochgeladen wurden.'
+    ],
+    correct: 2,
+    feedback: 'Drei Zeichen der Qualitaet: (1) Die KI nutzt Details, die nicht im Internet stehen. (2) Sie nennt Quelldokumente und Seitenzahlen. (3) Sie sagt "Dazu finde ich keine internen Daten", statt zu halluzinieren.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "daten-02";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

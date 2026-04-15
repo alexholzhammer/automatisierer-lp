@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.8 Briefings &amp; Contentpläne = System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Master-Briefing Builder */
+.briefing-builder {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.bb-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bb-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.bb-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bb-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.bb-block-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.bb-block-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.bb-block-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.bb-block-ref {
+  font-size: 10px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-left: auto;
+}
+.bb-input {
+  padding: 8px 10px;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+}
+.bb-input:focus { background: var(--accent-light); }
+.bb-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bb-run-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  background: var(--accent-2-light);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.bb-run-btn:hover { background: var(--accent-2); color: white; }
+.bb-output-wrap { display: none; padding: 0 16px 16px; }
+.bb-output-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.bb-output {
+  position: relative;
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  min-height: 100px;
+  white-space: pre-wrap;
+}
+.bb-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.bb-copy-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* Pillar-Spoke diagram */
+.pillar-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.pillar-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pillar-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.pillar-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.pillar-panel { display: none; padding: 16px; }
+.pillar-panel.active { display: block; }
+.pillar-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.spoke-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 600px) { .spoke-grid { grid-template-columns: 1fr; } }
+.spoke-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: var(--surface);
+}
+.spoke-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.spoke-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.spoke-format {
+  font-size: 11px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}
+.pillar-prompt {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  margin-top: 12px;
+}
+
+/* 4-Stufen Workflow */
+.workflow-steps {
+  margin: 14px 0;
+}
+.wf-step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.wf-step:last-child { border-bottom: none; }
+.wf-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  margin-top: 2px;
+}
+.wf-step-num.s1 { background: var(--accent); }
+.wf-step-num.s2 { background: #B45309; }
+.wf-step-num.s3 { background: var(--green); }
+.wf-step-num.s4 { background: var(--red); }
+.wf-step-content { flex: 1; }
+.wf-step-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.wf-step-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.wf-step-ref {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+/* Montags-Workflow Timeline */
+.montag-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.montag-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.montag-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.montag-timeline {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.mt-row {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+  position: relative;
+}
+.mt-row:last-child { padding-bottom: 0; }
+.mt-row:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.mt-time {
+  width: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+  padding-top: 6px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.mt-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--border);
+  z-index: 1;
+  position: relative;
+}
+.mt-dot.s1 { background: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.mt-dot.s2 { background: #B45309; box-shadow: 0 0 0 2px #B45309; }
+.mt-dot.s3 { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+.mt-dot.s4 { background: var(--red); box-shadow: 0 0 0 2px var(--red); }
+.mt-dot.s5 { background: var(--text); box-shadow: 0 0 0 2px var(--text); }
+.mt-content { flex: 1; }
+.mt-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.mt-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Repurposing matrix */
+.repurpose-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+@media (max-width: 600px) { .repurpose-grid { grid-template-columns: 1fr; } }
+.rp-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.rp-card-head {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-subtle);
+}
+.rp-card-body {
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  background: var(--surface);
+}
+.rp-card-prompt {
+  padding: 8px 10px;
+  background: var(--accent-light);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--accent);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 3 · Content-Produktion</div>
+    <h1>Briefings &amp; Contentpläne = System</h1>
+    <p>Wir führen alle Fäden zusammen: Stimme, SEO und Daten werden zu einer wiederholbaren Content-Engine, die konsistent Ergebnisse liefert.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir führen alle Fäden zusammen. Du lernst, wie du aus den Einzelbausteinen (Stimme, SEO, Daten) ein wiederholbares System baust. Wir verwandeln vage Ideen in präzise Briefings und statische Kalender in dynamische Content-Pläne.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du wirst Content-Produktion skalieren können, ohne dass die Qualität einbricht. Du baust dir eine "Content-Engine", die konsistent Ergebnisse liefert, die nach dir klingen und deine Ziele erreichen.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Vom Prompten zum Briefing -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Vom "Prompten" zum "Briefing"</h2>
+        <p>Warum ein Briefing den Prompt immer schlägt</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>In einer Werbeagentur bekommt kein Texter den Auftrag: "Mach mal was Schönes." Er bekommt ein Briefing, das den Rahmen absteckt. Genau so musst du deine KI behandeln. Ein systematisches Briefing ist die einzige Versicherung gegen den Einheitsbrei.</p>
+
+      <p>Ein Prompt lässt der KI zu viel Interpretationsspielraum. Und wenn eine KI interpretiert, nutzt sie den Durchschnitt des Internets. Ein Briefing hingegen <strong>engt die KI gezielt ein</strong>. Wir wollen keine "kreative Freiheit" der Maschine, wir wollen, dass sie deine spezifischen Daten in deiner Stimme verarbeitet.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>80 % der Textqualität entstehen vor dem ersten Wort</strong>
+          <p>Nämlich im Briefing. Je präziser du führst, desto weniger musst du später korrigieren. Ein gutes Briefing-System sorgt dafür, dass dein Content am Montag die gleiche hohe Qualität hat wie am Freitag, unabhängig von deiner Tagesform.</p>
+        </div>
+      </div>
+
+      <h3>Das Master-Briefing Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Fülle die sechs Bausteine deines Master-Briefings aus. Das Tool generiert daraus ein fertiges Briefing-Template, das du in deinen Custom Instructions oder als Textbaustein speichern kannst.</p>
+
+      <div class="briefing-builder">
+        <div class="bb-toolbar">
+          <span>📋 Master-Briefing Builder</span>
+        </div>
+        <div class="bb-body">
+          <div class="bb-block">
+            <div class="bb-block-header">
+              <div class="bb-block-num">1</div>
+              <div class="bb-block-title">Kontext &amp; Rolle</div>
+              <div class="bb-block-ref">→ 3.1 / 3.2</div>
+            </div>
+            <textarea class="bb-input" id="bb-1" placeholder="Wer schreibt hier für wen? z.B. 'Du bist mein Sparringspartner für Marketing-Content. Ich bin Solopreneur im Bereich KI-Marketing.'"></textarea>
+          </div>
+          <div class="bb-block">
+            <div class="bb-block-header">
+              <div class="bb-block-num">2</div>
+              <div class="bb-block-title">Brand Voice Regelwerk</div>
+              <div class="bb-block-ref">→ 3.4</div>
+            </div>
+            <textarea class="bb-input" id="bb-2" placeholder="Tonalität in 3 Adjektiven + Ansprache. z.B. 'Direkt, pragmatisch, humorvoll. Immer Du. Kurze Sätze. Kein passiv.'"></textarea>
+          </div>
+          <div class="bb-block">
+            <div class="bb-block-header">
+              <div class="bb-block-num">3</div>
+              <div class="bb-block-title">Suchintention &amp; Zielgruppe</div>
+              <div class="bb-block-ref">→ 3.5</div>
+            </div>
+            <textarea class="bb-input" id="bb-3" placeholder="Wer liest das und was sucht er? z.B. 'Überarbeitete Marketing-Manager, die nach konkreten KI-Workflows suchen, keine Theorie.'"></textarea>
+          </div>
+          <div class="bb-block">
+            <div class="bb-block-header">
+              <div class="bb-block-num">4</div>
+              <div class="bb-block-title">No-Go Liste (Tabu-Wörter)</div>
+              <div class="bb-block-ref">→ 3.3 / 3.4</div>
+            </div>
+            <textarea class="bb-input" id="bb-4" placeholder="Verbotene Wörter, durch Komma trennen. z.B. 'bahnbrechend, nahtlos, revolutionär, im heutigen digitalen Zeitalter, transformativ'"></textarea>
+          </div>
+          <div class="bb-block">
+            <div class="bb-block-header">
+              <div class="bb-block-num">5</div>
+              <div class="bb-block-title">Ziel &amp; CTA</div>
+              <div class="bb-block-ref">→ Strategie</div>
+            </div>
+            <textarea class="bb-input" id="bb-5" placeholder="Was soll der Leser tun oder fühlen? z.B. 'Kommentar hinterlassen, Kostenlosen Check-up anfragen, Newsletter abonnieren'"></textarea>
+          </div>
+          <div class="bb-block">
+            <div class="bb-block-header">
+              <div class="bb-block-num">6</div>
+              <div class="bb-block-title">Format &amp; Plattform (optional)</div>
+              <div class="bb-block-ref">→ variabel</div>
+            </div>
+            <textarea class="bb-input" id="bb-6" placeholder="z.B. 'LinkedIn-Post, max 300 Wörter, 3 Absätze, starke Hook, kein Bullet-Spam'"></textarea>
+          </div>
+        </div>
+        <div class="bb-footer">
+          <span style="font-size:12px;color:var(--text-subtle);">Mindestens Felder 1–4 ausfüllen</span>
+          <button class="bb-run-btn" onclick="generateBriefing()">▶ Briefing generieren</button>
+        </div>
+        <div class="bb-output-wrap" id="bb-output-wrap">
+          <div class="bb-output-label">Dein Master-Briefing (kopieren → Custom Instructions)</div>
+          <div class="bb-output" id="bb-output">
+            <button class="bb-copy-btn" onclick="copyBriefing()">Kopieren</button>
+            <span id="bb-output-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Der KI-gestützte Content-Plan -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Der KI-gestützte Content-Plan: Strategie statt Zufall</h2>
+        <p>Die Pillar-Spoke-Methode und die 3-Säulen-Regel</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wir nutzen die KI hier als <strong>strategischen Architekten</strong>. Anstatt zu fragen "Was soll ich posten?", lassen wir sie dein Expertenwissen in verschiedene Blickwinkel zerlegen. Das Ergebnis: Kein "Loch" im Content-Kalender mehr.</p>
+
+      <div class="callout gray">
+        <div class="callout-icon">🌳</div>
+        <div class="callout-text">
+          <strong>Die Pillar-Spoke-Methode</strong>
+          <p>Stell dir dein Kern-Thema als Stamm eines Baumes vor (Pillar): ein tiefgehender, SEO-optimierter Leitfaden auf Basis deiner originären Daten. Die KI analysiert diesen Pillar und extrahiert daraus 10 verschiedene Äste (Spokes): eine konträre Meinung, ein kurzes How-to, eine persönliche Anekdote, eine Checkliste und so weiter.</p>
+        </div>
+      </div>
+
+      <h3>Die 5 Blickwinkel und der strategische Mix</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke die drei Säulen durch und sieh, welche KI-Aufgaben und Blickwinkel zu jeder gehören.</p>
+
+      <div class="pillar-wrap">
+        <div class="pillar-toolbar">
+          <button class="pillar-btn active" onclick="showPillar('expertise', this)">🧠 Expertise</button>
+          <button class="pillar-btn" onclick="showPillar('personality', this)">❤️ Personality</button>
+          <button class="pillar-btn" onclick="showPillar('sales', this)">🎯 Sales / Action</button>
+        </div>
+
+        <div class="pillar-panel active" id="pp-expertise">
+          <div class="pillar-desc">Beweist, dass du dein Handwerk verstehst. Positioniert dich als Autorität in deiner Nische.</div>
+          <div class="spoke-grid">
+            <div class="spoke-card">
+              <div class="spoke-num">Angle 1</div>
+              <div class="spoke-title">Der Skeptiker-Blick</div>
+              <div class="spoke-format">→ LinkedIn-Post / Blogartikel</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">Angle 2</div>
+              <div class="spoke-title">Gestern vs. Heute</div>
+              <div class="spoke-format">→ Carousel / Newsletter</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">Angle 5</div>
+              <div class="spoke-title">Die langfristige Vision</div>
+              <div class="spoke-format">→ SEO-Artikel / Podcast</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">KI-Task</div>
+              <div class="spoke-title">Fach-Erkenntnisse extrahieren</div>
+              <div class="spoke-format">→ "Extrahiere die 3 wichtigsten Erkenntnisse aus meinem Rohmaterial"</div>
+            </div>
+          </div>
+          <div class="pillar-prompt"><span style="color:#58A6FF;">Angle-Analyse:</span> "Analysiere mein Thema X. Erstelle 5 verschiedene Blickwinkel: 1. Den Skeptiker-Blick, 2. Den Schnelleinstieg, 3. Den harten Fehler, 4. Die langfristige Vision, 5. Den Vergleich Gestern vs. Heute."</div>
+        </div>
+
+        <div class="pillar-panel" id="pp-personality">
+          <div class="pillar-desc">Baut Vertrauen und Nähe auf. Menschen kaufen von Menschen, nicht von Marken. Dieser Anteil macht dich sympathisch.</div>
+          <div class="spoke-grid">
+            <div class="spoke-card">
+              <div class="spoke-num">Angle 3</div>
+              <div class="spoke-title">Der harte Fehler</div>
+              <div class="spoke-format">→ Story-Post / Reel-Skript</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">Fail-Story</div>
+              <div class="spoke-title">Das Learning-Post</div>
+              <div class="spoke-format">→ LinkedIn / Newsletter</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">Behind Scenes</div>
+              <div class="spoke-title">Persönliche Anekdote</div>
+              <div class="spoke-format">→ Instagram / Story</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">KI-Task</div>
+              <div class="spoke-title">Hürde identifizieren</div>
+              <div class="spoke-format">→ "Finde die Stelle in meinen Notizen, wo ich über eine Hürde spreche, und mache daraus einen Learning-Post"</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pillar-panel" id="pp-sales">
+          <div class="pillar-desc">Wandelt Leser in Kunden um. Ohne diesen Anteil ist dein Content nur Entertainment ohne Geschäftsziel.</div>
+          <div class="spoke-grid">
+            <div class="spoke-card">
+              <div class="spoke-num">Angle 2</div>
+              <div class="spoke-title">Der Schnelleinstieg</div>
+              <div class="spoke-format">→ How-to / Checkliste / Lead-Magnet</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">Problem → Lösung</div>
+              <div class="spoke-title">Case-Study Format</div>
+              <div class="spoke-format">→ Newsletter-Serie / Blogartikel</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">CTA-Post</div>
+              <div class="spoke-title">Konkreter Aufruf</div>
+              <div class="spoke-format">→ LinkedIn / E-Mail</div>
+            </div>
+            <div class="spoke-card">
+              <div class="spoke-num">KI-Task</div>
+              <div class="spoke-title">CTA aus Problem ableiten</div>
+              <div class="spoke-format">→ "Erstelle basierend auf dem gelösten Problem im Text einen klaren Aufruf zur Zusammenarbeit"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚖️</div>
+        <div class="callout-text">
+          <strong>Die 3-Säulen-Regel: Balance halten</strong>
+          <p>Ein System, das nur informiert, langweilt. Ein System, das nur verkauft, nervt. Plane deinen Content bewusst so, dass alle drei Säulen regelmäßig vorkommen. Eine grobe Orientierung: 50 % Expertise, 30 % Personality, 20 % Sales.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Workflow-Automatisierung -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Workflow-Automatisierung: Die Kette schließen</h2>
+        <p>Von rohen Gedanken zum veröffentlichungsreifen Text in 30 Minuten</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein Workflow ist ein Fließband: Vorne kommen deine rohen Gedanken rein, hinten kommt der geprüfte Text raus. Damit das funktioniert, müssen die Übergaben zwischen den Phasen <strong>blind funktionieren</strong>. Du musst nicht mehr entscheiden, wie du schreibst, nur noch, worüber.</p>
+
+      <h3>Die 4 Stufen deiner Content-Engine</h3>
+
+      <div class="workflow-steps">
+        <div class="wf-step">
+          <div class="wf-step-num s1">1</div>
+          <div class="wf-step-content">
+            <div class="wf-step-title">Input: Der Treibstoff</div>
+            <div class="wf-step-desc">Du lieferst deine originären Daten: Sprachnotiz, Transkript, Kundenfeedback, interne Zahlen. Das ist die einzige Variable im System. Alles andere bleibt fest.</div>
+            <div class="wf-step-ref">↗ Lektion 3.7</div>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num s2">2</div>
+          <div class="wf-step-content">
+            <div class="wf-step-title">Transformation: Die Maschine</div>
+            <div class="wf-step-desc">Du nutzt dein Master-Briefing. Die KI "weiß" bereits, wer du bist (Brand Voice), was du hasst (No-Go Liste) und wie du schreibst. Sie generiert den ersten Entwurf.</div>
+            <div class="wf-step-ref">↗ Lektion 3.4 + diese Lektion Abschnitt 1</div>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num s3">3</div>
+          <div class="wf-step-content">
+            <div class="wf-step-title">Veredelung: Der Feinschliff</div>
+            <div class="wf-step-desc">Der Text wird durch die SEO-Brille und den Tonalitäts-Check gezogen. Du streichst KI-Floskeln, fügst persönliche Anekdoten hinzu und korrigierst aktiv den "KI-Geruch".</div>
+            <div class="wf-step-ref">↗ Lektion 3.3 + 3.5</div>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num s4">4</div>
+          <div class="wf-step-content">
+            <div class="wf-step-title">Prüfung: Das Sicherheitsnetz</div>
+            <div class="wf-step-desc">Der unerbittliche Fakten- und Heart-Check. Zahlen nachrechnen, Quellen verifizieren, laut vorlesen. Ohne dieses grüne Licht verlässt nichts das System.</div>
+            <div class="wf-step-ref">↗ Lektion 3.6</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Der Montags-Workflow (30 Minuten)</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">So sieht das System in der Praxis aus. Alle vier Stufen, vom Rohmaterial bis zum Live-Post.</p>
+
+      <div class="montag-wrap">
+        <div class="montag-toolbar">
+          <span>⏱️ Montags-Workflow (30 Min)</span>
+        </div>
+        <div class="montag-timeline">
+          <div class="mt-row">
+            <div class="mt-time">08:00</div>
+            <div class="mt-dot s1"></div>
+            <div class="mt-content">
+              <div class="mt-label">5 Min Sprachnotiz aufnehmen</div>
+              <div class="mt-desc">Im Auto, beim Kaffee, nach dem Laufen. Ungefiltert. Keine Vorformatierung. Das ist dein Treibstoff.</div>
+            </div>
+          </div>
+          <div class="mt-row">
+            <div class="mt-time">08:10</div>
+            <div class="mt-dot s2"></div>
+            <div class="mt-content">
+              <div class="mt-label">Transkript + Master-Briefing an KI</div>
+              <div class="mt-desc">Transkript einfügen, Briefing aktivieren (aus Custom Instructions oder Textbaustein). KI generiert ersten Entwurf.</div>
+            </div>
+          </div>
+          <div class="mt-row">
+            <div class="mt-time">08:20</div>
+            <div class="mt-dot s3"></div>
+            <div class="mt-content">
+              <div class="mt-label">Veredelung: 2 Floskeln streichen, 1 Anekdote hinzufügen</div>
+              <div class="mt-desc">Nicht perfektionieren, sondern menschlich machen. Eine echte persönliche Note reicht.</div>
+            </div>
+          </div>
+          <div class="mt-row">
+            <div class="mt-time">08:25</div>
+            <div class="mt-dot s4"></div>
+            <div class="mt-content">
+              <div class="mt-label">Faktencheck + laut vorlesen</div>
+              <div class="mt-desc">Jede Zahl verifizieren. Klingt es nach dir? Würdest du das am Telefon genauso sagen?</div>
+            </div>
+          </div>
+          <div class="mt-row">
+            <div class="mt-time">08:30</div>
+            <div class="mt-dot s5"></div>
+            <div class="mt-content">
+              <div class="mt-label">Post ist live oder geplant ✓</div>
+              <div class="mt-desc">Fertig. 30 Minuten. Jeden Montag. Das ist eine Content-Engine.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">⚡</div>
+        <div class="callout-text">
+          <strong>Wo lebt dein System?</strong>
+          <p><strong>Custom Instructions:</strong> Brand Voice, Tabu-Liste und Kontext einmal hinterlegt, dann automatisch in jedem neuen Chat aktiv.<br><br>
+          <strong>Prompt-Bibliothek:</strong> In Notion, Evernote oder als Textbaustein. Ein Kürzel wie <span class="inline-code">/briefing</span> spuckt sofort die gesamte Struktur aus.<br><br>
+          <strong>Master-Chat:</strong> Für wiederkehrende Formate (z.B. wöchentlichen Newsletter) immer denselben Chat offen halten. Die KI lernt aus deinen Korrekturen der Vorwochen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Skalierung / Repurposing -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Skalierung: Einmal denken, mehrfach nutzen</h2>
+        <p>Die Multiplikator-Methode für verschiedene Kanäle</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Da die KI deinen Kern-Gedanken, deine Daten und deine Stimme durch das Briefing bereits "verstanden" hat, kann sie diesen Inhalt mit minimalem Aufwand in andere Formate gießen. Das Ziel: Den Pillar-Content als Quelle nutzen und die KI nur das <strong>Format</strong> ändern lassen.</p>
+
+      <div class="repurpose-grid">
+        <div class="rp-card">
+          <div class="rp-card-head">💼 LinkedIn</div>
+          <div class="rp-card-body">Kurz, kantig, mit starker Hook. Maximal 300 Wörter. Persönliche Haltung zeigen.</div>
+          <div class="rp-card-prompt">"Nimm die konträre These aus meinem Text und schreibe einen kantigen Post. Starte mit einer starken Hook."</div>
+        </div>
+        <div class="rp-card">
+          <div class="rp-card-head">📧 Newsletter</div>
+          <div class="rp-card-body">Persönlicher Ton, mehr Tiefe, erzählerischer Einstieg. Leserin hat aktiv abonniert.</div>
+          <div class="rp-card-prompt">"Fasse die Kernaussage zusammen und ergänze ein persönliches 'Learning der Woche' zum Thema."</div>
+        </div>
+        <div class="rp-card">
+          <div class="rp-card-head">🎥 Kurzvideo</div>
+          <div class="rp-card-body">Hook, 3 Tipps, CTA. 60 Sekunden gesprochen. Kein Fließtext, sondern gesprochenes Skript.</div>
+          <div class="rp-card-prompt">"Erstelle ein 60-Sekunden-Skript (Hook, 3 Tipps, CTA) basierend auf den Fakten aus dem Artikel."</div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Qualitätssicherung trotz Tempo</strong>
+          <p>Skalierung ist keine Entschuldigung für Spam. Auch wenn du 10 Beiträge aus einer Idee ziehst: <strong>Kanalspezifisch bleiben</strong> (ein Newsletter-Text funktioniert nicht als LinkedIn-Post), die <strong>10-Prozent-Regel</strong> (jeder Post bekommt eine kleine individuelle Note) und den <strong>Wiederholungs-Check</strong> (wirklich verschiedene Blickwinkel nutzen, nicht fünfmal dasselbe).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>System vor Einzelleistung</strong>
+          Wer ein festes System hat, produziert auch an schlechten Tagen exzellenten Content. Gewohnheit schlägt Disziplin, und ein Briefing schlägt jeden improvisierten Prompt.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Führung statt Hoffnung</strong>
+          Ein Briefing ist eine Führungsaufgabe. Je präziser du führst, desto weniger musst du später korrigieren. 80 % der Textqualität entstehen vor dem ersten geschriebenen Wort.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Expertise ist der Anker</strong>
+          Deine eigenen Daten sind das Einzige, was dich vor der KI-Austauschbarkeit schützt. Das Briefing-System ohne originäre Daten produziert nur schnelleren Einheitsbrei.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Einmal denken, zehnmal nutzen</strong>
+          Die Pillar-Spoke-Methode macht aus einer guten Idee einen ganzen Monatsplan. Die KI übernimmt das Sortieren und Strukturieren. Die Richtung gibst du vor.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Mensch bleibt Chef</strong>
+          Die KI ist der Turbo, aber du hältst das Lenkrad. Das System funktioniert nur, weil du die Strategie vorgibst, die Daten lieferst und am Ende jede Behauptung verantwortest.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PILLAR TABS
+function showPillar(id, btn) {
+  document.querySelectorAll('.pillar-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.pillar-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('pp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// MASTER-BRIEFING BUILDER
+function generateBriefing() {
+  var v = [1,2,3,4,5,6].map(function(n) {
+    return document.getElementById('bb-' + n).value.trim();
+  });
+  if (!v[0] || !v[1] || !v[2] || !v[3]) {
+    alert('Bitte fulle mindestens die Felder 1 bis 4 aus.');
+    return;
+  }
+  var lines = [];
+  lines.push('=== MASTER-BRIEFING ===');
+  lines.push('');
+  lines.push('ROLLE & KONTEXT:');
+  lines.push(v[0]);
+  lines.push('');
+  lines.push('BRAND VOICE:');
+  lines.push(v[1]);
+  lines.push('');
+  lines.push('ZIELGRUPPE & SUCHINTENTION:');
+  lines.push(v[2]);
+  lines.push('');
+  lines.push('NO-GO LISTE (NIEMALS VERWENDEN):');
+  var tabu = v[3].split(',').map(function(w) { return '- ' + w.trim(); }).join('\n');
+  lines.push(tabu);
+  if (v[4]) {
+    lines.push('');
+    lines.push('ZIEL & CTA:');
+    lines.push(v[4]);
+  }
+  if (v[5]) {
+    lines.push('');
+    lines.push('FORMAT & PLATTFORM:');
+    lines.push(v[5]);
+  }
+  lines.push('');
+  lines.push('QUALITATS-STANDARD:');
+  lines.push('- Nutze ausschliesslich originare Daten, die ich dir liefere.');
+  lines.push('- Halte dich stets an meine Brand Voice.');
+  lines.push('- Kein allgemeines Internet-Wissen einmischen.');
+  lines.push('- Keine Worter aus der No-Go-Liste.');
+  lines.push('');
+  lines.push('=== ENDE BRIEFING ===');
+
+  document.getElementById('bb-output-text').textContent = lines.join('\n');
+  document.getElementById('bb-output-wrap').style.display = 'block';
+}
+
+function copyBriefing() {
+  var text = document.getElementById('bb-output-text').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.bb-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+const questions = [
+  {
+    q: 'Warum schlägt ein systematisches Briefing einen einfachen Prompt?',
+    options: [
+      'Weil Briefings länger sind und die KI mehr Tokens verarbeiten kann.',
+      'Ein Prompt lässt der KI zu viel Interpretationsspielraum. Sie nutzt dann den Durchschnitt des Internets. Ein Briefing engt sie gezielt ein und zwingt sie, mit deinen spezifischen Daten in deiner Stimme zu arbeiten.',
+      'Weil KI-Tools Briefings technisch bevorzugen.',
+      'Weil Briefings SEO-freundlicher sind als Prompts.'
+    ],
+    correct: 1,
+    feedback: 'Interpretationsspielraum ist der Feind der Qualität. Wenn die KI raten muss, nutzt sie den Durchschnitt. Ein Briefing mit klarer Rolle, Brand Voice, Tabu-Liste und Ziel lässt keinen Raum für Durchschnitt. Es ist eine Führungsaufgabe.'
+  },
+  {
+    q: 'Was ist die einzige Variable in der 4-Stufen Content-Engine?',
+    options: [
+      'Die Brand Voice, die sich je nach Stimmung ändert.',
+      'Das Format, das für jeden Kanal neu definiert wird.',
+      'Die originären Daten, die du als Input einbringst. Alles andere (Brand Voice, No-Go-Liste, SEO-Logik) bleibt als fester Standard.',
+      'Das KI-Modell, das für jeden Task gewechselt wird.'
+    ],
+    correct: 2,
+    feedback: 'Genau das macht es zu einem System: Der Standard ist fix (Briefing, Brand Voice, Qualitätsprüfung), nur der Treibstoff wechselt. Du musst nicht mehr entscheiden, wie du schreibst, nur noch, worüber. Das ist Entscheidungsfasten in seiner reinsten Form.'
+  },
+  {
+    q: 'Was beschreibt die "Pillar-Spoke"-Methode?',
+    options: [
+      'Eine Technik, um einzelne Prompts zu strukturieren.',
+      'Ein SEO-Framework für interne Verlinkung.',
+      'Ein tiefgehender Kern-Artikel (Pillar) als Quelle, aus dem die KI 10 verschiedene Blickwinkel (Spokes) für verschiedene Formate und Kanäle extrahiert.',
+      'Eine Methode zum Schreiben von Überschriften-Hierarchien.'
+    ],
+    correct: 2,
+    feedback: 'Pillar-Spoke ist das Gegenteil von "jeden Tag neu überlegen". Du denkst einmal tief (der Pillar), und die KI hilft dir, dieses eine Thema aus 10 Winkeln zu beleuchten: konträre Meinung, How-to, persönliche Story, Checkliste usw. Kein Loch im Kalender, keine Wiederholung.'
+  },
+  {
+    q: 'Was ist Ziel der "3-Säulen-Regel" (Expertise, Personality, Sales)?',
+    options: [
+      'Jeder Post muss alle drei Säulen gleichzeitig abdecken.',
+      'Die Balance sicherzustellen: rein informierender Content langweilt, rein verkaufender nervt. Alle drei regelmäßig in den Plan zu integrieren hält das Gleichgewicht.',
+      'Drei verschiedene KI-Tools für drei verschiedene Inhaltstypen einzusetzen.',
+      'Die Textlänge nach Säule zu bestimmen.'
+    ],
+    correct: 1,
+    feedback: 'Balance ist das Ziel, nicht Gleichverteilung. Die Säulen dienen als Planungsraster: Beweise ich Expertise? Baue ich Nähe auf? Fordere ich zur Handlung auf? Ein Content-Plan ohne alle drei Säulen ist entweder ein Lehrbuch oder ein Verkaufsprospekt.'
+  },
+  {
+    q: 'Was ist der Vorteil des "Master-Chats" für wiederkehrende Formate?',
+    options: [
+      'Er ist schneller als Custom Instructions.',
+      'Die KI lernt aus deinen Korrekturen der Vorwochen und verbessert ihre Ausgaben mit der Zeit innerhalb dieses Chats.',
+      'Er spart Tokens.',
+      'Er erlaubt mehrere Nutzer gleichzeitig.'
+    ],
+    correct: 1,
+    feedback: 'Ein persistenter Chat für ein festes Format (z.B. wöchentlicher Newsletter) akkumuliert Kontext: Deine Korrekturen, dein Feedback, dein Stil. Die KI wird nicht besser durch Magie, sondern weil sie mehr Kontext über deine Erwartungen hat. Das ist Kontinuität als Qualitätshebel.'
+  },
+  {
+    q: 'Was ist die Kernidee der "Multiplikator-Methode" beim Repurposing?',
+    options: [
+      'Denselben Text mehrfach auf verschiedenen Plattformen veröffentlichen.',
+      'Den Pillar-Content als Quelle nutzen und die KI nur das Format ändern lassen, nicht den Kern-Gedanken neu erfinden.',
+      'Mehrere KI-Modelle gleichzeitig für denselben Text nutzen.',
+      'Den Text automatisch für verschiedene Sprachen übersetzen.'
+    ],
+    correct: 1,
+    feedback: 'Die Kraft liegt darin, dass du den kreativen Kern, also deine originären Daten, Expertise und Haltung, nur einmal entwickelst. Die KI ist dann dein Format-Konverter. Das ist skalierbare Authentizität: mehr Output, gleiche Substanz, deutlich weniger Aufwand.'
+  },
+  {
+    q: 'Wo sollte dein Master-Briefing "leben", um maximale Effizienz zu erreichen?',
+    options: [
+      'In einem separaten Dokument, das du jedes Mal öffnen und kopieren musst.',
+      'Ausschließlich in den Custom Instructions.',
+      'An einem Ort, der mit maximal zwei Klicks oder einem Kürzel erreichbar ist, z.B. Custom Instructions, Prompt-Bibliothek oder Textbaustein.',
+      'Ausgedruckt neben dem Computer.'
+    ],
+    correct: 2,
+    feedback: 'Reibung ist der Feind der Gewohnheit. Wenn das Briefing mehr als zwei Klicks entfernt ist, wirst du es an schlechten Tagen nicht nutzen. Ob Custom Instructions, /briefing-Textbaustein oder Notion-Seite: Es muss sofort greifbar sein, damit das System wirklich funktioniert.'
+  },
+  {
+    q: 'Was ist die "10-Prozent-Regel" beim Repurposing?',
+    options: [
+      'Maximal 10 % des Pillar-Contents darf in Spokes verwendet werden.',
+      'Der Content muss zu 10 % von der KI geschrieben sein.',
+      'Auch beim Repurposing sollte jedem Post eine kleine individuelle Note gegeben werden, z.B. ein aktueller Satz oder ein passendes Bild.',
+      '10 % des Monatsplans sollte Sales-Content sein.'
+    ],
+    correct: 2,
+    feedback: 'Skalierung ist keine Entschuldigung für Spam. Auch wenn die KI 90 % des Formats übernimmt, braucht jeder Post eine kleine menschliche Geste, die ihn aktuell und spezifisch macht. Das ist der Unterschied zwischen "republiziert" und "neu aufbereitet".'
+  },
+  {
+    q: 'Was passiert in Stufe 3 (Veredelung) der Content-Engine?',
+    options: [
+      'Die KI generiert den ersten Entwurf anhand des Briefings.',
+      'Die Fakten werden geprüft und Quellen verifiziert.',
+      'Der Text wird durch SEO-Brille und Tonalitäts-Check gezogen: KI-Floskeln streichen, persönliche Anekdoten hinzufügen, den "KI-Geruch" aktiv entfernen.',
+      'Das Format für verschiedene Kanäle wird angepasst.'
+    ],
+    correct: 2,
+    feedback: 'Veredelung ist der Moment, wo deine Handschrift in den Text kommt. Nicht perfektionieren, sondern menschlich machen: 2 Floskeln streichen, eine echte Anekdote einfügen. Das kostet 5 Minuten und macht den Unterschied zwischen KI-Output und deinem Content.'
+  },
+  {
+    q: 'Welche Aussage beschreibt das Verhältnis von Mensch und KI in der Content-Engine am besten?',
+    options: [
+      'Die KI übernimmt den kreativen Part, der Mensch die technische Umsetzung.',
+      'Mensch und KI sind gleichwertige Co-Autoren.',
+      'Die KI ist der Turbo, der Mensch hält das Lenkrad: Strategie, originäre Daten und Verantwortung bleiben beim Menschen, Strukturierung und Formulierung bei der KI.',
+      'Die KI ersetzt den Menschen nach ausreichend Training.'
+    ],
+    correct: 2,
+    feedback: 'Diese Metapher fasst das gesamte Modul zusammen: Der Turbo beschleunigt, aber er fährt nicht. Du gibst die Richtung vor, lieferst die exklusiven Daten und trägst am Ende die Verantwortung für jedes Wort. Das System macht dich schneller, nicht überflüssig.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+<script>var MODULE_ID = "content-08";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

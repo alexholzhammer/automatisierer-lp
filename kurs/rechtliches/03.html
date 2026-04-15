@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EU AI Act &amp; Kennzeichnungspflichten: Dein Compliance-Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Risikoklassen-Klassifikator */
+.risk-classifier {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.risk-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.risk-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.risk-body { padding: 14px; }
+.risk-examples-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;
+}
+.risk-examples {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+}
+.risk-example {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); cursor: pointer; transition: all 0.15s;
+  font-size: 12px; color: var(--text-muted); line-height: 1.5;
+}
+.risk-example:hover { border-color: var(--accent); }
+.risk-example.selected { border-color: var(--accent); background: var(--accent-light); }
+.risk-result { padding: 14px; border-radius: var(--radius); font-size: 12px; line-height: 1.65; display: none; }
+.risk-result.visible { display: block; }
+.risk-class-0 { background: #1a0000; border: 2px solid #c00; color: #ff9999; }
+.risk-class-1 { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.risk-class-2 { background: #FFF8E1; border: 1px solid #FFE082; color: #92400E; }
+.risk-class-3 { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+
+/* Kennzeichnungs-Entscheider */
+.kenn-tree {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.kenn-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.kenn-tab {
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.kenn-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.kenn-body { padding: 14px; }
+.kenn-case-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.kenn-case { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+.kenn-result { padding: 12px 14px; border-radius: var(--radius); font-size: 12px; line-height: 1.65; }
+.kenn-result.pflicht  { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--text); }
+.kenn-result.optional { background: #FFF8E1; border: 1px solid #FFE082; color: var(--text); }
+.kenn-result.frei     { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--text); }
+.kenn-verdict {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.kenn-result.pflicht .kenn-verdict  { color: var(--red); }
+.kenn-result.optional .kenn-verdict { color: #92400E; }
+.kenn-result.frei .kenn-verdict     { color: var(--green); }
+.kenn-how-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin: 10px 0 4px;
+}
+.kenn-how {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 10px 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.7; color: #C9D1D9; white-space: pre-wrap;
+}
+
+/* Zeitplan Timeline */
+.timeline {
+  margin: 14px 0;
+  position: relative;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  position: relative;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 1;
+  border: 2px solid var(--border);
+  background: var(--surface);
+}
+.dot-done    { background: var(--accent-2-light); border-color: var(--accent-2); color: var(--green); }
+.dot-current { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.dot-future  { background: var(--surface-2); border-color: var(--border); color: var(--text-subtle); }
+.timeline-content { padding-top: 8px; }
+.timeline-when {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+}
+.dot-done ~ .timeline-content .timeline-when    { color: var(--green); }
+.dot-current ~ .timeline-content .timeline-when { color: var(--accent); }
+.dot-future ~ .timeline-content .timeline-when  { color: var(--text-subtle); }
+.timeline-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.timeline-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+
+/* Sanktions-Rechner */
+.sanktion-calc {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.sanktion-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+}
+.sanktion-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.sanktion-body { padding: 14px; }
+.sanktion-field label {
+  display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+}
+.sanktion-field { margin-bottom: 12px; }
+.sanktion-field select {
+  width: 100%; padding: 7px 10px; font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;
+}
+.sanktion-result {
+  padding: 14px; background: var(--red-light); border: 1px solid #FFBDAD;
+  border-radius: var(--radius); display: none;
+}
+.sanktion-result.visible { display: block; }
+.sanktion-amount {
+  font-size: 22px; font-weight: 800; color: var(--red);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.sanktion-or { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
+.sanktion-pct { font-size: 16px; font-weight: 700; color: var(--red); font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+.sanktion-note { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+@media (max-width: 600px) {
+  .risk-examples { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 11 · Rechtliches</div>
+    <h1>EU AI Act &amp; Kennzeichnungspflichten: Dein Compliance-Guide</h1>
+    <p>Das erste verbindliche KI-Regelwerk Europas, was es für dich bedeutet, wann du kennzeichnen musst und welche Sanktionen drohen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~20 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Mit dem EU AI Act existiert erstmals ein verbindliches Regelwerk für KI in Europa. Wir klären, in welche Risikoklasse deine Tools fallen, welche Kennzeichnungspflichten für dich gelten und wann die Fristen ablaufen.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du stufst deine KI-Tools korrekt ein, kennzeichnest Inhalte regelkonform, verstehst deine Pflichten als Deployer und weißt, welche Sanktionen drohen, wenn du die Anforderungen ignorierst.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Risikoklassen -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Das Risikosystem: In welche Kategorie fällst du?</h2>
+        <p>Vier Klassen, vier verschiedene Pflichten</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die EU teilt KI-Systeme in vier Risikoklassen ein. Die Einstufung entscheidet darüber, ob du eine Anwendung sofort stoppen musst oder ob ein einfacher Hinweis auf der Website ausreicht. Für die meisten Marketing-Anwendungen landest du in <strong>Kategorie 3 (Transparenzrisiko)</strong>.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf einen Anwendungsfall und sieh, in welche Risikoklasse er fällt und was das für dich bedeutet.</p>
+
+      <div class="risk-classifier">
+        <div class="risk-toolbar">
+          <span>⚖️ Risikoklassen-Klassifikator</span>
+        </div>
+        <div class="risk-body">
+          <div class="risk-examples-label">Wähle einen Anwendungsfall:</div>
+          <div class="risk-examples">
+            <div class="risk-example" onclick="classifyRisk(0, this)">🤖 ChatGPT-Chatbot auf deiner Website</div>
+            <div class="risk-example" onclick="classifyRisk(1, this)">📋 KI filtert Bewerbungen automatisch</div>
+            <div class="risk-example" onclick="classifyRisk(2, this)">🎨 Midjourney für Social Media Bilder</div>
+            <div class="risk-example" onclick="classifyRisk(3, this)">📧 KI-gestützter Spam-Filter</div>
+            <div class="risk-example" onclick="classifyRisk(4, this)">💳 KI bewertet Kreditwürdigkeit</div>
+            <div class="risk-example" onclick="classifyRisk(5, this)">🕵️ Heimliche Emotionserkennung von Mitarbeitern</div>
+            <div class="risk-example" onclick="classifyRisk(6, this)">📊 DeepL für Übersetzungen</div>
+            <div class="risk-example" onclick="classifyRisk(7, this)">📰 KI schreibt Newsartikel für Öffentlichkeit</div>
+          </div>
+          <div class="risk-result" id="risk-result"></div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Der entscheidende Sprung zu Kategorie 2</strong>
+          <p>Planst du KI für <strong>Personalentscheidungen</strong> (Bewerber filtern) oder zur <strong>Bewertung von Kundenrisiken</strong> (Kreditwürdigkeit) einzusetzen, springst du sofort in Hochrisiko. Dann reicht ein Tool-Abo nicht mehr aus, strenge Dokumentationspflichten greifen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Kennzeichnungspflicht -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Die Kennzeichnungspflicht: Wann und wie musst du markieren?</h2>
+        <p>Chatbots, Bilder, Videos, Texte und die wichtigen Ausnahmen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die Kennzeichnungspflicht sorgt dafür, dass die Herkunft von Inhalten nachvollziehbar bleibt. Es gibt keine strikte Formvorschrift, aber die Kennzeichnung muss <strong>"angemessen, klar und lesbar"</strong> sein.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle deinen Inhaltstyp und sieh, ob eine Kennzeichnungspflicht besteht und wie du sie umsetzt.</p>
+
+      <div class="kenn-tree">
+        <div class="kenn-toolbar">
+          <button class="kenn-tab active" onclick="setKenn(0, this)">🤖 Chatbot</button>
+          <button class="kenn-tab" onclick="setKenn(1, this)">🖼 KI-Bild</button>
+          <button class="kenn-tab" onclick="setKenn(2, this)">🎬 KI-Video</button>
+          <button class="kenn-tab" onclick="setKenn(3, this)">📝 KI-Text</button>
+          <button class="kenn-tab" onclick="setKenn(4, this)">🎨 Kunst/Satire</button>
+        </div>
+        <div class="kenn-body" id="kenn-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Deployer-Pflichten -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Deine Pflichten als "Deployer"</h2>
+        <p>Sobald du KI geschäftlich nutzt, bist du kein Konsument mehr</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Sobald du KI-Systeme für geschäftliche Zwecke nutzt, bist du ein Betreiber, für den spezifische Sorgfaltspflichten gelten. Der wichtigste davon ist
+        <span class="tooltip-word">Artikel 4: AI Literacy
+          <span class="tooltip-popup">Artikel 4 des EU AI Acts verpflichtet Unternehmen, sicherzustellen, dass ihre Mitarbeiter über ausreichende KI-Kompetenz verfügen: Wie funktioniert das System? Welche Risiken gibt es? Wie erkenne ich Bias?</span>
+        </span>.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>AI Literacy (Art. 4): Pflicht zur KI-Kompetenz</strong>
+          <p>Alle Mitarbeiter, die KI-Systeme bedienen, müssen verstehen, wie das System funktioniert, welche Risiken es birgt und wie sie Fehler oder Verzerrungen (Bias) erkennen. Du musst nicht jeden zum KI-Experten ausbilden, aber eine dokumentierte Einweisung ist Pflicht.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Menschliche Aufsicht: KI darf nicht autonom entscheiden</strong>
+          <p>Bei Entscheidungen, die erhebliche Auswirkungen auf Personen haben, muss ein Mensch das letzte Wort behalten. KI darf nicht unkontrolliert handeln. Beispiel: KI-Chatbot kann Informationen geben, aber kein Vertrags-Angebot autonom abschließen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Daten-Compliance: Qualität der Eingabedaten</strong>
+          <p>Du musst sicherstellen, dass die Eingabedaten für das jeweilige System relevant und ausreichend repräsentativ sind, um Verzerrungen (Bias) zu vermeiden. Garbage In = Biased Out.</p>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Warum AI Literacy dein wichtigster Hebel ist</strong>
+          <p>Die Schulungspflicht ist kein bürokratischer Aufwand, sondern ein Invest in Effizienz: Gut geschulte Mitarbeiter erkennen Urheberrechtsrisiken sofort, gehen verantwortungsvoller mit Daten um und erzielen durch besseres Prompting qualitativ hochwertigere Ergebnisse. Dieser Kurs ist bereits Teil deiner AI-Literacy-Pflicht.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Zeitplan + Sanktionen -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Zeitplan und Sanktionen: Wann wird es ernst?</h2>
+        <p>Der stufenweise Inkrafttreten und was es kostet, die Anforderungen zu ignorieren</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Der EU AI Act ist kein Papiertiger. Die Einführung erfolgt schrittweise ab dem offiziellen Inkrafttreten (August 2024).</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot dot-done">✓</div>
+          <div class="timeline-content">
+            <div class="timeline-when">Feb. 2025 (nach 6 Monaten)</div>
+            <div class="timeline-title">Verbote für unannehmbares Risiko</div>
+            <div class="timeline-desc">Social Scoring, biometrische Massenüberwachung, manipulative KI-Systeme: Diese Anwendungen sind seit Februar 2025 verboten.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-current">!</div>
+          <div class="timeline-content">
+            <div class="timeline-when">Aug. 2025 (nach 12 Monaten)</div>
+            <div class="timeline-title">Regeln für GPAI-Modelle verbindlich</div>
+            <div class="timeline-desc">Anbieter von Basis-Modellen (GPT-4, Claude, Gemini) müssen Transparenzberichte über Trainingsdaten veröffentlichen. Für dich: Tool-Wahl nach Transparenz-Kriterien wird wichtiger.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-future">2</div>
+          <div class="timeline-content">
+            <div class="timeline-when">Aug. 2026 (nach 24 Monaten)</div>
+            <div class="timeline-title">Kennzeichnungspflichten treten in Kraft</div>
+            <div class="timeline-desc">Kennzeichnungspflichten für generative KI sowie die meisten Deployer-Pflichten (inkl. AI Literacy) werden verbindlich. Das ist die wichtigste Frist für Marketer.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-future">3</div>
+          <div class="timeline-content">
+            <div class="timeline-when">Aug. 2027 (nach 36 Monaten)</div>
+            <div class="timeline-title">Hochrisiko-Regeln vollständig</div>
+            <div class="timeline-desc">Die strengsten Regeln für die restlichen Hochrisiko-Kategorien greifen. Betrifft v.a. HR-Software, Bildungs-KI und Kreditbewertung.</div>
+          </div>
+        </div>
+      </div>
+
+      <p>Die Sanktionen sind bewusst hoch angesetzt, um auch global agierende Tech-Konzerne zur Einhaltung zu zwingen. Wähle unten den Verstoßtyp, um das Bußgeld-Spektrum zu sehen.</p>
+
+      <div class="sanktion-calc">
+        <div class="sanktion-toolbar">
+          <span>⚠️ Sanktions-Übersicht</span>
+        </div>
+        <div class="sanktion-body">
+          <div class="sanktion-field">
+            <label>Verstoß-Art wählen:</label>
+            <select id="sv-type" onchange="showSanktion()">
+              <option value="">Bitte wählen...</option>
+              <option value="0">Verstoß gegen Verbote (Kategorie 1)</option>
+              <option value="1">Verstoß gegen Kennzeichnung / Transparenz</option>
+              <option value="2">Falsche Angaben gegenüber Behörden</option>
+            </select>
+          </div>
+          <div class="sanktion-result" id="sv-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Transparenz als Qualitätssiegel, nicht als Bürokratie</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Die meisten Marketing-Tools = Kategorie 3</strong>
+          <p>ChatGPT, Midjourney, Copilot: Spezifisches Transparenzrisiko. Du darfst sie nutzen, musst aber ehrlich kommunizieren. Erst bei HR-Entscheidungen oder Kreditbewertung springst du in Hochrisiko.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Chatbot-Hinweis ist ab erster Interaktion Pflicht</strong>
+          <p>"Ich bin dein KI-Assistent. Wie kann ich dir helfen?" reicht rechtlich aus. Kein Roman, aber der Hinweis muss da sein, bevor der Nutzer zu tippen beginnt.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>AI Literacy ist Unternehmens-Pflicht, nicht Option</strong>
+          <p>Artikel 4 verpflichtet dich, sicherzustellen, dass dein Team KI-Systeme versteht. Schulungen wie dieser Kurs sind Teil der Compliance-Pflicht.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Aug. 2026 ist deine wichtigste Frist</strong>
+          <p>Dann werden Kennzeichnungspflichten und Deployer-Regeln verbindlich. Wer die Prozesse jetzt schrittweise anpasst, wird von diesem Stichtag nicht kalt erwischt.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Transparenz ist ein Wettbewerbsvorteil</strong>
+          <p>In einer Welt, in der bald ein Großteil aller Inhalte von Maschinen generiert wird, wird Transparenz zum Differenzierungsmerkmal. Wer Kennzeichnungspflichten ernst nimmt, positioniert sich als verlässlicher Profi.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// RISIKOKLASSEN KLASSIFIKATOR
+var riskItems = [
+  { cls: 2, label: 'KATEGORIE 3: SPEZIFISCHES TRANSPARENZRISIKO',
+    msg: 'Ein KI-Chatbot auf deiner Website faellt in Kategorie 3. Du darfst ihn nutzen, musst aber sicherstellen, dass Nutzer bei der ersten Interaktion wissen, dass sie mit einer KI sprechen. Ein Hinweis wie "Ich bin dein KI-Assistent" reicht rechtlich aus.' },
+  { cls: 1, label: 'KATEGORIE 2: HOCHRISIKO-KI',
+    msg: 'KI, die Bewerbungen filtert, faellt in Hochrisiko. Als Deployer unterliegt du strengen Dokumentationspflichten, musst menschliche Aufsicht garantieren und die Qualitaet der Eingabedaten sicherstellen. Ein einfaches Tool-Abo reicht hier nicht.' },
+  { cls: 2, label: 'KATEGORIE 3: SPEZIFISCHES TRANSPARENZRISIKO',
+    msg: 'KI-Bildgeneratoren fallen in Kategorie 3. Wenn du die Bilder veroffentlichst, muessen sie als KI-generiert erkennbar sein. Social Media: Hinweis in der Caption (#AIgenerated). Deepfakes oder sehr realistische Bilder benoetigen klarere Kennzeichnung.' },
+  { cls: 3, label: 'KATEGORIE 4: MINIMALES RISIKO',
+    msg: 'KI-gestuetzte Spam-Filter fallen unter minimales Risiko. Der AI Act bringt hier keine neuen gesetzlichen Auflagen. Du kannst diese Tools weiterhin wie gewohnt nutzen.' },
+  { cls: 1, label: 'KATEGORIE 2: HOCHRISIKO-KI',
+    msg: 'Kreditwuerdigkeitsbewertung ist ein klassischer Hochrisiko-Fall, da sie erheblichen Einfluss auf den Lebensweg einer Person haben kann. Strenge Dokumentationspflichten, menschliche Kontrolle und hohe Datenqualitaet sind Pflicht.' },
+  { cls: 0, label: 'KATEGORIE 1: UNZULAESSIGES RISIKO (VERBOTEN)',
+    msg: 'Heimliche Emotionsanalyse von Mitarbeitern am Arbeitsplatz ist in der EU komplett verboten. Das ist die rote Linie: KI-Systeme, die menschliche Wuerde verletzen oder Verhalten manipulativ beeinflussen. Seit Februar 2025 rechtskraeftig untersagt.' },
+  { cls: 3, label: 'KATEGORIE 4: MINIMALES RISIKO',
+    msg: 'UEbersetzungs-Tools wie DeepL fallen unter minimales Risiko. Keine neuen gesetzlichen Anforderungen durch den AI Act. Weiter nutzen wie bisher.' },
+  { cls: 2, label: 'KATEGORIE 3: SPEZIFISCHES TRANSPARENZRISIKO',
+    msg: 'KI-Text fuer die Oeffentlichkeit (Nachrichtenartikel, offizielle Statements) muss als KI-generiert gekennzeichnet werden. Ausnahme: Wenn ein Mensch die redaktionelle Verantwortung uebernimmt und den Text vor Veroeffentlichung prueft.' }
+];
+
+function classifyRisk(idx, el) {
+  document.querySelectorAll('.risk-example').forEach(function(e) { e.classList.remove('selected'); });
+  el.classList.add('selected');
+  var d = riskItems[idx];
+  var clsMap = ['risk-class-0','risk-class-1','risk-class-2','risk-class-3'];
+  var res = document.getElementById('risk-result');
+  res.className = 'risk-result visible ' + clsMap[d.cls];
+  res.innerHTML = '<strong>' + d.label + '</strong><br><br>' + d.msg;
+}
+
+// KENNZEICHNUNGS-ENTSCHEIDER
+var kennData = [
+  {
+    case: 'Du setzt einen KI-Chatbot (z. B. auf Basis von ChatGPT) auf deiner Website oder in deinem Kundensupport ein.',
+    result: 'pflicht',
+    verdict: 'KENNZEICHNUNG PFLICHT',
+    text: 'Nutzer müssen spätestens bei der ersten Interaktion wissen, dass sie mit einer KI sprechen. Die Ausnahme: Wenn es aufgrund des Kontexts absolut offensichtlich ist (z. B. technisches Interface ohne menschliche Identität).',
+    how: 'Empfohlene Umsetzung:\n"Ich bin dein KI-Assistent [Name]. Wie kann ich dir helfen?"\n\nDieser Satz am Beginn des Chat-Fensters reicht rechtlich aus.\nAlternativ: Kleines Bot-Icon mit Label "KI-Assistent" dauerhaft sichtbar.'
+  },
+  {
+    case: 'Du erstellst mit Midjourney oder Flux ein Bild für einen Instagram-Post deiner Marke.',
+    result: 'pflicht',
+    verdict: 'KENNZEICHNUNG PFLICHT',
+    text: 'KI-generierte Bilder, die täuschend echt wirken oder als Deepfakes gelten könnten, müssen als KI-generiert erkennbar sein. Vorhandene Metadaten-Kennzeichnungen dürfen nicht mutwillig entfernt werden.',
+    how: 'Empfohlene Umsetzung fuer Social Media:\nCaption: "#AIgenerated" oder "Bild erstellt mit Midjourney"\n\nFuer Werbeanzeigen oder Deepfakes:\nDirekter Hinweis im oder am Bild selbst (nicht nur Hashtag).\nMetadaten-Kennzeichnung erhalten.'
+  },
+  {
+    case: 'Du erstellst ein realistisches KI-Video, in dem eine bekannte Person etwas sagt oder tut (Deepfake).',
+    result: 'pflicht',
+    verdict: 'KENNZEICHNUNG PFLICHT (STRENG)',
+    text: 'Deepfakes erfordern eine besonders klare Kennzeichnung. Ein kleiner Hashtag reicht hier nicht aus. Der Hinweis muss direkt im oder am Video platziert sein und darf nicht leicht zu übersehen sein.',
+    how: 'Empfohlene Umsetzung fuer Deepfakes:\n- Visueller Hinweis: Eingeblendeter Text im Video\n  "Dieses Video wurde mit KI erstellt. Die dargestellte\n  Person hat diese Aussagen nicht getaetigt."\n- Position: Anfang UND Ende des Videos\n- Schriftgroesse: Klar lesbar, nicht minimiert'
+  },
+  {
+    case: 'Du lässt von der KI einen Blogartikel schreiben, den du danach durchliest, inhaltlich prüfst und mit kleinen Korrekturen veröffentlichst.',
+    result: 'optional',
+    verdict: 'KENNZEICHNUNG EMPFOHLEN, NICHT ZWINGEND',
+    text: 'Bei Texten, die vor der Veröffentlichung einen menschlichen Prüfprozess durchlaufen haben und bei denen ein Mensch die redaktionelle Verantwortung übernimmt, ist eine Kennzeichnung nicht zwingend erforderlich. Dennoch empfehlen wir einen freiwilligen Hinweis.',
+    how: 'Empfehlung fuer Blogartikel:\n"Dieser Artikel wurde mit Unterstuetzung von KI erstellt\nund redaktionell geprueft."\n\nVorteile der freiwilligen Kennzeichnung:\n- Vertrauensaufbau mit Lesern\n- Schutz vor Vorwurf der Taueschung\n- Zukunftssicher (Regeln koennen sich verschaerfen)'
+  },
+  {
+    case: 'Du nutzt KI, um eine satirische Parodie zu erstellen, die bekannte Personen in einer offensichtlich übertriebenen Situation zeigt.',
+    result: 'frei',
+    verdict: 'AUSNAHME: KUNST, SATIRE, PARODIE',
+    text: 'Bei Satire und Parodie schützt die Kunstfreiheit den Ersteller. Dennoch muss die Kennzeichnung so erfolgen, dass erkennbar ist, dass der Inhalt nicht echt ist, ohne den künstlerischen Genuss zu zerstören.',
+    how: 'Empfehlung fuer Satire:\nEin kurzer, nicht-stoerrender Hinweis geniegt:\n"Satire: KI-generiert"\n\nPflicht bleibt bei:\n- Inhalten, die so echt wirken, dass das Satirische\n  nicht ohne Hinweis erkennbar ist\n- Verbreitung ohne Kontext (z. B. Screenshot ohne Caption)'
+  }
+];
+
+var currentKenn = 0;
+
+function setKenn(idx, btn) {
+  currentKenn = idx;
+  document.querySelectorAll('.kenn-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  renderKenn();
+}
+
+function renderKenn() {
+  var d = kennData[currentKenn];
+  document.getElementById('kenn-body').innerHTML =
+    '<div class="kenn-case-label">Szenario</div>' +
+    '<div class="kenn-case">' + d.case + '</div>' +
+    '<div class="kenn-result ' + d.result + '">' +
+    '<div class="kenn-verdict">' + d.verdict + '</div>' +
+    '<div>' + d.text + '</div>' +
+    '<div class="kenn-how-label">Praktische Umsetzung</div>' +
+    '<div class="kenn-how">' + d.how + '</div>' +
+    '</div>';
+}
+
+renderKenn();
+
+// SANKTIONS-RECHNER
+var sanktionen = [
+  { max: '35 Mio. EUR', pct: '7 %', note: 'Hoechststrafe fuer Verstoeße gegen die absoluten Verbote (Kategorie 1). Betrifft Social Scoring, biometrische Massenuberwachung und manipulative KI-Systeme. Fuer KMU gilt Verhältnismäßigkeit, das Risiko bleibt erheblich.' },
+  { max: '15 Mio. EUR', pct: '3 %', note: 'Für Verstoeße gegen Kennzeichnungspflichten, Transparenzanforderungen und sonstige Deployer-Pflichten (inkl. AI Literacy). Das ist die relevante Kategorie fuer die meisten Marketer. Gilt ab August 2026.' },
+  { max: '7,5 Mio. EUR', pct: '1,5 %', note: 'Fuer falsche oder irrefuehrende Angaben gegenueber Aufsichtsbehoerden. Klingt nach wenig, aber 1,5 % des weltweiten Jahresumsatzes ist auch fuer mittelgroesse Unternehmen eine signifikante Summe.' }
+];
+
+function showSanktion() {
+  var idx = document.getElementById('sv-type').value;
+  var res = document.getElementById('sv-result');
+  if (idx === '') { res.classList.remove('visible'); return; }
+  var s = sanktionen[parseInt(idx)];
+  res.innerHTML =
+    '<div class="sanktion-amount">bis zu ' + s.max + '</div>' +
+    '<div class="sanktion-or">oder</div>' +
+    '<div class="sanktion-pct">' + s.pct + ' des weltweiten Jahresumsatzes</div>' +
+    '<div class="sanktion-note">' + s.note + '</div>';
+  res.classList.add('visible');
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'In welche Risikoklasse fallen die meisten Marketing-KI-Tools wie ChatGPT oder Midjourney?',
+    options: [
+      'Kategorie 1: Unzulaessiges Risiko (verboten)',
+      'Kategorie 2: Hochrisiko (streng reguliert)',
+      'Kategorie 3: Spezifisches Transparenzrisiko (nutzbar mit Kennzeichnungspflicht)',
+      'Kategorie 4: Minimales Risiko (keine Pflichten)'
+    ],
+    correct: 2,
+    feedback: 'ChatGPT, Midjourney und Co. fallen in Kategorie 3: Spezifisches Transparenzrisiko. Du darfst sie nutzen, musst aber sicherstellen, dass Nutzer wissen, wenn sie mit einer KI interagieren.'
+  },
+  {
+    q: 'Was macht KI-Software, die Bewerbungen automatisch filtert, zu einem Hochrisiko-System?',
+    options: [
+      'Weil sie sehr teuer ist und daher besondere Sorgfalt erfordert.',
+      'Weil sie erheblichen Einfluss auf den Lebensweg einer Person haben kann (Berufsweg).',
+      'Weil sie immer diskriminierend arbeitet.',
+      'Weil Bewerber-Daten unter Art. 9 DSGVO fallen.'
+    ],
+    correct: 1,
+    feedback: 'Hochrisiko-KI ist definiert durch ihren erheblichen Einfluss auf wichtige Lebensbereiche. HR-Software, Kreditbewertung, Bildungszulassung: Alle diese Systeme entscheiden mit ueber Chancen und Moeglichkeiten von Menschen.'
+  },
+  {
+    q: 'Wann muss ein Chatbot auf der Website den "Ich bin ein Bot"-Hinweis geben?',
+    options: [
+      'Nach der dritten Interaktion mit dem Nutzer.',
+      'Nur wenn der Nutzer explizit fragt, ob er mit einer KI spricht.',
+      'Spaetestens bei der ersten Interaktion.',
+      'Erst wenn ein Kauf oder Vertragsabschluss droht.'
+    ],
+    correct: 2,
+    feedback: 'Der Hinweis muss bei der ERSTEN Interaktion erfolgen. Ein Satz wie "Ich bin dein KI-Assistent, wie kann ich dir helfen?" am Anfang des Chat-Fensters reicht rechtlich aus.'
+  },
+  {
+    q: 'Wann ist eine Kennzeichnung bei KI-generierten Texten NICHT zwingend erforderlich?',
+    options: [
+      'Wenn der Text kurzer als 300 Woerter ist.',
+      'Wenn der Text sachliche Informationen enthalt.',
+      'Wenn ein Mensch redaktionelle Verantwortung uebernimmt und den Text vor Veroeffentlichung geprueft hat.',
+      'Wenn das KI-Tool ein Business-Abo hat.'
+    ],
+    correct: 2,
+    feedback: 'Der menschliche Pruefprozess ist der Schluesselfaktor bei Texten. Wenn ein Mensch die redaktionelle Verantwortung uebernimmt, muss der Text nicht als "KI-generiert" markiert werden. Dennoch empfiehlt sich ein freiwilliger Hinweis.'
+  },
+  {
+    q: 'Was verpflichtet Artikel 4 des EU AI Acts Unternehmen zu tun?',
+    options: [
+      'Alle KI-Systeme bei einer europaeischen Behoerde zu registrieren.',
+      'Sicherzustellen, dass relevante Mitarbeiter ueber ausreichende KI-Kompetenz verfuegen (AI Literacy).',
+      'Einen Datenschutzbeauftragten fuer jedes genutzte KI-Tool zu benennen.',
+      'KI-Systeme nur von EU-zertifizierten Anbietern zu kaufen.'
+    ],
+    correct: 1,
+    feedback: 'Artikel 4 ist die Schulungspflicht: Alle Mitarbeiter, die KI bedienen, muessen verstehen wie das System funktioniert, welche Risiken es birgt und wie sie Fehler oder Bias erkennen. Dieser Kurs ist bereits Teil der Pflicht-Erfullung.'
+  },
+  {
+    q: 'Welche Frist ist fuer Marketer besonders wichtig?',
+    options: [
+      'Februar 2025: Verbote fuer Kategorie 1 sind in Kraft.',
+      'August 2025: Regeln fuer GPAI-Modelle werden verbindlich.',
+      'August 2026: Kennzeichnungspflichten und Deployer-Regeln treten in Kraft.',
+      'August 2027: Hochrisiko-Regeln vollstaendig.'
+    ],
+    correct: 2,
+    feedback: 'August 2026 ist die wichtigste Frist fuer Marketing-Profis: Dann werden die Kennzeichnungspflichten fuer generative KI und die Deployer-Pflichten (inkl. AI Literacy) verbindlich. Wer jetzt beginnt, wird nicht kalt erwischt.'
+  },
+  {
+    q: 'Was gilt im EU AI Act als "unzulaessiges Risiko" (verboten)?',
+    options: [
+      'Chatbots ohne explizites Einverstaendnis des Nutzers.',
+      'KI-generierte Bilder ohne Wasserzeichen.',
+      'Social Scoring, biometrische Massenuberwachung und manipulative KI-Systeme.',
+      'KI-Tools von US-Anbietern ohne EU-Niederlassung.'
+    ],
+    correct: 2,
+    feedback: 'Kategorie 1 umfasst die absolute rote Linie: Anwendungen, die die Menschenwuerde verletzen. Social Scoring (wie in China), heimliche Emotionserkennung und manipulative Verhaltensbeeinflussung sind seit Februar 2025 verboten.'
+  },
+  {
+    q: 'Was bedeutet "Deployer" im Kontext des EU AI Acts?',
+    options: [
+      'Ein Unternehmen, das KI-Modelle trainiert und entwickelt.',
+      'Ein Nutzer, der KI-Systeme fuer geschaeftliche Zwecke einsetzt und damit spezifische Sorgfaltspflichten hat.',
+      'Ein EU-zertifizierter KI-Pruefer und Gutachter.',
+      'Ein Privatnutzer, der KI kostenpflichtig abonniert hat.'
+    ],
+    correct: 1,
+    feedback: 'Deployer = Betreiber: Sobald du KI fuer geschaeftliche Zwecke nutzt, bist du kein reiner Konsument mehr. Du traegst Verantwortung fuer die Art des Einsatzes, die Qualitaet der Eingabedaten und die menschliche Aufsicht.'
+  },
+  {
+    q: 'Wie hoch ist das Bußgeld fuer Verstoesse gegen Kennzeichnungs- und Transparenzpflichten (Kategorie 3)?',
+    options: [
+      'Bis zu 35 Mio. EUR oder 7% des weltweiten Jahresumsatzes.',
+      'Bis zu 15 Mio. EUR oder 3% des weltweiten Jahresumsatzes.',
+      'Bis zu 7,5 Mio. EUR oder 1,5% des weltweiten Jahresumsatzes.',
+      'Abmahnung ohne Bußgeld beim ersten Verstoß.'
+    ],
+    correct: 1,
+    feedback: 'Verstoeße gegen Kennzeichnung und Transparenz (also das, was fuer die meisten Marketer relevant ist) kosten bis zu 15 Mio. EUR oder 3% des weltweiten Jahresumsatzes. Das ist keine theoretische Drohung.'
+  },
+  {
+    q: 'Was meint der Satz "Transparenz ist ein Qualitaetssiegel" im Kontext des EU AI Acts?',
+    options: [
+      'Transparente Unternehmen bekommen Steuererleichterungen von der EU.',
+      'KI-Tools mit Transparenz-Rating presformen besser.',
+      'Wer Kennzeichnungspflichten ernst nimmt, signalisiert Kunden Professionalitaet und schutzt sich vor dem Vorwurf der Irrefuehrung.',
+      'Transparenz macht KI-generierte Inhalte rechtlich sicherer als menschliche Werke.'
+    ],
+    correct: 2,
+    feedback: 'Der AI Act ist kein Hindernis, sondern ein Qualitaetsstandard. In einer Welt voller KI-Content wird Ehrlichkeit zum Differenzierungsmerkmal. Wer kennzeichnet, signalisiert: "Hier arbeiten Profis, die Verantwortung fuer ihre Technologie uebernehmen."'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "rechtliches-03";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

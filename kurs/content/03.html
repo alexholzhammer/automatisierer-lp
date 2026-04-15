@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.3 Textoptimierung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* KI-Sound Bingo Cards */
+.bingo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+@media (max-width: 600px) { .bingo-grid { grid-template-columns: 1fr; } }
+
+.bingo-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.bingo-card-header {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-subtle);
+}
+.bingo-card-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--surface);
+}
+.bingo-tag {
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid #FFBDAD;
+  background: var(--red-light);
+  color: var(--red);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  user-select: none;
+}
+.bingo-tag.struck {
+  text-decoration: line-through;
+  opacity: 0.45;
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-subtle);
+}
+.bingo-score {
+  text-align: center;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* Before/after comparison */
+.ba-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.ba-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ba-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.ba-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.ba-panel { display: none; padding: 16px; }
+.ba-panel.active { display: block; }
+.ba-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.ba-label.bad { color: var(--red); }
+.ba-label.good { color: var(--green); }
+.ba-text {
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.ba-text.bad { background: var(--red-light); border-color: #FFBDAD; }
+.ba-text.good { background: var(--accent-2-light); border-color: #ABF5D1; }
+.ba-prompt {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  margin-bottom: 10px;
+}
+.ba-verdict {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.ba-verdict.bad { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.ba-verdict.good { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+
+/* Na-und tester */
+.nund-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.nund-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nund-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.nund-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.nund-row { display: flex; flex-direction: column; gap: 4px; }
+.nund-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.nund-input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  min-height: 60px;
+  transition: border 0.15s;
+}
+.nund-input:focus { outline: none; border-color: var(--accent); }
+.nund-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nund-run-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  background: var(--accent-2-light);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.nund-run-btn:hover { background: var(--accent-2); color: white; }
+.nund-output-wrap { display: none; padding: 0 16px 16px; }
+.nund-output-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.nund-output {
+  position: relative;
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  min-height: 80px;
+  white-space: pre-wrap;
+}
+.nund-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.nund-copy-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* Level selector */
+.level-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.level-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.level-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.level-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.level-panel { display: none; padding: 16px; }
+.level-panel.active { display: block; }
+.level-source {
+  background: var(--red-light);
+  border: 1px solid #FFBDAD;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.level-arrow {
+  text-align: center;
+  font-size: 18px;
+  margin: 6px 0;
+  color: var(--text-subtle);
+}
+.level-result {
+  background: var(--accent-2-light);
+  border: 1px solid #ABF5D1;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.level-prompt {
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #C9D1D9;
+}
+.level-desc {
+  font-size: 12px;
+  color: var(--text-subtle);
+  margin-bottom: 10px;
+  line-height: 1.55;
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 3 · Content-Produktion</div>
+    <h1>Textoptimierung</h1>
+    <p>Wie du den typischen "KI-Sound" eliminierst, echten Nutzwert einbaust und die Sprache exakt auf deine Zielgruppe abstimmst.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>4 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Du lernst, wie du einen soliden KI-Entwurf in einen Text verwandelst, der sich nach einem echten Menschen anfühlt. Wir entfernen den typischen "KI-Sound" und polieren den Inhalt auf maximalen Nutzwert.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du kannst die KI gezielt einsetzen, um Texte zu kürzen, zu beleben und so umzuformulieren, dass sie deine Leser wirklich bewegen und einen echten Mehrwert bieten.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: KI-Sound erkennen -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Den "KI-Sound" erkennen und eliminieren</h2>
+        <p>Buzzwords, verräterische Formate und passive Distanz</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein KI-Entwurf ist oft wie ein ungeschliffener Rohdiamant. Die Fakten stimmen meistens, aber der Klang ist eintönig und die Formulierungen wirken, als hätte man sie schon tausend Mal gehört. Du liest zwei Sätze und weißt sofort: "Da hat jemand ChatGPT angeworfen."</p>
+
+      <p>Das liegt an konkreten Mustern, die Sprachmodelle immer wieder reproduzieren. Wer sie kennt, kann sie direkt aus dem Text herausoperieren, mit einem gezielten Prompt oder von Hand.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Warum KI zu Superlativen neigt</strong>
+          <p>KI-Modelle sind darauf trainiert, das statistisch wahrscheinlichste Wort zu wählen. Da sie mit Unmengen an Marketing-Texten und Ratgebern gefüttert wurden, haben sie eine Vorliebe für das "Dramatische" entwickelt. Sie greifen automatisch zu den stärksten und damit leider oft abgenutztesten Begriffen, um Bedeutung zu simulieren.</p>
+        </div>
+      </div>
+
+      <h3>Das Buzzword-Bingo: Klicke weg, was du erkennst</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Diese Wörter und Phrasen sind die häufigsten KI-Verräterfloskel. Klicke alle an, die du schon in KI-Texten gesehen hast.</p>
+
+      <div class="bingo-grid">
+        <div class="bingo-card">
+          <div class="bingo-card-header">💥 Superlativ-Falle</div>
+          <div class="bingo-card-body" id="bc-superlativ">
+            <!-- filled by JS -->
+          </div>
+          <div class="bingo-score" id="bs-superlativ">0 erkannt</div>
+        </div>
+        <div class="bingo-card">
+          <div class="bingo-card-header">🪣 Füll-Phrasen</div>
+          <div class="bingo-card-body" id="bc-fuell">
+          </div>
+          <div class="bingo-score" id="bs-fuell">0 erkannt</div>
+        </div>
+        <div class="bingo-card">
+          <div class="bingo-card-header">🌊 Motivations-Kitsch</div>
+          <div class="bingo-card-body" id="bc-kitsch">
+          </div>
+          <div class="bingo-score" id="bs-kitsch">0 erkannt</div>
+        </div>
+        <div class="bingo-card">
+          <div class="bingo-card-header">⚖️ Sowohl-als-auch</div>
+          <div class="bingo-card-body" id="bc-sowohl">
+          </div>
+          <div class="bingo-score" id="bs-sowohl">0 erkannt</div>
+        </div>
+      </div>
+
+      <p>Neben den Wörtern verrät auch die Formatierung die KI: Bulletpoints für alles, jedes erste Wort in Fett, immer derselbe kurze Einleitungssatz, drei Punkte, kurzes Fazit. Und: Viele Passiv-Konstruktionen ("Es wurde festgestellt") statt aktiver Sprache.</p>
+
+      <h3>Vom KI-Roboter zum Marketer: Vorher und Nachher</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Sieh dir den Optimierungsprozess in der Praxis an: derselbe Inhalt, einmal im KI-Standardmodus und einmal nach einem gezielten Überarbeitungs-Prompt.</p>
+
+      <div class="ba-wrap" id="ba-ki">
+        <div class="ba-toolbar">
+          <button class="ba-tab active" onclick="showBa('ki', 'vorher', this)">❌ Vorher</button>
+          <button class="ba-tab" onclick="showBa('ki', 'prompt', this)">⚙️ Prompt</button>
+          <button class="ba-tab" onclick="showBa('ki', 'nachher', this)">✓ Nachher</button>
+        </div>
+        <div class="ba-panel active" id="bap-ki-vorher">
+          <div class="ba-label bad">Typischer KI-Output</div>
+          <div class="ba-text bad">"Effizienz: Im heutigen digitalen Zeitalter ist es <strong>unverzichtbar</strong>, Workflows <strong>nahtlos</strong> zu optimieren. Zusammenfassend lässt sich sagen, dass unser Tool eine <strong>bahnbrechende</strong> Lösung bietet."</div>
+          <div class="ba-verdict bad">❌ Drei Superlative in zwei Sätzen. Passiv-Konstruktion. Leere Ankündigung statt echtem Inhalt.</div>
+        </div>
+        <div class="ba-panel" id="bap-ki-prompt">
+          <div class="ba-label" style="color:var(--accent);">Der Optimierungs-Prompt</div>
+          <div class="ba-prompt">Überarbeite diesen Abschnitt.
+1. Streiche Superlative wie <span style="color:#FFA657;">"unverzichtbar"</span>, <span style="color:#FFA657;">"nahtlos"</span> und <span style="color:#FFA657;">"bahnbrechend"</span>.
+2. Schreibe aktiv: Wer tut was?
+3. Brich das starre Listenformat auf und nutze zwei fliessende Satze.
+4. Keine Floskeln.
+5. Nutze kurze, mittlere und lange Satze abwechselnd.</div>
+        </div>
+        <div class="ba-panel" id="bap-ki-nachher">
+          <div class="ba-label good">Optimiertes Ergebnis</div>
+          <div class="ba-text good">"Wir wissen, wie nervig komplizierte Prozesse sind. Deshalb haben wir unser Tool so gebaut, dass es dir die Arbeit abnimmt, statt sie komplizierter zu machen. Du sparst Zeit und kannst dich wieder auf das Wesentliche konzentrieren, denn darauf kommt es ja schließlich an!"</div>
+          <div class="ba-verdict good">✓ Aktive Sprache. Direkte Ansprache. Kein einziger Superlativ. Der Nutzen steht im Mittelpunkt, nicht die Behauptung.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Na und Test -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Maximaler Nutzwert: Der "Na und?"-Test</h2>
+        <p>Vom Merkmal zur echten Lösung</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Texte, die zwar flüssig klingen, aber beim Leser keinen Impuls auslösen, sind im Marketing wertloses Rauschen. Die größte Schwäche von KI-Systemen ist das "Labern": Die Maschine füllt den Platz mit wohlklingenden Worten, ohne eine echte Information oder einen greifbaren Vorteil zu liefern.</p>
+
+      <p>Der <strong>"Na und?"-Test</strong> zwingt dich und die KI, die entscheidende Frage direkt zu beantworten: Was hat mein Leser konkret davon?</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Warum KI an der Oberfläche bleibt</strong>
+          <p>KI-Modelle sind darauf trainiert, Informationen aus dem breiten Durchschnitt zu destillieren. Das führt dazu, dass sie die allgemein bekannten Vorteile eines Produkts wiederholen, aber nie das benennen, was deine Zielgruppe wirklich nachts wachhält. Deshalb musst du die KI mit konkreten Schmerzpunkten deiner Zielgruppe briefen.</p>
+        </div>
+      </div>
+
+      <h3>Merkmal zu Mehrwert: Vorher und Nachher</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Derselbe Inhalt, einmal als Feature-Liste und einmal als echte Problemlösung. Der Unterschied entsteht durch einen einzigen gezielten Prompt.</p>
+
+      <div class="ba-wrap" id="ba-nund">
+        <div class="ba-toolbar">
+          <button class="ba-tab active" onclick="showBa('nund', 'vorher', this)">❌ Feature-Text</button>
+          <button class="ba-tab" onclick="showBa('nund', 'prompt', this)">⚙️ Na und?-Prompt</button>
+          <button class="ba-tab" onclick="showBa('nund', 'nachher', this)">✓ Nutzwert-Text</button>
+        </div>
+        <div class="ba-panel active" id="bap-nund-vorher">
+          <div class="ba-label bad">Schwacher KI-Entwurf</div>
+          <div class="ba-text bad">"Unsere neue Software verfügt über ein integriertes Dashboard und eine Cloud-Schnittstelle für Echtzeit-Daten. Das sorgt für maximale Transparenz in deinem Unternehmen."</div>
+          <div class="ba-verdict bad">❌ "Integriertes Dashboard" und "Echtzeit-Daten" sagen dem Leser nichts darüber, was er damit gewinnt. Der Text listet Features auf, löst aber kein Problem.</div>
+        </div>
+        <div class="ba-panel" id="bap-nund-prompt">
+          <div class="ba-label" style="color:var(--accent);">Der "Na und?"-Prompt</div>
+          <div class="ba-prompt">Der Text ist zu theoretisch. Wende den <span style="color:#FFA657;">"Na und?"-Test</span> an.
+Ubersetze das "integrierte Dashboard" in einen konkreten Zeitvorteil
+fur einen Abteilungsleiter.
+Erkl are, warum "Echtzeit-Daten" dabei helfen,
+Fehlentscheidungen beim Budget zu vermeiden.
+Schreibe so, dass der Nutzen sofort greifbar ist.</div>
+        </div>
+        <div class="ba-panel" id="bap-nund-nachher">
+          <div class="ba-label good">Ergebnis mit echtem Nutzwert</div>
+          <div class="ba-text good">"Mit dem zentralen Dashboard sparst du dir das manuelle Zusammenfügen von Excel-Tabellen am Montagmorgen. Da du alle Kennzahlen in Echtzeit siehst, erkennst du sofort, welche Kampagnen dein Budget verschwenden, und kannst gegensteuern, bevor unnötige Kosten entstehen."</div>
+          <div class="ba-verdict good">✓ Konkreter Zeitvorteil (kein Excel-Zusammenfügen). Konkretes Problem gelöst (Budget-Fehlentscheidungen). Der Leser weiß sofort, was er gewinnt.</div>
+        </div>
+      </div>
+
+      <h3>Nutzwert-Prompt-Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Trage einen schwachen Feature-Satz und den Schmerzpunkt deiner Zielgruppe ein. Das Tool generiert den fertigen "Na und?"-Prompt für die KI.</p>
+
+      <div class="nund-wrap">
+        <div class="nund-toolbar">
+          <span>🎯 "Na und?"-Builder</span>
+        </div>
+        <div class="nund-body">
+          <div class="nund-row">
+            <label class="nund-label">Der schwache Feature-Satz (KI-Entwurf)</label>
+            <textarea class="nund-input" id="nund-feature" placeholder="z.B. Unsere Software verfügt über eine automatische Berichtsfunktion und Cloud-Synchronisation."></textarea>
+          </div>
+          <div class="nund-row">
+            <label class="nund-label">Wer ist deine Zielgruppe und was ist ihr größtes Problem?</label>
+            <textarea class="nund-input" id="nund-schmerz" placeholder="z.B. Überarbeitete Marketing-Manager, die jeden Montag eine Stunde mit manuellen Reportings verschwenden"></textarea>
+          </div>
+        </div>
+        <div class="nund-footer">
+          <span style="font-size:12px;color:var(--text-subtle);">Beide Felder ausfüllen</span>
+          <button class="nund-run-btn" onclick="generateNund()">▶ Prompt generieren</button>
+        </div>
+        <div class="nund-output-wrap" id="nund-output-wrap">
+          <div class="nund-output-label">Dein "Na und?"-Prompt</div>
+          <div class="nund-output" id="nund-output">
+            <button class="nund-copy-btn" onclick="copyNund()">Kopieren</button>
+            <span id="nund-output-text"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kontrollfrage</th>
+              <th>Was du prufen solltest</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>"Was ist neu?"</strong></td>
+              <td>Enthält der Text eine Information, die der Leser nicht schon auf zehn anderen Seiten gelesen hat?</td>
+            </tr>
+            <tr>
+              <td><strong>Schmerzpunkt-Analyse</strong></td>
+              <td>Welches konkrete Problem des Lesers wird in diesem Absatz gelöst?</td>
+            </tr>
+            <tr>
+              <td><strong>Zeit-Nutzen-Rechnung</strong></td>
+              <td>Rechtfertigt der Informationsgehalt die Lesezeit, oder kann man den Absatz um 50 % kürzen?</td>
+            </tr>
+            <tr>
+              <td><strong>Zielsetzung</strong></td>
+              <td>Verfolgt der Text dein Ziel? (Eintragen in eine Liste, Download, Bestellung)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Leseverständnis -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Das Leseverständnis steuern: Die Zielgruppe im Fokus</h2>
+        <p>Kognitive Leichtigkeit durch die richtige Sprache</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein Text für einen Chirurgen muss anders klingen als eine Anleitung für einen Gärtner. Das Ziel ist <strong>Cognitive Ease</strong>: Dein Leser soll seine Energie für den Inhalt verbrauchen, nicht für das Entschlüsseln der Sätze.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Die Falle der "gehobenen Sprache"</strong>
+          <p>Wir neigen dazu, Texte aufzublähen, um professionell zu wirken. Substantivierungen ("Die Durchführung der Optimierung") statt Verben ("Wir optimieren"). Die KI übernimmt dieses Muster oft ungefragt. Das Ergebnis: Ein Text, der intelligent wirkt, aber extrem anstrengend zu lesen ist.</p>
+        </div>
+      </div>
+
+      <h3>Die Sprachniveau-Skala in der Praxis</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Derselbe technische Sachverhalt, drei verschiedene Zielgruppen. Sieh, wie sich Sprache, Satzlänge und Fokus verändern.</p>
+
+      <div class="level-wrap">
+        <div class="level-toolbar">
+          <button class="level-btn active" onclick="showLevel('fach', this)">🔬 Fachpublikum</button>
+          <button class="level-btn" onclick="showLevel('manager', this)">💼 C-Level</button>
+          <button class="level-btn" onclick="showLevel('b2c', this)">🏠 Endverbraucher</button>
+        </div>
+
+        <div class="level-panel active" id="lp-fach">
+          <div class="level-desc">Fachbegriffe sind erlaubt und erwünscht. Die Sätze dürfen komplexer sein. Fokus liegt auf technischer Präzision.</div>
+          <div class="level-source">"Die Implementierung der Lithium-Ionen-Polymer-Struktur ermöglicht eine signifikante Steigerung der Energiedichte bei gleichzeitiger Minimierung der thermischen Instabilität."</div>
+          <div class="level-arrow">↓ kein Prompt nötig, passt für diese Zielgruppe</div>
+          <div class="level-result">"Die LiPo-Architektur erhöht die Energiedichte um bis zu 23 % gegenüber Standard-Li-Ion-Zellen, während die thermische Belastungsgrenze durch verbesserte Elektrolytformulierung auf 85 °C angehoben wurde."</div>
+        </div>
+
+        <div class="level-panel" id="lp-manager">
+          <div class="level-desc">Fokus auf Ergebnisse, Zahlen und Strategie. Keine langen Erklärungen. Entscheider wollen wissen: Was bringt es mir?</div>
+          <div class="level-source">"Die Implementierung der Lithium-Ionen-Polymer-Struktur ermöglicht eine signifikante Steigerung der Energiedichte bei gleichzeitiger Minimierung der thermischen Instabilität."</div>
+          <div class="level-arrow">↓</div>
+          <div class="level-prompt">Schreibe diesen Satz fur ein C-Level-Publikum um.
+Fokus auf Geschaftsnutzen, keine Fachbegriffe.
+Maximal 2 Satze, Ergebnis-orientiert.</div>
+          <div class="level-result">"Die neue Akkutechnologie hält 23 % länger durch und reduziert Ausfallrisiken durch Überhitzung deutlich. Das senkt die Wartungskosten und verlängert den Produktlebenszyklus."</div>
+        </div>
+
+        <div class="level-panel" id="lp-b2c">
+          <div class="level-desc">Fokus auf Emotionen und einfache Lösungen. Keine Schachtelsätze, keine Fachbegriffe ohne Erklärung. Sprache, die ein 14-Jähriger versteht.</div>
+          <div class="level-source">"Die Implementierung der Lithium-Ionen-Polymer-Struktur ermöglicht eine signifikante Steigerung der Energiedichte bei gleichzeitiger Minimierung der thermischen Instabilität."</div>
+          <div class="level-arrow">↓</div>
+          <div class="level-prompt">Formuliere diesen technischen Satz fur einen Hobby-Handwerker um.
+Zielgruppe: ohne technisches Studium.
+Nutze eine Sprache, die ein 14-Jahriger versteht.
+Vermeide Begriffe wie "thermische Instabilitat".</div>
+          <div class="level-result">"Dank einer neuen Bauweise halten unsere Akkus deutlich länger durch. Gleichzeitig werden sie selbst bei harter Arbeit nicht mehr so heiß wie herkömmliche Modelle."</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">📐</div>
+        <div class="callout-text">
+          <strong>Drei Hebel für das Sprachniveau</strong>
+          <p><strong>Rollen-Zuweisung:</strong> "Schreibe wie ein erfahrener Mentor, der einem kompletten Neuling ein komplexes Thema erklärt."<br><br>
+          <strong>Längen-Beschränkung:</strong> "Nutze maximal 15 Wörter pro Satz. Vermeide Schachtelsätze mit mehr als einem Komma."<br><br>
+          <strong>Jargon-Check:</strong> "Identifiziere alle Fachbegriffe in diesem Text. Ersetze sie entweder durch einfache Begriffe oder erkläre sie in einem kurzen Nebensatz."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>KI-Muster kennen heißt KI-Muster eliminieren</strong>
+          Superlative, Füll-Phrasen, Motivations-Kitsch und Passiv-Konstruktionen sind die Fingerabdrücke der KI. Wer sie kennt, kann sie mit einem gezielten Prompt in Sekunden entfernen.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Nutzen schlägt Merkmal</strong>
+          Der Leser interessiert sich nicht für das "Was", sondern für das "Was habe ich davon?". Der "Na und?"-Test zwingt die KI, von Features zu echten Problemlösungen zu wechseln.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Präzision statt Abstraktion</strong>
+          Begriffe wie "effektiv" oder "ganzheitlich" sind Worthülsen. Ersetze sie durch Szenarien, Zahlen und konkrete Situationen aus dem Alltag deiner Zielgruppe.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Kognitive Leichtigkeit als Ziel</strong>
+          Ein Text ist erst dann gut, wenn er ohne Anstrengung verstanden wird. Die KI kann Jargon übersetzen und Sätze vereinfachen, aber nur wenn du ihr sagst, für wen das Ergebnis bestimmt ist.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Verben statt Substantive</strong>
+          Aktives Schreiben erhöht das Leseverständnis sofort. Zwinge die KI explizit dazu: "Schreibe aktiv. Wer tut was?" statt Passiv-Konstruktionen zuzulassen.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// BINGO SETUP
+var bingoData = {
+  'superlativ': ['bahnbrechend', 'revolutionär', 'unverzichtbar', 'nahtlos', 'umfassend', 'transformativ', 'hochmodern', 'erstklassig', 'führend', 'ultimativ', 'exzellent'],
+  'fuell': ['Es ist wichtig zu beachten', 'Zusammenfassend lässt sich sagen', 'Darüber hinaus', 'Des Weiteren', 'In diesem Zusammenhang', 'Unterm Strich', 'Im Großen und Ganzen'],
+  'kitsch': ['Begib dich auf eine Reise', 'Tauche ein in die Welt von', 'Entfessle dein volles Potenzial', 'Hebe dein Business auf das nächste Level', 'Meistere die Kunst des', 'Entdecke das Universum der Möglichkeiten'],
+  'sowohl': ['sowohl als auch', 'ob ... oder', 'für Profis und Anfänger', 'flexibel und benutzerfreundlich', 'effizient und intuitiv']
+};
+
+var bingoState = {};
+
+function setupBingo() {
+  Object.keys(bingoData).forEach(function(key) {
+    var container = document.getElementById('bc-' + key);
+    bingoState[key] = {};
+    bingoData[key].forEach(function(word, idx) {
+      bingoState[key][idx] = false;
+      var tag = document.createElement('span');
+      tag.className = 'bingo-tag';
+      tag.textContent = word;
+      tag.onclick = function() { toggleBingo(key, idx, tag); };
+      container.appendChild(tag);
+    });
+  });
+}
+
+function toggleBingo(key, idx, el) {
+  bingoState[key][idx] = !bingoState[key][idx];
+  el.classList.toggle('struck', bingoState[key][idx]);
+  var count = Object.values(bingoState[key]).filter(Boolean).length;
+  var total = bingoData[key].length;
+  document.getElementById('bs-' + key).textContent = count + ' / ' + total + ' erkannt';
+}
+
+setupBingo();
+
+// BEFORE/AFTER TABS
+function showBa(id, tab, btn) {
+  var prefix = 'bap-' + id + '-';
+  ['vorher','prompt','nachher'].forEach(function(t) {
+    var el = document.getElementById(prefix + t);
+    if (el) el.classList.remove('active');
+  });
+  document.querySelectorAll('#ba-' + id + ' .ba-tab').forEach(function(b) { b.classList.remove('active'); });
+  var target = document.getElementById(prefix + tab);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// LEVEL TABS
+function showLevel(id, btn) {
+  document.querySelectorAll('.level-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.level-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('lp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// NA UND BUILDER
+function generateNund() {
+  var feature = document.getElementById('nund-feature').value.trim();
+  var schmerz = document.getElementById('nund-schmerz').value.trim();
+  if (!feature || !schmerz) {
+    alert('Bitte fulle beide Felder aus.');
+    return;
+  }
+  var lines = [];
+  lines.push('Der folgende Text ist zu theoretisch und listet nur Features auf:');
+  lines.push('');
+  lines.push('"' + feature + '"');
+  lines.push('');
+  lines.push('Wende den "Na und?"-Test an.');
+  lines.push('Zielgruppe: ' + schmerz);
+  lines.push('');
+  lines.push('Übersetze jedes genannte Feature in einen konkreten Vorteil fur diese Zielgruppe.');
+  lines.push('Erkläre, welches spezifische Problem damit gelöst wird.');
+  lines.push('Schreibe so, dass der Nutzen sofort greifbar ist. Kein Fachjargon, keine Floskeln.');
+  document.getElementById('nund-output-text').textContent = lines.join('\n');
+  document.getElementById('nund-output-wrap').style.display = 'block';
+}
+
+function copyNund() {
+  var text = document.getElementById('nund-output-text').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.nund-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+const questions = [
+  {
+    q: 'Warum neigen KI-Modelle besonders stark zu Superlativen wie "bahnbrechend" oder "revolutionär"?',
+    options: [
+      'Weil sie speziell darauf trainiert wurden, Produkte zu vermarkten.',
+      'Weil sie auf das statistisch wahrscheinlichste Wort optimiert sind und durch Training auf viel Marketing-Content Dramatik als Signal internalisiert haben.',
+      'Weil Superlative in der Linguistik als besonders informationsreich gelten.',
+      'Weil diese Wörter besonders kurz sind und die Antwortlänge optimieren.'
+    ],
+    correct: 1,
+    feedback: 'KI-Modelle sind auf statistische Wahrscheinlichkeit trainiert. Da Trainingsdaten voll von Marketing-Texten und Ratgebern sind, hat die KI gelernt, dass "dramatische" Adjektive in diesen Kontexten häufig vorkommen. Deshalb greift sie automatisch zu Superlativen, auch wenn ein nüchterner Fakt wirkungsvoller wäre.'
+  },
+  {
+    q: 'Was ist das Problem mit der "Sowohl-als-auch"-Struktur in KI-Texten?',
+    options: [
+      'Sie macht Texte grammatikalisch falsch.',
+      'Sie ist zu kurz und liefert zu wenig Information.',
+      'Wer jeden ansprechen will, spricht niemanden an. Die Aussage verliert jede Kante und Spezifität.',
+      'Sie ist nur im Deutschen ein Problem, nicht in anderen Sprachen.'
+    ],
+    correct: 2,
+    feedback: 'Die "Sowohl-als-auch"-Struktur versucht, extrem ausgewogen zu klingen. Das klingt auf den ersten Blick fair, aber das Ergebnis ist ein Text ohne Profil. Eine klare Zielgruppe und eine klare Aussage sind wirkungsvoller als der Versuch, jeden anzusprechen.'
+  },
+  {
+    q: 'Was ist der "Na und?"-Test und wann wendet man ihn an?',
+    options: [
+      'Ein Test, der prüft, ob ein Text grammatikalisch korrekt ist.',
+      'Eine Methode, um zu prüfen, ob ein Satz echten Nutzwert für den Leser hat, oder nur Features ohne Bedeutung auflistet.',
+      'Ein SEO-Tool, das Keyword-Dichte misst.',
+      'Ein A/B-Test-Verfahren für Überschriften.'
+    ],
+    correct: 1,
+    feedback: 'Der "Na und?"-Test ist eine einfache mentale Probe: Steht nach jedem Feature-Satz eine echte Antwort auf "Was habe ich davon?" Da die KI dazu neigt, Features aufzulisten statt Probleme zu lösen, zwingt dieser Test dazu, von der Merkmals-Ebene auf die Nutzen-Ebene zu wechseln.'
+  },
+  {
+    q: 'Was bedeutet "Cognitive Ease" im Kontext der Textoptimierung?',
+    options: [
+      'Die KI soll möglichst wenige Tokens für eine Antwort verbrauchen.',
+      'Der Leser soll seine mentale Energie für den Inhalt nutzen, nicht für das Entschlüsseln von Sätzen und Fachbegriffen.',
+      'Der Text soll einfach genug sein, damit die KI ihn gut verarbeiten kann.',
+      'Texte sollen immer in einfacher Sprache geschrieben werden, unabhängig von der Zielgruppe.'
+    ],
+    correct: 1,
+    feedback: 'Kognitive Leichtigkeit bedeutet: Der Leser kämpft nicht mit dem Wie, sondern verarbeitet das Was. Komplizierte Substantivierungen, Schachtelsätze und Fachjargon ohne Erklärung erzeugen kognitive Reibung. Das Ziel ist, diese Reibung für die jeweilige Zielgruppe zu minimieren.'
+  },
+  {
+    q: 'Wie optimierst du einen Text für ein C-Level-Publikum, verglichen mit einem Endverbraucher?',
+    options: [
+      'C-Level braucht mehr Details und längere Erklärungen.',
+      'Für beide Gruppen gilt dasselbe: möglichst einfache Sprache.',
+      'C-Level: Fokus auf Zahlen, Ergebnisse und knappe Strategie. Endverbraucher: Fokus auf Emotionen, einfache Lösungen und keine Fachbegriffe.',
+      'C-Level bevorzugt Bullet-Points, Endverbraucher Fließtext.'
+    ],
+    correct: 2,
+    feedback: 'C-Level-Entscheider wollen keine langen Erklärungen, sondern Zahlen und Ergebnisse. Endverbraucher im B2C-Bereich brauchen emotionale Ansprache und einfache Sprache ohne Fachjargon. Dieselbe KI kann beide Varianten liefern, wenn du ihr die Zielgruppe klar benennst.'
+  },
+  {
+    q: 'Was ist das Problem mit Substantivierungen wie "Die Durchführung der Optimierung"?',
+    options: [
+      'Sie sind grammatikalisch falsch.',
+      'Sie machen Texte länger als nötig, sind aber im Deutschen die bevorzugte Form.',
+      'Sie wirken schwerfällig und anstrengend zu lesen. "Wir optimieren" ist direkter, kürzer und aktiver.',
+      'KI kann Substantivierungen nicht korrekt verwenden.'
+    ],
+    correct: 2,
+    feedback: 'Substantivierungen sind ein klassisches Muster, um professionell zu wirken, das aber das Gegenteil bewirkt. "Wir optimieren" ist schneller zu lesen, klarer und aktiver. Die KI übernimmt das Substantivierungs-Muster oft ungefragt. Ein expliziter Prompt nach aktiver Sprache löst das Problem.'
+  },
+  {
+    q: 'Du hast einen KI-Text, der flüssig klingt, aber keinen Impuls auslöst. Was ist laut Modul das wahrscheinlichste Problem?',
+    options: [
+      'Der Text ist zu kurz.',
+      'Die KI hat die falsche Sprache verwendet.',
+      'Der Text "labert": Er füllt Platz mit wohlklingenden Worten, ohne greifbaren Vorteil oder echte Information zu liefern.',
+      'Es fehlen Emojis und Aufzählungspunkte.'
+    ],
+    correct: 2,
+    feedback: 'Das "Labern" ist die größte Schwäche von KI-Systemen bei Marketing-Texten. Die Maschine optimiert auf sprachliche Plausibilität, nicht auf echten Informationsgehalt. Der "Na und?"-Test und der Nutzwert-Check sind die direkten Gegenmittel.'
+  },
+  {
+    q: 'Welcher Prompt-Ansatz erhöht das Leseverständnis am direktesten?',
+    options: [
+      '"Schreibe einen sehr langen Text über das Thema."',
+      '"Nutze maximal 15 Wörter pro Satz, schreibe aktiv und ersetze alle Fachbegriffe durch einfache Begriffe."',
+      '"Nutze viele Absätze und Bulletpoints."',
+      '"Schreibe so, wie ein Experte es tun würde."'
+    ],
+    correct: 1,
+    feedback: 'Konkrete Sprach-Parameter sind direkt umsetzbar: Satzlängen-Limits, der Befehl zur aktiven Sprache und der Jargon-Check-Auftrag. Diese drei Hebel greifen sofort und sind leicht überprüfbar. Vage Anweisungen wie "schreibe einfach" führen zu kaum messbaren Änderungen.'
+  },
+  {
+    q: 'Was verrät die KI durch ihre typische Formatierung?',
+    options: [
+      'Bulletpoints und nummerierte Listen sind ein klares Zeichen, dass eine KI involviert war.',
+      'KI-Texte haben immer zu viele Absätze.',
+      'KI antwortet fast immer in Bulletpoints mit fettem erstem Wort, kurzem Einleitungssatz und motivierendem Ausblick, selbst wenn Fließtext passender wäre.',
+      'KI bevorzugt kursiven Text und lange Überschriften.'
+    ],
+    correct: 2,
+    feedback: 'Das "Sandwich-Layout" der KI ist fast immer dasselbe: kurze Einleitung, drei Bullet-Punkte (erstes Wort fett), kurzes Fazit. Dieses Muster ist so verbreitet, dass es auch ohne einzelne Buzzwords sofort als KI-Output erkennbar ist. Aktiv aufbrechen durch explizite Formatierungs-Anweisung.'
+  },
+  {
+    q: 'Du willst einen Text für "gestresste Gastronomen mit wenig Zeit" optimieren. Welcher Prompt-Ansatz ist laut Modul am präzisesten?',
+    options: [
+      '"Schreibe einen professionellen Text über das Thema."',
+      '"Schreibe für Gastronomen."',
+      '"Analysiere den Text. Auf einer Skala 1-10: Wie schwer ist er? Optimiere ihn auf Niveau 4, damit er schnell zwischendurch gelesen werden kann. Keine Schachtelsätze."',
+      '"Kürze den Text auf 50 %."'
+    ],
+    correct: 2,
+    feedback: 'Der Skalierungs-Ansatz aus dem Modul ist besonders wirkungsvoll, weil er zwei Dinge kombiniert: Erstens eine Analyse des Ist-Zustands (wie schwer ist der Text?), und zweitens ein präzises Ziel (Niveau 4). Das gibt der KI eine messbare Aufgabe statt einer vagen Richtung.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+<script>var MODULE_ID = "content-03";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>
