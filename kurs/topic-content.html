@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content-Produktion · KI Marketing Bootcamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--text-subtle); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb-sep { color: var(--border-strong); }
+
+.intro-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.intro-section-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex; align-items: center; gap: 10px;
+}
+.intro-section-header h2 { font-size: 15px; font-weight: 600; }
+.intro-section-body { padding: 24px; }
+.intro-section-body p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+.intro-section-body p:last-child { margin-bottom: 0; }
+
+.goals-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 4px;
+}
+.goal-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.goal-check {
+  width: 20px; height: 20px; border-radius: var(--radius);
+  background: var(--accent-2-light); border: 1px solid #ABF5D1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; margin-top: 1px;
+  color: var(--accent-2);
+}
+.goal-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+.modules-list { display: flex; flex-direction: column; gap: 10px; }
+
+.module-card-status {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent-2); font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 2px;
+}
+
+@media(max-width: 580px) {
+  .goals-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <a href="index.html" class="topnav-logo">
+    <div class="topnav-logo-dot"></div>
+    <span>KI Marketing Bootcamp</span>
+  </a>
+  <div class="topnav-spacer"></div>
+  <a href="index.html" class="topnav-link">← Alle Themen</a>
+</nav>
+
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="index.html">KI Marketing Bootcamp</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>Content-Produktion</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Thema 03 · Content-Produktion</div>
+    <h1>Content-Produktion</h1>
+    <p>Lerne, wie du mit KI wirklich guten Content produzierst — von der richtigen Rollenverteilung zwischen Mensch und Maschine bis hin zu Brand Voice, SEO, Prüfprozessen und einer wiederholbaren Content-Engine.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📚 <span>8 Module</span></div>
+      <div class="hero-meta-item">⏱ <span>~116 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🎯 <span>28+ interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>80 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>📖</span>
+      <h2>Über dieses Thema</h2>
+    </div>
+    <div class="intro-section-body">
+      <p>Content-Produktion mit KI ist kein Knopfdruck. Dieses Thema zeigt dir, wie du KI als echten Co-Autor einsetzt — mit klarer Rollenverteilung, deiner eigenen Stimme und einem System, das skaliert.</p>
+      <p>Du lernst, den typischen „KI-Sound" zu eliminieren, deine Brand Voice konsequent in alle Outputs einzubringen, SEO-relevante Inhalte strategisch zu produzieren und Prüfprozesse zu etablieren, die Qualität sicherstellen. Am Ende hast du keine Sammlung von Prompts, sondern eine wiederholbare Content-Engine.</p>
+    </div>
+  </div>
+
+  <!-- LEARNING GOALS -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>🎯</span>
+      <h2>Lernziele</h2>
+    </div>
+    <div class="intro-section-body">
+      <div class="goals-grid">
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">KI als Co-Autor steuern statt nur Befehle geben</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Den „KI-Sound" erkennen und durch echten Mehrwert ersetzen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Brand Voice konsistent in alle KI-Outputs einbauen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">SEO-optimierten Content mit KI strategisch erstellen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Einen effizienten Prüf- und Qualitätssicherungsprozess aufbauen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Eine wiederholbare Content-Engine aus Briefings und Plänen entwickeln</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="section-label">Module</div>
+
+  <div class="modules-list">
+
+    <a href="module-3-1.html" class="module-card">
+      <div class="module-card-num">3.1</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Content-Produktion Basics: Weg vom „One-Click-Wunder"</div>
+        <div class="module-card-desc">Warum guter KI-Content kein Knopfdruck ist — und wie du das System dahinter aufbaust.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~15 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-2.html" class="module-card">
+      <div class="module-card-num">3.2</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Texterstellung Mensch mit Maschine</div>
+        <div class="module-card-desc">Wie du die KI als Co-Autor steuerst statt ihr einfach Befehle zu geben, und dabei Texte mit echtem Tiefgang erzeugst.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~12 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-3.html" class="module-card">
+      <div class="module-card-num">3.3</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Textoptimierung</div>
+        <div class="module-card-desc">Wie du den typischen „KI-Sound" eliminierst, echten Nutzwert einbaust und die Sprache exakt auf deine Zielgruppe abstimmst.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~15 Min</div>
+          <div class="module-card-meta-item">🎯 4 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-4.html" class="module-card">
+      <div class="module-card-num">3.4</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Konsistenz &amp; Brand Voice</div>
+        <div class="module-card-desc">Wie du der KI deinen individuellen Schreibstil beibringst und sicherstellst, dass alle Outputs wie aus einem Guss klingen.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~15 Min</div>
+          <div class="module-card-meta-item">🎯 4 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-5.html" class="module-card">
+      <div class="module-card-num">3.5</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">SEO bei der Contenterstellung</div>
+        <div class="module-card-desc">Wie du die KI als strategischen Analysten nutzt, um Inhalte zu erstellen, die nicht nur gut klingen, sondern auch gefunden werden.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~18 Min</div>
+          <div class="module-card-meta-item">🎯 4 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-6.html" class="module-card">
+      <div class="module-card-num">3.6</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Prüfungspflicht</div>
+        <div class="module-card-desc">Warum blindes Vertrauen in die KI dein Business ruinieren kann — und wie du einen effizienten Prüfprozess etablierst, der nichts durchlässt.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~12 Min</div>
+          <div class="module-card-meta-item">🎯 4 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-7.html" class="module-card">
+      <div class="module-card-num">3.7</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Originäre Daten + KI + Prüfung</div>
+        <div class="module-card-desc">Wie du aufhörst, das Internet zu wiederkäuen, und stattdessen Content produzierst, den deine Konkurrenz nicht replizieren kann.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~14 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="module-3-8.html" class="module-card">
+      <div class="module-card-num">3.8</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Briefings &amp; Contentpläne = System</div>
+        <div class="module-card-desc">Alle Fäden zusammenführen: Stimme, SEO und Daten werden zur wiederholbaren Content-Engine, die konsistent Ergebnisse liefert.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~15 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+  </div>
+
+</div>
+
+</body>
+</html>
