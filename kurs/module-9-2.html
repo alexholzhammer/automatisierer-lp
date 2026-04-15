@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9.2 Vibe Coding: 10 Do's und Don'ts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Do/Don't interactive cards */
+.rules-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.rules-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rules-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.rules-tab.active-do { background: var(--green); border-color: var(--green); color: white; }
+.rules-tab.active-dont { background: var(--red); border-color: var(--red); color: white; }
+.rules-panel { display: none; padding: 0; }
+.rules-panel.active { display: block; }
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.rule-item:last-child { border-bottom: none; }
+.rule-item:hover { background: var(--surface-2); }
+.rule-item.expanded { background: var(--surface-2); }
+.rule-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: white;
+}
+.rule-num.do   { background: var(--green); }
+.rule-num.dont { background: var(--red); }
+.rule-content { flex: 1; }
+.rule-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+.rule-detail {
+  display: none;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.rule-item.expanded .rule-detail { display: block; }
+.rule-arrow {
+  font-size: 11px;
+  color: var(--text-subtle);
+  transition: transform 0.2s;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.rule-item.expanded .rule-arrow { transform: rotate(90deg); }
+
+/* Bad vs Good prompt compare */
+.prompt-compare {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.pc-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pc-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.pc-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.pc-panel { display: none; padding: 16px; }
+.pc-panel.active { display: block; }
+.pc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.pc-label.bad  { color: var(--red); }
+.pc-label.good { color: var(--green); }
+.pc-prompt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+.pc-prompt.bad  { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--text); }
+.pc-prompt.good { background: #0D1117; border: 1px solid #21262D; color: #C9D1D9; }
+.pc-verdict {
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+}
+.pc-verdict.bad  { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.pc-verdict.good { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+
+/* Quick-Reference Score */
+.score-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.score-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.score-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.score-body { padding: 16px; }
+.score-question {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+.score-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.score-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.12s;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+}
+.score-option:hover { border-color: var(--accent); background: var(--accent-light); }
+.score-option.correct { border-color: var(--green); background: var(--accent-2-light); color: var(--green); }
+.score-option.wrong   { border-color: var(--red); background: var(--red-light); color: var(--red); }
+.score-option.disabled { cursor: default; pointer-events: none; }
+.score-indicator {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+  transition: all 0.12s;
+}
+.score-option.correct .score-indicator { border-color: var(--green); background: var(--green); color: white; }
+.score-option.wrong   .score-indicator { border-color: var(--red); background: var(--red); color: white; }
+.score-feedback {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.score-feedback.correct { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.score-feedback.wrong   { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.score-next {
+  display: none;
+  margin-top: 10px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-light);
+  color: var(--accent);
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.15s;
+}
+.score-next:hover { background: var(--accent); color: white; }
+.score-progress {
+  font-size: 11px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-coding.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">9.2 / 9.3</span>
+  <a href="module-9-3.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 9 · Vibe Coding</div>
+    <h1>10 Do's und Don'ts</h1>
+    <p>Die Regeln, die den Unterschied zwischen einem frustrierten Anfänger und einem produktiven Vibe Coder ausmachen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~10 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir destillieren die häufigsten Fehler und besten Praktiken aus der Vibe-Coding-Praxis. Jede Regel hier wurde aus echten Frustrationen geboren.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du kennst die 10 wichtigsten Gebote des Vibe Codings auswendig und erkennst sofort, wenn du in eine der typischen Fallen tappst.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Die 10 Do's und Don'ts -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die 20 Regeln: Do's und Don'ts</h2>
+        <p>Klicke jeden Punkt auf, um die Erklärung zu sehen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Diese Regeln sind keine Theorie. Sie entstammen der Praxis: Jedes "Don't" ist ein Fehler, den du mit Vibe Coding früher oder später machen wirst. Besser du liest sie hier, als dass du sie schmerzhaft selbst entdeckst.</p>
+
+      <div class="rules-wrap">
+        <div class="rules-toolbar">
+          <button class="rules-tab active-do" id="tab-do" onclick="showRules('do', this)">✓ Die 10 Do's</button>
+          <button class="rules-tab" id="tab-dont" onclick="showRules('dont', this)">✗ Die 10 Don'ts</button>
+        </div>
+
+        <div class="rules-panel active" id="rp-do">
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">1</div>
+            <div class="rule-content">
+              <div class="rule-title">Denke in "Containern"</div>
+              <div class="rule-detail">Beschreibe deine Seite als Abfolge von Sektionen. Statt "bau mir eine Landing Page", sag: "Sektion 1: Hero mit Überschrift und CTA. Sektion 2: 3-Spalten-Feature-Grid. Sektion 3: E-Mail-Formular." Das hält die Struktur sauber und gibt der KI ein klares Gerüst.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">2</div>
+            <div class="rule-content">
+              <div class="rule-title">Nutze visuelle Vorbilder</div>
+              <div class="rule-detail">Lade einen Screenshot einer Seite hoch, die dir gefällt. Sage: "Nutze dieses Layout als Inspiration für Abstände und Struktur." Die KI ist erstaunlich gut darin, Layouts von Screenshots zu übernehmen. Das ist oft schneller als jede textliche Beschreibung.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">3</div>
+            <div class="rule-content">
+              <div class="rule-title">Definiere deine "Action" sofort</div>
+              <div class="rule-detail">Sag der KI am Anfang, was das Hauptziel ist: "E-Mail einsammeln", "Kauf auslösen", "Termin buchen". Alles im Code muss auf dieses Ziel einzahlen. Ohne klares Ziel baut die KI hübsche, aber wirkungslose Seiten.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">4</div>
+            <div class="rule-content">
+              <div class="rule-title">Arbeite mit Platzhaltern</div>
+              <div class="rule-detail">Lass die KI erst die Funktion bauen. Nutze Texte wie [HIER HEADLINE EINSETZEN] oder [BILD-URL]. So verlierst du dich nicht im Texten, während du eigentlich an der Struktur arbeitest. Texten und Bauen sind zwei verschiedene Jobs.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">5</div>
+            <div class="rule-content">
+              <div class="rule-title">Meta-Prompting nutzen</div>
+              <div class="rule-detail">Du kennst dich nicht mit Webdesign aus? Kein Problem. Erkläre einem LLM, was du machen willst, und frage nach einem umfassenden Prompt für Vibe Coding. Beispiel: "Ich will eine Landing Page für X bauen. Hilf mir, einen präzisen Vibe-Coding-Prompt zu formulieren." Erst dann den finalen Prompt einsetzen.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">6</div>
+            <div class="rule-content">
+              <div class="rule-title">Ping-Pong-Prinzip: Eine Sache auf einmal</div>
+              <div class="rule-detail">Fordere nach jedem Schritt eine Vorschau an. Korrigiere nur eine Sache auf einmal. "Mach erst den Button grün. Gut. Jetzt füge den Text an." So weißt du genau, welche Änderung was bewirkt hat.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">7</div>
+            <div class="rule-content">
+              <div class="rule-title">Sichere deine Fortschritte</div>
+              <div class="rule-detail">Wenn eine Version funktioniert, kopiere den Code als Backup in ein Textdokument. Benne die Datei klar: "landing-v2-formular-funktioniert.html". Wenn die nächste Änderung alles kaputt macht, hast du immer eine Rückfallposition.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">8</div>
+            <div class="rule-content">
+              <div class="rule-title">Prüfe die Ladezeit vor dem Launch</div>
+              <div class="rule-detail">Frage die KI: "Gibt es unnötigen Ballast im Code? Optimiere die Seite für schnelle Ladezeiten." KI-generierter Code enthält manchmal zu große Bibliotheken oder doppelte CSS-Regeln. Eine langsame Seite kostet Conversions und Rankings.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">9</div>
+            <div class="rule-content">
+              <div class="rule-title">Feedback-Schleifen nutzen</div>
+              <div class="rule-detail">Sag der KI, was dir gefällt, bevor du neue Änderungen forderst. "Das Layout gefällt mir sehr. Jetzt ändere nur die Farbe des Buttons." Lob festigt funktionierende Muster und verhindert, dass die KI in der nächsten Runde bereits Gutes wieder umschreibt.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num do">10</div>
+            <div class="rule-content">
+              <div class="rule-title">Reset-Knopf drücken wenn nötig</div>
+              <div class="rule-detail">Das Projekt geht in die völlig falsche Richtung? Manchmal ist ein neues Fenster effizienter als weiterkämpfen. Lerne aus den Fehlern des vorigen Chats. Was hätte der initiale Prompt besser machen sollen? Dann neu starten mit verbessertem Prompt.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+        </div>
+
+        <div class="rules-panel" id="rp-dont">
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">1</div>
+            <div class="rule-content">
+              <div class="rule-title">Die "Alles-auf-einmal"-Falle</div>
+              <div class="rule-detail">Verlange nie die komplette Seite in einem Prompt. Details werden "verschluckt", Logikfehler entstehen, und du hast keine Ahnung, was die KI falsch verstanden hat. Schichten-Modell statt Gesamtbeschreibung.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">2</div>
+            <div class="rule-content">
+              <div class="rule-title">Vage Adjektive nutzen</div>
+              <div class="rule-detail">Vermeide "mach es schöner" oder "professioneller". Sag stattdessen: "Nutze mehr Whitespace, runde die Button-Ecken ab und erhöhe die Schriftgröße der Headline auf 40px." Was konkret messbar ist, kann die KI konkret umsetzen.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">3</div>
+            <div class="rule-content">
+              <div class="rule-title">Mobile Ansicht vergessen</div>
+              <div class="rule-detail">Veröffentliche nie, ohne die mobile Vorschau zu prüfen. Über 60 % des Traffics kommt von Smartphones. Ein Desktop-perfekter ROI-Rechner, der auf dem Handy bricht, ist nutzlos. Immer testen: "Wie sieht das auf einem 375px breiten Screen aus?"</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">4</div>
+            <div class="rule-content">
+              <div class="rule-title">Geheimnisse teilen</div>
+              <div class="rule-detail">Schreibe niemals echte Passwörter, API-Keys oder Datenbankverbindungen in den Chat oder den Code. Klingt offensichtlich, passiert aber häufiger als du denkst, besonders wenn die KI fragt "Gib mir deinen API-Key für Formular-X". Niemals.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">5</div>
+            <div class="rule-content">
+              <div class="rule-title">Zu viele Schrifttypen</div>
+              <div class="rule-detail">Verwende nicht mehr als zwei verschiedene Schriftarten auf einer Seite. Das wirkt unruhig und unseriös. Faustregel: eine Schrift für Überschriften, eine für Fließtext. Wenn du dir unsicher bist, nimm eine einzige Schrift mit verschiedenen Gewichten.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">6</div>
+            <div class="rule-content">
+              <div class="rule-title">Fehlermeldungen ignorieren</div>
+              <div class="rule-detail">Wenn das Tool einen Fehler zeigt, kopiere ihn komplett zurück an die KI und frage nach einer Lösung. Nie versuchen, Fehlermeldungen zu interpretieren oder selbst zu reparieren, wenn du nicht weißt was du tust. Die KI kann sie meist sofort lösen.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">7</div>
+            <div class="rule-content">
+              <div class="rule-title">In endlosen Chats verharren</div>
+              <div class="rule-detail">Wenn die KI nach 10 Korrekturen denselben Fehler macht: Neuer Chat, letzter guter Code-Stand rein, Neustart. Ein Chat kann sich "festfahren". Zu viel widersprüchlicher Kontext macht die Ausgaben unzuverlässig. Sunk-Cost-Fallacy gilt auch für Chats.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">8</div>
+            <div class="rule-content">
+              <div class="rule-title">Bilder direkt einbetten</div>
+              <div class="rule-detail">Versuche nicht, Bilder in den Code zu "pressen" (als Base64 oder ähnliches). Nutze Links (URLs) oder Platzhalter. Bild-URLs sind einfach auszutauschen, eingebettete Bilder machen den Code riesig und unhandlich.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">9</div>
+            <div class="rule-content">
+              <div class="rule-title">Interaktions-Chaos bauen</div>
+              <div class="rule-detail">Baue nicht fünf verschiedene Pop-ups auf eine Seite. Das verwirrt Nutzer und KI gleichermaßen. Jede Interaktion auf deiner Seite sollte einem klaren Ziel dienen. Weniger ist hier radikal mehr.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+          <div class="rule-item" onclick="toggleRule(this)">
+            <div class="rule-num dont">10</div>
+            <div class="rule-content">
+              <div class="rule-title">Hoffen, dass alles funktioniert</div>
+              <div class="rule-detail">Verlasse dich nicht darauf, dass ein Button "schon funktioniert". Teste aktiv alle Elemente: Klickt der Button? Sendet das Formular? Zeigt der Rechner das richtige Ergebnis? Ungetesteter Code ist kein fertiger Code.</div>
+            </div>
+            <div class="rule-arrow">▶</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Gut vs. schlecht Prompts -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Vage vs. Präzise: Der Unterschied in der Praxis</h2>
+        <p>Drei konkrete Vorher/Nachher-Vergleiche</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Abstrakte Regeln sind gut, konkrete Beispiele sind besser. Hier siehst du denselben Auftrag einmal als vagen Prompt und einmal als präzisen Vibe-Coding-Prompt.</p>
+
+      <div class="prompt-compare">
+        <div class="pc-toolbar">
+          <button class="pc-tab active" onclick="showPc('design', this)">🎨 Design</button>
+          <button class="pc-tab" onclick="showPc('funktion', this)">⚙️ Funktion</button>
+          <button class="pc-tab" onclick="showPc('mobile', this)">📱 Mobile</button>
+        </div>
+
+        <div class="pc-panel active" id="pcp-design">
+          <div class="pc-label bad">❌ Vager Prompt</div>
+          <div class="pc-prompt bad">Mach die Seite schöner und professioneller.</div>
+          <div class="pc-verdict bad">Die KI rät. Vielleicht ändert sie die Farben, vielleicht die Schriften, vielleicht beide. Du weißt nicht, was sie geändert hat und warum, und kannst das Ergebnis nicht steuern.</div>
+          <div style="margin-top:12px;">
+          <div class="pc-label good">✓ Präziser Prompt</div>
+          <div class="pc-prompt good">Zum Design: Erhöhe den Whitespace zwischen den Sektionen auf 80px.
+Runde alle Buttons auf border-radius 8px ab.
+Erhöhe die Hero-Headline auf 48px, bold.
+Nutze nur Inter als Schriftart, keine weiteren.
+Hintergrundfarbe: #F8F9FA, Button-Farbe: #FF6B35.</div>
+          <div class="pc-verdict good">Jede Anweisung ist messbar und umsetzbar. Die KI hat keine Interpretationsfläche. Das Ergebnis ist vorhersehbar.</div>
+          </div>
+        </div>
+
+        <div class="pc-panel" id="pcp-funktion">
+          <div class="pc-label bad">❌ Vager Prompt</div>
+          <div class="pc-prompt bad">Füge eine Berechnung hinzu.</div>
+          <div class="pc-verdict bad">Welche Berechnung? Wo? Für wen? Die KI erfindet etwas Plausibles. Das ist selten das, was du gemeint hast.</div>
+          <div style="margin-top:12px;">
+          <div class="pc-label good">✓ Präziser Prompt</div>
+          <div class="pc-prompt good">Fuge folgende Logik ein:
+<span style="color:#FFA657;">WENN</span> der Nutzer auf "Berechnen" klickt,
+<span style="color:#FFA657;">DANN</span> nimm Feld "Ad Spend" (€) geteilt durch Feld "CPC" (€)
+und zeige das Ergebnis als "Geschatzte Klicks: X" in Grun, fett, 24px.
+<span style="color:#FFA657;">WENN</span> ein Feld leer ist, zeige eine rote Fehlermeldung.</div>
+          <div class="pc-verdict good">Klare Wenn-Dann-Logik. Die KI weiß genau was zu tun ist. Kein Raten, kein Interpretieren.</div>
+          </div>
+        </div>
+
+        <div class="pc-panel" id="pcp-mobile">
+          <div class="pc-label bad">❌ Häufiger Fehler</div>
+          <div class="pc-prompt bad"><span style="color:#F85149;">[Deploy-Button klicken ohne Mobile-Check]</span>
+→ Seite live schalten
+→ Nutzer meldet: "Alles bricht auf dem Handy"</div>
+          <div class="pc-verdict bad">Über 60 % des Traffics kommt von Smartphones. Kein Mobile-Check vor dem Launch bedeutet: Conversion-Verlust vom ersten Tag an.</div>
+          <div style="margin-top:12px;">
+          <div class="pc-label good">✓ Mobile-Check Routine</div>
+          <div class="pc-prompt good"><span style="color:#6E7681;">// Vor jedem Launch ausführen:</span>
+Prüfe die Seite in der mobilen Vorschau (375px Breite).
+Sind alle Buttons noch klickbar?
+Überlappt sich Text mit anderen Elementen?
+Sind die Formulare bedienbar?
+
+Falls Probleme: "In der mobilen Ansicht (375px)
+passiert folgendes Problem: [Beschreibung]. Fixe das."</div>
+          <div class="pc-verdict good">Mobile-Check ist Pflicht, nicht Optional. Keine Ausnahmen. Kein Launch ohne Handy-Test.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Schnell-Test Spiel -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Do or Don't? Erkenne die Regel</h2>
+        <p>5 Szenarien, die du sofort beurteilen können musst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Für jedes Szenario: Ist das eine gute oder schlechte Vibe-Coding-Praxis? Klicke deine Antwort an.</p>
+
+      <div class="score-wrap">
+        <div class="score-toolbar">
+          <span>🎯 Schnell-Check</span>
+          <span class="score-progress" id="sc-progress">0 / 5</span>
+        </div>
+        <div class="score-body" id="sc-body">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Präzision schlägt Magie</strong>
+          Vibe Coding ist kein Raten, sondern präzises Delegieren. Je genauer deine Anweisung, desto vorhersehbarer das Ergebnis. "Schöner" ist keine Anweisung.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Modularität ist Sicherheit</strong>
+          Baue deine Landing Page wie ein Haus aus einzelnen Zimmern (Containern). Dann kannst du jedes Zimmer einzeln reparieren, ohne das ganze Haus einzureißen.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Du bist der Qualitätsfilter</strong>
+          Dein Auge für Marketing-Psychologie entscheidet über den Erfolg, nicht der Code der KI. Ein technisch perfekter Button an der falschen Stelle konvertiert trotzdem nicht.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Backup, Mobile, Test: Immer</strong>
+          Diese drei Schritte vor jedem Launch sind nicht optional. Backup schützt dich vor Datenverlust. Mobile-Check schützt deine Conversions. Aktives Testen schützt vor peinlichen Live-Fehlern.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// RULES ACCORDION
+function showRules(id, btn) {
+  document.querySelectorAll('.rules-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('rp-' + id).classList.add('active');
+  document.getElementById('tab-do').className = 'rules-tab' + (id === 'do' ? ' active-do' : '');
+  document.getElementById('tab-dont').className = 'rules-tab' + (id === 'dont' ? ' active-dont' : '');
+}
+function toggleRule(el) {
+  el.classList.toggle('expanded');
+}
+
+// PROMPT COMPARE TABS
+function showPc(id, btn) {
+  document.querySelectorAll('.pc-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.pc-tab').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('pcp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// SCHNELL-CHECK
+var scenarios = [
+  {
+    q: 'Du gibst der KI einen Prompt mit allem auf einmal: Struktur, Design, 3 Features und Mobile-Optimierung.',
+    correct: 'dont',
+    feedback: 'Das ist die "Alles-auf-einmal"-Falle. Details werden verschluckt, Fehler entstehen, und du kannst nicht nachvollziehen, was schief ging. Schichten-Modell nutzen.'
+  },
+  {
+    q: 'Nach jeder funktionierenden Version kopierst du den Code in ein Textdokument und benennst ihn klar.',
+    correct: 'do',
+    feedback: 'Richtig. Backups sind die wichtigste Schutzmaßnahme beim Vibe Coding. Wenn die nächste Änderung alles bricht, hast du immer einen sicheren Stand.'
+  },
+  {
+    q: 'Du schreibst deinen API-Key direkt in den Chat, weil die KI danach gefragt hat.',
+    correct: 'dont',
+    feedback: 'Niemals. Echte Passwörter, API-Keys oder Datenbankverbindungen gehören nie in den Chat oder den Code. Das ist ein kritischer Sicherheitsfehler.'
+  },
+  {
+    q: 'Du sagst der KI, was dir an der aktuellen Version gefällt, bevor du neue Änderungen anforderst.',
+    correct: 'do',
+    feedback: 'Richtig. Lob festigt funktionierende Muster und verhindert, dass die KI in der nächsten Runde bereits Gutes wieder umbaut. Feedback-Schleifen sind ein Do.'
+  },
+  {
+    q: 'Du deployest deine neue Landing Page, ohne sie in der mobilen Vorschau getestet zu haben.',
+    correct: 'dont',
+    feedback: 'Don\'t. Über 60 % des Traffics kommt von Smartphones. Kein Launch ohne Mobile-Check. Punkt.'
+  }
+];
+var scAnswered = [false, false, false, false, false];
+var scScore = 0;
+
+function renderScenario(idx) {
+  if (idx >= scenarios.length) {
+    document.getElementById('sc-body').innerHTML = '<div style="text-align:center;padding:20px;font-size:14px;font-weight:700;color:var(--green);">' + scScore + ' / ' + scenarios.length + ' richtig! ' + (scScore === scenarios.length ? '🏆' : scScore >= 3 ? '👍' : '📚') + '</div>';
+    return;
+  }
+  var s = scenarios[idx];
+  document.getElementById('sc-progress').textContent = idx + ' / ' + scenarios.length;
+  document.getElementById('sc-body').innerHTML =
+    '<div class="score-question">' + s.q + '</div>' +
+    '<div class="score-options">' +
+      '<div class="score-option" id="sc-do" onclick="answerSc(' + idx + ', \'do\')">' +
+        '<div class="score-indicator" id="sci-do">✓</div>' +
+        '<span>Das ist eine gute Praxis (Do)</span>' +
+      '</div>' +
+      '<div class="score-option" id="sc-dont" onclick="answerSc(' + idx + ', \'dont\')">' +
+        '<div class="score-indicator" id="sci-dont">✗</div>' +
+        '<span>Das ist eine schlechte Praxis (Don\'t)</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="score-feedback" id="sc-feedback"></div>' +
+    '<button class="score-next" id="sc-next" onclick="renderScenario(' + (idx + 1) + ')">Nächste Situation →</button>';
+}
+
+function answerSc(idx, answer) {
+  var s = scenarios[idx];
+  var doEl = document.getElementById('sc-do');
+  var dontEl = document.getElementById('sc-dont');
+  var fb = document.getElementById('sc-feedback');
+  var next = document.getElementById('sc-next');
+
+  doEl.classList.add('disabled');
+  dontEl.classList.add('disabled');
+
+  if (answer === s.correct) {
+    document.getElementById('sc-' + answer).classList.add('correct');
+    document.getElementById('sci-' + answer).textContent = '\u2713';
+    scScore++;
+    fb.className = 'score-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!</strong> ' + s.feedback;
+  } else {
+    document.getElementById('sc-' + answer).classList.add('wrong');
+    document.getElementById('sci-' + answer).textContent = '\u2717';
+    document.getElementById('sc-' + s.correct).classList.add('correct');
+    document.getElementById('sci-' + s.correct).textContent = '\u2713';
+    fb.className = 'score-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + s.feedback;
+  }
+  fb.style.display = 'block';
+  next.style.display = 'inline-block';
+  document.getElementById('sc-progress').textContent = (idx + 1) + ' / ' + scenarios.length;
+}
+
+renderScenario(0);
+
+// QUIZ
+const questions = [
+  {
+    q: 'Was ist der Kerngedanke hinter "Denke in Containern"?',
+    options: [
+      'Jedes HTML-Element sollte in einem div-Container sein.',
+      'Die Seite als Abfolge klar abgegrenzter Sektionen beschreiben, damit die KI eine saubere Struktur aufbauen kann.',
+      'Container sind ein CSS-Framework für Vibe Coding.',
+      'Man sollte immer mit einem leeren Container starten.'
+    ],
+    correct: 1,
+    feedback: 'Container-Denken bedeutet: Statt "bau mir eine Landing Page" sagst du "Sektion 1: Hero. Sektion 2: Features. Sektion 3: Formular." Das gibt der KI ein klares Gerüst und verhindert, dass Sektionen ineinanderFließen oder Details vergessen werden.'
+  },
+  {
+    q: 'Warum solltest du der KI sagen, was dir an der aktuellen Version gefällt, bevor du neue Änderungen forderst?',
+    options: [
+      'Weil die KI Lob benötigt, um besser zu werden.',
+      'Um sicherzustellen, dass funktionierende Muster erhalten bleiben und nicht in der nächsten Runde wieder umgebaut werden.',
+      'Weil positive Aussagen schnellere Antworten erzeugen.',
+      'Das hat keinen Effekt und ist optional.'
+    ],
+    correct: 1,
+    feedback: 'Feedback-Schleifen schützen gute Arbeit. Wenn du ohne Lob direkt zur nächsten Änderung gehst, kann die KI auch bereits Funktionierendes verändern. "Das Layout gefällt mir sehr. Ändere jetzt nur den Button" ist präziser als einfach nur "Ändere den Button".'
+  },
+  {
+    q: 'Was solltest du tun, wenn du eine Fehlermeldung in deinem Code siehst?',
+    options: [
+      'Den Chat schließen und neu anfangen.',
+      'Den Fehler ignorieren und weitermachen.',
+      'Die Fehlermeldung komplett an die KI zurückschicken und nach einer Lösung fragen.',
+      'Den Code manuell reparieren.'
+    ],
+    correct: 2,
+    feedback: 'Fehlermeldungen sind präzise Informationen. Kopiere sie vollständig zurück an die KI. Sie kann sie meist sofort interpretieren und lösen. Nie versuchen, Fehlermeldungen selbst zu interpretieren, wenn du nicht weißt was du tust.'
+  },
+  {
+    q: 'Warum sollten maximal zwei Schriftarten auf einer Seite verwendet werden?',
+    options: [
+      'Weil mehr Schriftarten die Ladezeit stark erhöhen.',
+      'Weil CSS nur zwei Schriftarten laden kann.',
+      'Weil mehr Schriftarten unruhig und unseriös wirken und das Branding verwässern.',
+      'Das ist eine veraltete Regel und gilt nicht mehr.'
+    ],
+    correct: 2,
+    feedback: 'Zwei Schriftarten sind die Faustregel für professionelles Webdesign: eine für Überschriften, eine für Fließtext. Mehr Variationen erzeugen visuelle Unruhe und signalisieren mangelnde Design-Disziplin. Im Zweifelsfall: eine einzige Schrift mit verschiedenen Gewichten (Regular, Bold) reicht völlig.'
+  },
+  {
+    q: 'Was ist Meta-Prompting im Vibe-Coding-Kontext?',
+    options: [
+      'Das Schreiben von Code-Kommentaren.',
+      'Die KI zuerst fragen, wie man den besten Prompt für ein Vibe-Coding-Projekt formuliert, bevor man das eigentliche Projekt startet.',
+      'Ein spezifisches Vibe-Coding-Tool.',
+      'Das Hinzufügen von Meta-Tags im HTML-Head.'
+    ],
+    correct: 1,
+    feedback: 'Meta-Prompting bedeutet: die KI als Prompt-Berater nutzen, bevor man sie als Code-Schreiber einsetzt. "Ich will X bauen. Hilf mir, einen präzisen Vibe-Coding-Prompt dafür zu formulieren." Dann den resultierenden Prompt für das eigentliche Projekt nutzen.'
+  },
+  {
+    q: 'Warum solltest du Bilder nicht direkt in den Code einbetten (als Base64)?',
+    options: [
+      'Weil Base64 in HTML nicht erlaubt ist.',
+      'Weil eingebettete Bilder den Code riesig und unhandlich machen und schwer auszutauschen sind. Bild-URLs sind flexibler.',
+      'Weil die KI Base64 nicht versteht.',
+      'Das spielt keine Rolle, beide Methoden sind gleichwertig.'
+    ],
+    correct: 1,
+    feedback: 'Bilder als Base64-Strings einzubetten macht den Code extrem lang, schwer lesbar und unflexibel. Eine Bild-URL ist ein Link, den du einfach austauschst. Platzhalter-URLs (z.B. von picsum.photos) während der Entwicklung nutzen, echte URLs erst beim Finalisieren einsetzen.'
+  },
+  {
+    q: 'Was ist die "Sunk-Cost-Falle" beim Vibe Coding?',
+    options: [
+      'Zu viel Geld für Premium-Tools ausgeben.',
+      'An einem festgefahrenen Chat festhalten, weil man schon so viel Zeit investiert hat, obwohl ein Neustart effizienter wäre.',
+      'Zu viele Features in ein Projekt einzubauen.',
+      'Den falschen Deployment-Weg wählen.'
+    ],
+    correct: 1,
+    feedback: 'Nach 10 erfolglosen Korrekturen ist ein neuer Chat fast immer effizienter als weiterzukämpfen. Der investierte Zeitaufwand im alten Chat ist bereits "verloren", unabhängig davon ob man weiter macht oder neu startet. Neuer Chat = frischer Kontext = bessere Ergebnisse.'
+  },
+  {
+    q: 'Was bedeutet "Interaktions-Chaos" und warum sollte man es vermeiden?',
+    options: [
+      'Zu viele Prompts in kurzer Zeit senden.',
+      'Fünf verschiedene Pop-ups oder Interaktionen auf einer Seite bauen, die Nutzer und KI gleichermaßen verwirren.',
+      'JavaScript ohne Kommentare schreiben.',
+      'Formulare und Buttons auf derselben Seite haben.'
+    ],
+    correct: 1,
+    feedback: 'Jede Interaktion auf deiner Seite sollte einem klaren Ziel dienen. Fünf Pop-ups bedeuten: Nutzer weiß nicht, was er tun soll, und die KI kann die Logik zwischen ihnen nicht sauber trennen. Fokus: eine primäre Aktion pro Seite.'
+  },
+  {
+    q: 'Was ist der beste Prompt für eine Design-Änderung?',
+    options: [
+      '"Mach es professioneller."',
+      '"Verbessere das visuelle Erscheinungsbild der Seite."',
+      '"Erhöhe den Whitespace zwischen Sektionen auf 80px und runde alle Buttons auf 8px ab."',
+      '"Das Design gefällt mir nicht, mach es anders."'
+    ],
+    correct: 2,
+    feedback: 'Konkrete, messbare Anweisungen sind die einzigen, die die KI zuverlässig umsetzen kann. "80px Whitespace" und "8px border-radius" sind CSS-Eigenschaften, die die KI direkt anwenden kann. "Professioneller" ist subjektiv und führt zum Raten.'
+  },
+  {
+    q: 'Warum ist das aktive Testen aller Elemente vor dem Launch so wichtig?',
+    options: [
+      'Weil KI-generierter Code immer Fehler enthält.',
+      'Weil Testen eine SEO-Anforderung ist.',
+      'Weil man sich nicht darauf verlassen kann, dass Buttons oder Formulare funktionieren, nur weil sie visuell korrekt aussehen. Funktion und Aussehen sind zwei verschiedene Ebenen.',
+      'Nur weil es die Branche so empfiehlt.'
+    ],
+    correct: 2,
+    feedback: 'Ein Button kann perfekt aussehen und trotzdem beim Klick nichts tun. Ein Formular kann angezeigt werden und trotzdem keine E-Mails senden. KI-Code ist korrekt bis er getestet ist, nicht umgekehrt. Aktives Testen ist Pflicht, keine Option.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
