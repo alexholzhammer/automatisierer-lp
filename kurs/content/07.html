@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.7 Originäre Daten + KI + Prüfung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Originäre Daten examples gallery */
+.daten-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+@media (max-width: 600px) { .daten-grid { grid-template-columns: 1fr; } }
+.daten-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid var(--accent);
+}
+.daten-card:hover { background: var(--accent-light); border-left-color: var(--accent); }
+.daten-card.active { background: var(--accent-light); border-color: var(--accent); }
+.daten-card-icon { font-size: 18px; margin-bottom: 6px; }
+.daten-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.daten-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Before/After infusion compare */
+.infusion-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.infusion-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.inf-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.inf-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.inf-panel { display: none; padding: 16px; }
+.inf-panel.active { display: block; }
+.inf-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.inf-label.bad { color: var(--red); }
+.inf-label.good { color: var(--green); }
+.inf-label.raw { color: #B45309; }
+.inf-text {
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.inf-text.bad { background: var(--red-light); border-color: #FFBDAD; }
+.inf-text.good { background: var(--accent-2-light); border-color: #ABF5D1; }
+.inf-text.raw { background: #FFF8E7; border-color: #FDE68A; font-style: italic; }
+.inf-verdict {
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+}
+.inf-verdict.bad { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.inf-verdict.good { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+
+/* Daten-Infusion Builder */
+.infusion-builder {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.ib-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ib-toolbar span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.ib-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ib-row { display: flex; flex-direction: column; gap: 4px; }
+.ib-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+}
+.ib-input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  min-height: 64px;
+  transition: border 0.15s;
+}
+.ib-input:focus { outline: none; border-color: var(--accent); }
+.ib-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ib-run-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius);
+  background: var(--accent-2-light);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.ib-run-btn:hover { background: var(--accent-2); color: white; }
+.ib-phase-wrap {
+  display: none;
+  padding: 0 16px 16px;
+}
+.ib-phase {
+  margin-bottom: 12px;
+}
+.ib-phase-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-subtle);
+  margin-bottom: 6px;
+}
+.ib-phase-output {
+  position: relative;
+  background: #0D1117;
+  border: 1px solid #21262D;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #C9D1D9;
+  white-space: pre-wrap;
+}
+.ib-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.ib-copy-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* Anker highlight */
+.anker-box {
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 14px 0;
+  background: var(--accent-light);
+}
+.anker-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.anker-quote {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  font-style: italic;
+}
+.anker-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+/* Seele/Standard toggle */
+.soul-compare {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.soul-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.soul-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.soul-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.soul-panel { display: none; padding: 16px; }
+.soul-panel.active { display: block; }
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 3 · Content-Produktion</div>
+    <h1>Originäre Daten + KI + Prüfung</h1>
+    <p>Wie du aufhörst, das Internet zu wiederkäuen, und stattdessen Content produzierst, den deine Konkurrenz nicht replizieren kann.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~14 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir hören auf, nur Befehle zu tippen. Du wirst zum Kurator deines eigenen Wissens und lernst, wie du deine Erfahrungen, Kundenfeedbacks und internen Daten so mit der Power der KI verschmilzt, dass Content entsteht, den deine Konkurrenz nicht replizieren kann.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du verstehst den Unterschied zwischen "Wiederkäuen" und echtem Information Gain, verwandelst unstrukturiertes Expertenwissen in Texte mit echter Substanz und beherrschst die Formel: Originäre Daten + KI-Struktur + menschlicher Check = unkopierbarer Content.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Das Ende des Wiederkäuens -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Das Ende des "Internet-Wiederkäuens"</h2>
+        <p>Warum der Durchschnitt wertlos wird und originäre Daten der Ausweg sind</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn du die KI bittest, einen Text über "Zeitmanagement" zu schreiben, spuckt sie dir die immer gleichen Tipps aus: Pareto-Prinzip, Eisenhower-Matrix, Pausen machen. Die KI wurde auf dem Durchschnitt des Internets trainiert. Sie ist eine Weltmeisterin im Wiederkäuen.</p>
+
+      <p>In einer Welt, in der jeder per Knopfdruck "ganz okayen" Content erstellen kann, wird dieser Durchschnitt wertlos. Der einzige Weg aus der Austauschbarkeit ist die radikale Nutzung deiner <strong>originären Daten</strong>.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Das Prinzip</strong>
+          <p>Die KI liefert die Leinwand und die Pinsel, aber <strong>du bestimmst die Farben und das Motiv</strong>. Wir hören auf, die KI zu fragen: "Was sagst du zu Thema X?" Wir fangen an, ihr zu sagen: "Hier ist meine Erfahrung zu Thema X. Strukturiere sie, schärfe die Argumente und mach daraus einen Text, der meine Brand Voice atmet."</p>
+        </div>
+      </div>
+
+      <h3>Was sind originäre Daten?</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Originäre Daten sind alle Informationen, die nicht frei im Netz verfügbar sind. Dein Business produziert sie täglich. Klicke die vier Typen an und sieh, was in deinem Alltag schlummert.</p>
+
+      <div class="daten-grid">
+        <div class="daten-card" onclick="this.classList.toggle('active')">
+          <div class="daten-card-icon">📊</div>
+          <div class="daten-card-title">Echte Fallstudien</div>
+          <div class="daten-card-desc">"Wie wir Kunde X in 3 Monaten zu Ergebnis Y verholfen haben", inklusive der Probleme, die nicht im Lehrbuch stehen.</div>
+        </div>
+        <div class="daten-card" onclick="this.classList.toggle('active')">
+          <div class="daten-card-icon">📈</div>
+          <div class="daten-card-title">Interne Statistiken</div>
+          <div class="daten-card-desc">Deine eigenen Auswertungen, Umfragen oder Verkaufszahlen. Zahlen aus deiner eigenen Praxis, die niemand sonst hat.</div>
+        </div>
+        <div class="daten-card" onclick="this.classList.toggle('active')">
+          <div class="daten-card-icon">😬</div>
+          <div class="daten-card-title">Persönliche Fail-Storys</div>
+          <div class="daten-card-desc">Warum ein Projekt gescheitert ist und was du daraus gelernt hast. KI scheitert kläglich daran, echtes menschliches Scheitern zu simulieren.</div>
+        </div>
+        <div class="daten-card" onclick="this.classList.toggle('active')">
+          <div class="daten-card-icon">🎙️</div>
+          <div class="daten-card-title">Rohgedanken</div>
+          <div class="daten-card-desc">Sprachnotizen nach einem intensiven Coaching-Call, wirre App-Notizen, Transkripte von Kundengesprächen. Content-Gold im Rohzustand.</div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🛡️</div>
+        <div class="callout-text">
+          <strong>Der dreifache Schutzwall</strong>
+          <p><strong>Algorithmen lieben dich:</strong> Google erkennt, dass dein Inhalt exklusiv ist (E-E-A-T).<br><br>
+          <strong>Wettbewerber verzweifeln:</strong> Niemand kann deinen Text "nach-prompten", weil niemand Zugriff auf deine Daten hat.<br><br>
+          <strong>Leser vertrauen dir:</strong> Menschen spüren den Unterschied zwischen theoretischer Abhandlung und echtem Wissen aus der Praxis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Die Daten-Infusion -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Die "Daten-Infusion": Vom Chaos zum Gold-Prompt</h2>
+        <p>Zweistufig: erst analysieren, dann schreiben</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Dein wertvollstes Wissen existiert oft in einer Form, die du niemals veröffentlichen würdest: als hastige Sprachnotiz im Auto, als wirre Notiz in einer App, als 45-minütiges Transkript eines Kundengesprächs. Das ist dein <strong>Content-Gold</strong>. Die KI ist das Sieb, das den Dreck entfernt und das Wesentliche zum Glänzen bringt.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Warum "Schreib jetzt" der falsche erste Befehl ist</strong>
+          <p>Wer der KI rohe Notizen gibt und sofort "Schreib einen Artikel" sagt, bekommt oft einen Text, der die Notizen nur paraphrasiert und mit allgemeinem Internet-Wissen auffüllt. Der zweistufige Prozess verhindert das: Erst analysieren lassen, dann erst schreiben. Das verändert die Qualität dramatisch.</p>
+        </div>
+      </div>
+
+      <h3>Vor und nach der Daten-Infusion</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Dasselbe Rohmaterial, zwei völlig verschiedene Ausgangspunkte. Klicke durch alle drei Phasen und sieh den Unterschied.</p>
+
+      <div class="infusion-wrap">
+        <div class="infusion-toolbar">
+          <button class="inf-tab active" onclick="showInf('raw', this)">🗒️ Rohmaterial</button>
+          <button class="inf-tab" onclick="showInf('ohne', this)">❌ Ohne Infusion</button>
+          <button class="inf-tab" onclick="showInf('mit', this)">✓ Mit Infusion</button>
+        </div>
+
+        <div class="inf-panel active" id="ip-raw">
+          <div class="inf-label raw">Das Rohmaterial (Sprachnotiz-Transkript)</div>
+          <div class="inf-text raw">"...also ich reg mich wirklich auf. To-Do-Listen sind im Grunde Friedhöfe für Träume. Du schreibst alles rein, fühlst dich gut, aber die Liste hat keine Prioritäten, keinen Antrieb. Die Hälfte stirbt unbeachtet. Was ich stattdessen mache: Ich habe drei Aufgaben. Drei. Die machen mir die meiste Angst. Die kommen zuerst. Danach ist der Tag eigentlich schon gewonnen..."</div>
+        </div>
+
+        <div class="inf-panel" id="ip-ohne">
+          <div class="inf-label bad">Ohne Daten-Infusion ("Schreib über To-Do-Listen")</div>
+          <div class="inf-text bad">"To-Do-Listen sind ein bewährtes Werkzeug für effektives Zeitmanagement. Sie helfen dabei, Aufgaben zu strukturieren und Prioritäten zu setzen. Experten empfehlen, die wichtigsten Aufgaben an den Anfang der Liste zu stellen (Pareto-Prinzip). Regelmäßige Pausen steigern die Produktivität zusätzlich..."</div>
+          <div class="inf-verdict bad">❌ Generischer Einheitsbrei. Hätte jeder schreiben können. Keine Persönlichkeit, keine Meinung, keine Information, die der Leser nicht schon kennt.</div>
+        </div>
+
+        <div class="inf-panel" id="ip-mit">
+          <div class="inf-label good">Mit Daten-Infusion (Analyse zuerst, dann Schreiben)</div>
+          <div class="inf-text good">"Warum deine To-Do-Liste deine Träume tötet und was du stattdessen tun musst.<br><br>Ehrlich gesagt: Ich hasse To-Do-Listen. Nicht weil ich unorganisiert bin, sondern weil ich verstanden habe, was sie wirklich sind: Friedhöfe für Träume. Du trägst etwas ein, fühlst dich kurz gut, und drei Wochen später liegt es noch da. Unberührt. Still gestorben.<br><br>Was ich stattdessen mache? Ich habe genau drei Aufgaben pro Tag. Die drei, vor denen ich am meisten Angst habe. Die kommen zuerst. Danach ist der Tag schon gewonnen..."</div>
+          <div class="inf-verdict good">✓ Provokante These aus dem Rohmaterial. Echte Stimme, echte Wut. Niemand kann diesen Text nachpromten, weil er aus einer einzigartigen Haltung entstanden ist.</div>
+        </div>
+      </div>
+
+      <h3>Der Daten-Infusions-Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Trage dein Rohmaterial ein und erhalte die zwei Prompts für den zweistufigen Prozess: erst der Analyse-Prompt, dann der Schreib-Prompt mit Context-Stuffing.</p>
+
+      <div class="infusion-builder">
+        <div class="ib-toolbar">
+          <span>💎 Daten-Infusions-Builder</span>
+        </div>
+        <div class="ib-body">
+          <div class="ib-row">
+            <label class="ib-label">Dein Rohmaterial (Notizen, Transkript, Kundenfeedback)</label>
+            <textarea class="ib-input" id="ib-roh" placeholder="Füge hier dein ungefiltertes Rohmaterial ein. Je authentischer und roher, desto besser. Keine Vorformatierung nötig." style="min-height:100px;"></textarea>
+          </div>
+          <div class="ib-row">
+            <label class="ib-label">Welches Format soll entstehen?</label>
+            <input class="ib-input" id="ib-format" type="text" placeholder="z.B. LinkedIn-Post, Blogartikel, Newsletter-Intro" style="min-height:auto;">
+          </div>
+          <div class="ib-row">
+            <label class="ib-label">Dein "Anker" – der Satz mit dem meisten "Bumms" (optional)</label>
+            <input class="ib-input" id="ib-anker" type="text" placeholder="z.B. 'Effizienz ist die höfliche Form der Selbstausbeutung.'" style="min-height:auto;">
+          </div>
+        </div>
+        <div class="ib-footer">
+          <span style="font-size:12px;color:var(--text-subtle);">Rohmaterial und Format ausfüllen</span>
+          <button class="ib-run-btn" onclick="generateIb()">▶ Prompts generieren</button>
+        </div>
+        <div class="ib-phase-wrap" id="ib-output">
+          <div class="ib-phase">
+            <div class="ib-phase-label">Phase 1: Analyse-Prompt (zuerst abschicken)</div>
+            <div class="ib-phase-output" id="ib-out-1">
+              <button class="ib-copy-btn" onclick="copyIb('ib-out-1')">Kopieren</button>
+              <span id="ib-text-1"></span>
+            </div>
+          </div>
+          <div class="ib-phase">
+            <div class="ib-phase-label">Phase 2: Schreib-Prompt (nach der Analyse abschicken)</div>
+            <div class="ib-phase-output" id="ib-out-2">
+              <button class="ib-copy-btn" onclick="copyIb('ib-out-2')">Kopieren</button>
+              <span id="ib-text-2"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: KI als Chef-Analyst -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Der kreative Funke: KI als Chef-Analyst</h2>
+        <p>Muster finden, Thesen bilden, blinde Flecken aufdecken</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die KI hat eine Eigenschaft, die uns Menschen oft fehlt: Sie ist emotionslos objektiv und kann riesige Mengen an unstrukturiertem Text in Millisekunden auf <strong>wiederkehrende Muster</strong> prüfen.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">🔍</div>
+        <div class="callout-text">
+          <strong>Das Kundenfeedback-Beispiel</strong>
+          <p>Du hast 20 E-Mails mit Feedback. Du liest: "Danke, war super." Die KI liest: "15 Personen haben das Wort 'endlich' benutzt. Das bedeutet, dein Produkt löst einen langen Leidensdruck." Dein Marketing-Takeaway: Du wirbst ab sofort nicht mehr mit "Effizienz", sondern mit "Endlich Erleichterung."</p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">🧪</div>
+        <div class="callout-text">
+          <strong>Der Muster-Erkennungs-Prompt</strong>
+          <p>"Hier sind meine Notizen/Transkripte der letzten Zeit. Analysiere diese Daten: 1. Welche versteckten Gemeinsamkeiten oder Ängste ziehen sich wie ein roter Faden durch? 2. Welche Fragen stellen meine Kunden zwischen den Zeilen, die ich noch nicht explizit beantwortet habe? 3. Welches Thema hat das Potenzial für eine konträre Meinung zum Marktstandard?"</p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-text">
+          <strong>Der "Blinden Fleck"-Prompt</strong>
+          <p>"Basierend auf meinem Wissen in diesen Dokumenten: Wo bin ich vielleicht zu voreingenommen? Welche logische Gegenposition könnte ein Skeptiker einnehmen? Hilf mir, mein Argument so zu schärfen, dass es auch Kritiker überzeugt."</p>
+        </div>
+      </div>
+
+      <p>Ein Experte ist jemand, der nicht nur Fakten aufzählt, sondern <strong>Thesen</strong> aufstellt. Aus der Beobachtung "Kunden, die viel planen, kommen oft nicht ins Handeln" macht die KI-Analyse: "Es scheint eine Korrelation zwischen 'Over-Planning' und 'Angst vor Sichtbarkeit' zu geben." Deine neue These: "Warum ein perfekter Content-Plan das sicherste Anzeichen dafür ist, dass du dich vor deinem Erfolg versteckst."</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Synthese – Deine Seele, ihre Power -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Synthese: Deine Seele, ihre Power</h2>
+        <p>Wie du verhindert, dass die KI deine Kante rundlutscht</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die größte Gefahr bei der KI-Zusammenarbeit ist die <strong>Verwässerung</strong>. Du gibst ihr einen genialen, kantigen Gedanken und die KI packt so viel "Sicherheit" und Standard-Formulierungen drumherum, dass die Kante am Ende rundgelutscht ist.</p>
+
+      <h3>Das "Anker-Prinzip"</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Suche aus deinem Rohmaterial den Satz oder Gedanken heraus, der am meisten "Bumms" hat. Das ist dein Anker. Die KI muss den gesamten Text um diesen einen Punkt herum aufbauen.</p>
+
+      <div class="anker-box">
+        <div class="anker-label">⚓ Beispiel-Anker</div>
+        <div class="anker-quote">"Effizienz ist die höfliche Form der Selbstausbeutung."</div>
+        <div class="anker-desc">Die KI darf nun nicht schreiben: "Es ist wichtig, produktiv zu sein, aber man sollte auch auf sich achten." Sie muss bei dieser radikalen These bleiben. Kein Aufweichen, kein Ausgleichen, kein "Aber natürlich..."</div>
+      </div>
+
+      <h3>KI-Standard vs. Synthese mit deiner Seele</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Derselbe Gedanke, zweimal aufgeschrieben. Einmal von der KI ohne Anker, einmal mit deiner Seele als Fundament.</p>
+
+      <div class="soul-compare">
+        <div class="soul-toolbar">
+          <button class="soul-tab active" onclick="showSoul('standard', this)">🤖 KI-Standard</button>
+          <button class="soul-tab" onclick="showSoul('seele', this)">❤️ Mit deiner Seele</button>
+        </div>
+        <div class="soul-panel active" id="sp-standard">
+          <div class="inf-label bad">KI-Standard (verwässert)</div>
+          <div class="inf-text bad">"Es ist ratsam, morgens mit der schwersten Aufgabe zu beginnen. Studien zeigen, dass die Willenskraft am frühen Morgen am stärksten ist. Es empfiehlt sich daher, anspruchsvolle Tätigkeiten in die erste Tageshälfte zu legen, um die Produktivität zu maximieren."</div>
+          <div class="inf-verdict bad">❌ Klingt wie ein HR-Handbuch. Korrekt, aber ohne Reibung. Niemand merkt sich das. Niemand teilt das.</div>
+        </div>
+        <div class="soul-panel" id="sp-seele">
+          <div class="inf-label good">Synthese mit deiner Seele (Anker intakt)</div>
+          <div class="inf-text good">"Ganz ehrlich? Ich hasse den Spruch 'Eat the frog'. Aber meine Daten der letzten 12 Monate zeigen: Wenn ich den dicksten Brocken nicht vor 10 Uhr wegräume, verfolgt er mich wie ein schlechtes Gewissen bis zum Feierabend. Also tu ich es. Nicht weil ich ihn liebe. Sondern weil der Rest des Tages danach tatsächlich leichter atmet."</div>
+          <div class="inf-verdict good">✓ Ehrlich, persönlich, mit echter Spannung. Basiert auf deinen Daten ("die letzten 12 Monate"). Nicht replizierbar. Bleibt im Gedächtnis.</div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🎬</div>
+        <div class="callout-text">
+          <strong>Die Zero-Generic-Policy</strong>
+          <p>Prompt für den finalen Text: "Regel 1: Nutze meine originären Daten als Skelett und Fleisch. Regel 2: Wenn du Verbindungen herstellen musst, nutze Logik, aber füge keine Standard-Phrasen hinzu, die nicht in meinem Material stehen. Regel 3: Meine persönlichen Anekdoten sind die Highlights. Sie dürfen nicht gekürzt oder in passive Sprache umgewandelt werden."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Der finale Check -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Die finale Veredelung: Der 3-Fragen-Check</h2>
+        <p>Abschmecken, bevor das Gericht auf den Tisch kommt</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Stell dir diesen Schritt wie das Abschmecken eines 5-Sterne-Gerichts vor. Alle Zutaten sind im Topf, aber jetzt entscheidest du, ob der Eigengeschmack der Hauptzutat (deine Daten) unter der Soße (der KI-Sprache) begraben wurde.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Der Interpretations-Check: Hat die KI dich "begriffen"?</strong>
+          KIs neigen dazu, alles ins Positive oder Neutrale zu ziehen. Wenn deine Daten eine scharfe Kritik an einem Branchentrend waren, hat die KI daraus vielleicht eine "konstruktive Anregung" gemacht. Frage: Spiegelt das Fazit wirklich meine Meinung wider oder ist es ein weichgespülter Kompromiss?
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Der Resonanz-Test: Die Gänsehaut-Probe</strong>
+          Lies den Text mit der Brille deines Lieblingskunden. Merkt der Leser, dass echtes "Blut, Schweiß und Tränen" drinstecken? Suche die Stellen, die auf deinen originären Daten basieren. Hat die KI eine persönliche Geschichte von dir zusammengefasst ("Er erlebte einen Rückschlag"), ändere es zurück in die emotionale Realität: "Ich saß fassungslos vor meinem leeren Konto."
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Der "Aha"-Faktor: Information-Gain-Check</strong>
+          Würde ich diesen Text speichern, wenn ich ihn bei jemand anderem lesen würde? Wenn der Text einen Gedanken enthält, den man nirgendwo anders findet, weil er aus deinem Datensatz stammt, dann hat die Formel funktioniert.
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">🔧</div>
+        <div class="callout-text">
+          <strong>Profi-Tipp: Das Negativ-Beispiel</strong>
+          <p>Wenn die KI deine Daten immer wieder verwässert, gib ihr ein Negativ-Beispiel: "Hier ist ein Text, den jeder schreibt (generisch). Hier sind meine Daten. Ich will, dass das Ergebnis so weit wie möglich vom generischen Text entfernt ist." Dieser Kontrast gibt der KI eine klare Richtung, die schwer zu ignorieren ist.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>KI ist kein Experte, sie ist ein Spiegel</strong>
+          Wirkliche Expertise kommt nur durch deine exklusiven Daten in den Text. Ein kurzer, ehrlicher Erfahrungsbericht ist wertvoller als ein 2.000 Wörter langer Standard-Guide.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Analyse vor Erstellung</strong>
+          Der zweistufige Prozess ist der Unterschied zwischen Wiederkäuen und echtem Information Gain. Lass die KI erst verstehen, was dein Kernargument ist, bevor sie schreibt.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Seele braucht Kante</strong>
+          Deine persönlichen Daten liefern die Reibung, die ein Text braucht, um im Gedächtnis zu bleiben. Die KI soll deine Stimme lauter machen, nicht anders.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Datenschatz heben</strong>
+          Dein Business produziert täglich originäre Daten: Kundengespräche, eigene Zahlen, persönliche Erkenntnisse. Der Schatz liegt schon da. Du musst ihn nur systematisch für die KI aufbereiten.
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Skalierbare Authentizität</strong>
+          Mit diesem Workflow produzierst du Inhalte, die sich nach "dir" anfühlen, in einem Zehntel der Zeit. Nicht trotz KI, sondern durch die richtige Zusammenarbeit mit ihr.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// INFUSION TABS
+function showInf(id, btn) {
+  document.querySelectorAll('.inf-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.inf-tab').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('ip-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// SOUL TABS
+function showSoul(id, btn) {
+  document.querySelectorAll('.soul-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.soul-tab').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('sp-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// DATEN-INFUSIONS-BUILDER
+function generateIb() {
+  var roh = document.getElementById('ib-roh').value.trim();
+  var format = document.getElementById('ib-format').value.trim();
+  var anker = document.getElementById('ib-anker').value.trim();
+  if (!roh || !format) {
+    alert('Bitte fulle Rohmaterial und Format aus.');
+    return;
+  }
+
+  var phase1 = [];
+  phase1.push('Ich futttere dich gleich mit Rohmaterial von mir.');
+  phase1.push('Deine Aufgabe ist es noch NICHT zu schreiben.');
+  phase1.push('Analysiere das Material und erstelle mir:');
+  phase1.push('');
+  phase1.push('1. Eine Liste der 3 wichtigsten Kernaussagen, die meine spezifische Sichtweise widerspiegeln.');
+  phase1.push('2. Eine Liste von individuellen Begriffen oder Metaphern, die ich verwende.');
+  phase1.push('3. Eine Struktur fur einen ' + format + ', der ausschliesslich auf diesem Wissen basiert.');
+  if (anker) {
+    phase1.push('4. Bestattige, dass der Gedanke "' + anker + '" das Herzstuck bleiben soll.');
+  }
+  phase1.push('');
+  phase1.push('Bestatige mit "Bereit", dann sende ich die Daten.');
+  phase1.push('');
+  phase1.push('--- ROHMATERIAL ---');
+  phase1.push(roh);
+  phase1.push('--- ENDE ---');
+
+  var phase2 = [];
+  phase2.push('Erstelle nun den ' + format + ' basierend auf der Analyse.');
+  phase2.push('');
+  phase2.push('Regel 1: Nutze ausschliesslich die Fakten und Argumente aus meinem Rohmaterial.');
+  phase2.push('Regel 2: Wenn eine Information dort nicht vorkommt, erfinde sie nicht.');
+  phase2.push('         Kein allgemeines Internet-Wissen einmischen.');
+  phase2.push('Regel 3: Bleibe zu 100 % bei meiner Logik und meiner Haltung.');
+  phase2.push('Regel 4: Meine personlichen Anekdoten sind die Highlights.');
+  phase2.push('         Nicht kurzen, nicht in passive Sprache umwandeln.');
+  if (anker) {
+    phase2.push('Regel 5: Der Anker-Satz "' + anker + '" ist das Herzstuck.');
+    phase2.push('         Der gesamte Text dreht sich darum. Kein Aufweichen.');
+  }
+
+  document.getElementById('ib-text-1').textContent = phase1.join('\n');
+  document.getElementById('ib-text-2').textContent = phase2.join('\n');
+  document.getElementById('ib-output').style.display = 'block';
+}
+
+function copyIb(elId) {
+  var text = document.getElementById(elId).querySelector('span').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById(elId).querySelector('.ib-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+const questions = [
+  {
+    q: 'Warum produziert die KI ohne originäre Daten nur "Einheitsbrei"?',
+    options: [
+      'Weil die KI absichtlich langweilige Texte generiert.',
+      'Weil die KI auf dem Durchschnitt des Internets trainiert wurde und nur das wiederholt, was sie dort gelernt hat.',
+      'Weil die KI keine kreativen Texte schreiben kann.',
+      'Weil der Nutzer die falschen Prompts einsetzt.'
+    ],
+    correct: 1,
+    feedback: 'Die KI ist eine Weltmeisterin im Wiederkäuen. Sie destilliert den Durchschnitt ihres Trainingsmaterials. Ohne deine exklusiven Daten produziert sie den Durchschnitt des Internets: korrekt, aber austauschbar. Originäre Daten sind der Ausweg.'
+  },
+  {
+    q: 'Was sind "originäre Daten" im Kontext dieses Moduls?',
+    options: [
+      'Daten, die du im Internet recherchiert hast.',
+      'Statistiken aus Fachzeitschriften.',
+      'Alle Informationen, die nicht frei im Netz verfügbar sind: eigene Fallstudien, interne Zahlen, persönliche Erfahrungen, Kundenfeedback.',
+      'KI-generierte Inhalte, die du weiterverarbeitet hast.'
+    ],
+    correct: 2,
+    feedback: 'Originäre Daten sind der Schatz, der nur in deinem Kopf, in deinen Kundenprojekten oder auf deiner Festplatte liegt. Niemand kann sie nachpromten. Genau das macht sie zum stärksten Wettbewerbsvorteil im KI-Zeitalter.'
+  },
+  {
+    q: 'Warum ist der zweistufige Prozess (erst analysieren, dann schreiben) so wichtig?',
+    options: [
+      'Weil die KI technisch zwei separate Anfragen braucht.',
+      'Weil der Analyse-Schritt verhindert, dass die KI rohe Notizen einfach paraphrasiert und mit allgemeinem Wissen auffüllt. Sie versteht erst das Kernargument, bevor sie schreibt.',
+      'Weil es schneller ist als ein einziger langer Prompt.',
+      'Weil KIs nur kurze Texte analysieren können.'
+    ],
+    correct: 1,
+    feedback: 'Der einstufige Ansatz ("Schreib über Zeitmanagement basierend auf diesem Text") führt dazu, dass die KI deine Notizen paraphrasiert und mit Allgemeinwissen auffüllt. Der zweistufige Prozess zwingt sie, zuerst deine Logik und dein Kernargument zu verstehen, bevor sie formuliert.'
+  },
+  {
+    q: 'Was ist das "Context-Stuffing" und was ist seine Gefahr?',
+    options: [
+      'Ein Verfahren, bei dem man der KI zu wenig Kontext gibt.',
+      'Der KI so viel spezifischen Kontext wie möglich geben, um Halluzinationen zu reduzieren. Die Gefahr: Bei zu viel Input neigt die KI trotzdem wieder zu Allgemeinplätzen.',
+      'Ein Plug-in, das automatisch Kontext hinzufügt.',
+      'Das Kopieren von Wettbewerber-Texten als Kontext.'
+    ],
+    correct: 1,
+    feedback: 'Context-Stuffing ist mächtig, hat aber eine Schwäche: Wenn der Input überwältigend groß ist, fällt die KI manchmal in Allgemeinplätze zurück. Deshalb braucht es den expliziten Befehl: "Nutze ausschließlich die Fakten aus meinem Rohmaterial. Wenn etwas dort nicht steht, erfinde es nicht."'
+  },
+  {
+    q: 'Was beschreibt das "Anker-Prinzip" in der Synthese-Phase?',
+    options: [
+      'Ein Keyword, das als erstes in der Headline erscheinen muss.',
+      'Den stärksten, kantigsten Satz aus dem Rohmaterial, um den herum die KI den gesamten Text aufbauen muss, ohne ihn aufzuweichen.',
+      'Den letzten Absatz, der den Text abschließt.',
+      'Eine Verlinkungsstrategie für interne Links.'
+    ],
+    correct: 1,
+    feedback: 'Der Anker ist der Kern deiner Originalität. Er verhindert die Verwässerung: Die KI darf den Text nicht mit "Es ist jedoch auch wichtig zu beachten..." absichern. Sie muss bei der radikalen These bleiben. Beispiel: "Effizienz ist die höfliche Form der Selbstausbeutung" wird nicht aufgeweicht zu "Effizienz hat Vor- und Nachteile."'
+  },
+  {
+    q: 'Was ist die "Verwässerungs-Gefahr" bei der KI-Zusammenarbeit?',
+    options: [
+      'Dass die KI zu viel Text generiert.',
+      'Dass die KI kantigen, originellen Gedanken mit Standard-Formulierungen umgibt, bis die Kante verschwunden ist.',
+      'Dass die KI fremde Texte kopiert.',
+      'Dass die KI zu kurze Antworten liefert.'
+    ],
+    correct: 1,
+    feedback: 'Die größte Gefahr ist nicht, dass die KI falsche Fakten liefert, sondern dass sie richtige, aber langweilige Sätze produziert. Sie schleift die Kante ab und macht aus einer provokativen These eine "ausgewogene Betrachtung". Die Zero-Generic-Policy und das Anker-Prinzip sind die Gegenmittel.'
+  },
+  {
+    q: 'Was zeigt das Kundenfeedback-Beispiel mit dem Wort "endlich"?',
+    options: [
+      'Dass Kundenfeedback immer positiv ist.',
+      'Dass die KI Emotionen analysieren kann, besser als Menschen.',
+      'Wie die KI Muster in Massendaten erkennt, die wir übersehen: 15 von 20 Kunden nutzen "endlich" = langer Leidensdruck. Das ist eine Marketing-Erkenntnis, die man aus Einzellektüre nie gewinnen würde.',
+      'Dass Emojis im Kundenfeedback wichtig sind.'
+    ],
+    correct: 2,
+    feedback: 'Wir lesen Feedback sequenziell und sehen: "Super, danke." Die KI sieht das Muster über alle 20 Texte: "endlich" als wiederkehrendes Signal für aufgestauten Leidensdruck. Diese Mustererkennung ist das, was die KI als Chef-Analyst so mächtig macht.'
+  },
+  {
+    q: 'Was ist der Unterschied zwischen dem KI-Standard und der "Synthese mit deiner Seele" am Beispiel von "Eat the frog"?',
+    options: [
+      'Die Synthese ist länger und detaillierter.',
+      'Der KI-Standard ist sachlicher und professioneller.',
+      'Die Synthese basiert auf echten persönlichen Daten und einer ehrlichen Haltung, was sie unkopiierbar und einprägsam macht. Der Standard klingt wie ein HR-Handbuch.',
+      'Es gibt keinen Unterschied, nur eine andere Formatierung.'
+    ],
+    correct: 2,
+    feedback: 'Der KI-Standard ist korrekt, aber ohne Reibung. Die Synthese sagt: "Ganz ehrlich? Ich hasse den Spruch. Aber meine Daten der letzten 12 Monate zeigen..." Das ist persönlich, basiert auf echten Daten und bleibt im Gedächtnis. Niemand teilt das HR-Handbuch, aber den ehrlichen Widerspruch schon.'
+  },
+  {
+    q: 'Was prüft der "Resonanz-Test" (Gänsehaut-Probe)?',
+    options: [
+      'Ob der Text die richtige Länge hat.',
+      'Ob der Text SEO-optimiert ist.',
+      'Ob die Stellen mit originären Daten lebendig genug sind, und ob die KI persönliche Geschichten in passive Zusammenfassungen verwandelt hat.',
+      'Ob der Text für die KI verständlich ist.'
+    ],
+    correct: 2,
+    feedback: 'Der Resonanz-Test ist gezielt: Suche die Stellen, die auf deinen originären Daten basieren. Hat die KI "Er erlebte einen Rückschlag" draus gemacht, ändere es zurück zu "Ich saß fassungslos vor meinem leeren Konto." Echte Daten brauchen echte Emotionen.'
+  },
+  {
+    q: 'Wie funktioniert das "Negativ-Beispiel" als Technik gegen Verwässerung?',
+    options: [
+      'Du gibst der KI ein schlechtes Beispiel und sagst ihr, genau so zu schreiben.',
+      'Du zeigst der KI einen generischen Standard-Text und sagst ihr, so weit wie möglich davon abzuweichen, während sie deine originären Daten nutzt.',
+      'Du kritisierst den Entwurf der KI öffentlich.',
+      'Du nutzt ein schlechtes Beispiel als Einleitung in deinem Text.'
+    ],
+    correct: 1,
+    feedback: 'Der Kontrast gibt der KI eine klare Richtung: "Hier ist das Generische. Hier sind meine Daten. Das Ergebnis soll so weit wie möglich vom Generischen entfernt sein." Diese Technik ist besonders wirksam, wenn die KI trotz guter Anweisungen immer wieder in Standard-Formulierungen zurückfällt.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+<script>var MODULE_ID = "content-07";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live-Daten: KI als Echtzeit-Sonde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Brain mode toggle comparison */
+.brain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.brain-col {
+  padding: 18px 20px;
+}
+.brain-col.training {
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
+}
+.brain-col.browsing {
+  background: var(--accent-2-light);
+}
+.brain-col-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brain-col.training .brain-col-label { color: var(--text-subtle); }
+.brain-col.browsing .brain-col-label { color: var(--green); }
+.brain-col h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: var(--text);
+}
+.brain-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 7px;
+}
+.brain-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+.badge-pro { background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1; }
+.badge-con { background: var(--red-light); color: var(--red); border: 1px solid #FFBDAD; }
+.badge-use { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+.brain-row p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Preis-Falle Scenario Tabs */
+.preis-sim {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.preis-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.preis-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.preis-tab.active-danger { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.preis-tab.active-safe  { background: var(--accent-2-light); border-color: var(--accent-2); color: var(--green); }
+.preis-body { padding: 14px; }
+.preis-prompt-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.preis-prompt {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 13px; color: var(--text-muted); line-height: 1.6;
+  font-style: italic; margin-bottom: 12px;
+}
+.preis-output {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.75; color: #C9D1D9; min-height: 90px;
+  position: relative; white-space: pre-wrap;
+}
+.preis-result-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.preis-verdict {
+  margin-top: 12px; padding: 10px 14px; border-radius: var(--radius);
+  font-size: 12px; line-height: 1.6;
+}
+.preis-verdict.danger { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.preis-verdict.safe   { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+
+/* Deep Search Builder */
+.dsb-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.dsb-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.dsb-toolbar span {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.dsb-gen-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.dsb-gen-btn:hover { background: var(--accent-2); color: white; }
+.dsb-body { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dsb-left { display: flex; flex-direction: column; gap: 10px; }
+.dsb-field label {
+  display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+}
+.dsb-field input, .dsb-field select {
+  width: 100%; padding: 7px 10px; font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;
+}
+.dsb-field input:focus, .dsb-field select:focus {
+  outline: none; border-color: var(--accent);
+}
+.dsb-checks { display: flex; flex-direction: column; gap: 6px; }
+.dsb-check {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted); cursor: pointer;
+}
+.dsb-check input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+.dsb-check.active { color: var(--text); font-weight: 500; }
+.dsb-right {}
+.dsb-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.dsb-preview {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px; line-height: 1.75; color: #C9D1D9;
+  min-height: 200px; white-space: pre-wrap; position: relative;
+}
+.dsb-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.dsb-copy-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* Link-Check game */
+.linkcheck-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.linkcheck-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+}
+.linkcheck-toolbar span {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.linkcheck-next-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  background: var(--accent-light); color: var(--accent);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.linkcheck-next-btn:hover { background: var(--accent); color: white; }
+.linkcheck-body { padding: 16px; }
+.linkcheck-question { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
+.linkcheck-link-display {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 10px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: #58A6FF; margin-bottom: 12px; word-break: break-all;
+}
+.linkcheck-metadata {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 14px; font-size: 12px; color: var(--text-muted);
+  line-height: 1.7; margin-bottom: 12px;
+}
+.linkcheck-options { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.linkcheck-opt {
+  padding: 8px 18px; font-size: 13px; font-weight: 600;
+  border-radius: var(--radius); cursor: pointer; transition: all 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--border);
+  background: var(--surface);
+}
+.linkcheck-opt:hover { border-color: var(--accent); color: var(--accent); }
+.linkcheck-opt.correct-pick { background: var(--accent-2-light); border-color: #ABF5D1; color: var(--green); }
+.linkcheck-opt.wrong-pick   { background: var(--red-light); border-color: #FFBDAD; color: var(--red); }
+.linkcheck-feedback {
+  padding: 10px 14px; border-radius: var(--radius); font-size: 12px;
+  line-height: 1.6; display: none;
+}
+.linkcheck-feedback.correct { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.linkcheck-feedback.wrong   { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.linkcheck-progress {
+  font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+  text-align: right; margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .brain-grid { grid-template-columns: 1fr; }
+  .brain-col.training { border-right: none; border-bottom: 1px solid var(--border); }
+  .dsb-body { grid-template-columns: 1fr; }
+  .linkcheck-options { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 6 · Recherche &amp; Analyse</div>
+    <h1>Live-Daten: KI als Echtzeit-Sonde</h1>
+    <p>Wann du der KI vertrauen kannst und wann du sie zwingen musst, das Fenster zum aktuellen Internet zu öffnen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir klären den fundamentalen Unterschied zwischen dem "Gedächtnis" der KI und ihrer Fähigkeit, live im Internet zu recherchieren, damit du nie wieder auf veraltete Daten hereinfällst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du wirst instinktiv entscheiden, wann du die KI einfach fragen kannst und wann du sie zwingen musst, das Fenster zum aktuellen Internet zu öffnen.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Training vs Browsing -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Training vs. Browsing: Zwei völlig verschiedene Gehirne</h2>
+        <p>Die versiegelte Bibliothek und das Fenster nach draußen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn du eine KI fragst: "Wer hat gestern das Champions-League-Spiel gewonnen?", gibt es zwei Möglichkeiten: Entweder sie sagt "Ich weiß es nicht", oder, viel gefährlicher, sie rät basierend auf Wahrscheinlichkeiten. Um das zu verstehen, musst du wissen, dass jede KI zwei völlig unterschiedliche Zustände hat.</p>
+
+      <p>Stell dir das
+        <span class="tooltip-word">Training
+          <span class="tooltip-popup">Das Training ist der Prozess, bei dem die KI auf riesigen Textmengen aus dem Internet lernt. Danach wird dieses Wissen "eingefroren". Neue Ereignisse nach diesem Datum sind der KI unbekannt.</span>
+        </span> der KI wie eine gigantische Bibliothek vor. Sie enthält Billionen von Texten, aber ab einem bestimmten Datum, dem
+        <span class="tooltip-word">Knowledge Cut-off
+          <span class="tooltip-popup">Der Knowledge Cut-off ist das Datum, nach dem die KI keine neuen Informationen mehr in ihr Training aufgenommen hat. Ereignisse nach diesem Datum sind ihr schlicht unbekannt.</span>
+        </span>, kamen keine weiteren Informationen mehr hinzu. Das Browsing dagegen ist das Fenster dieser Bibliothek nach draußen.</p>
+
+      <div class="brain-grid">
+        <div class="brain-col training">
+          <div class="brain-col-label">📚 Training (Gedächtnis)</div>
+          <h4>Die versiegelte Bibliothek</h4>
+          <div class="brain-row">
+            <span class="brain-badge badge-pro">+</span>
+            <p>Extrem schnell, volle logische Kapazität, tiefes Kontextwissen</p>
+          </div>
+          <div class="brain-row">
+            <span class="brain-badge badge-con">–</span>
+            <p>Keine Ahnung von heute. Gesetz letzte Woche geändert? Konkurrent hat Preise gesenkt? Unbekannt.</p>
+          </div>
+          <div class="brain-row">
+            <span class="brain-badge badge-use">→</span>
+            <p>Strategie-Konzepte, Code, Grammatik, allgemeine Logik, historische Fakten</p>
+          </div>
+        </div>
+        <div class="brain-col browsing">
+          <div class="brain-col-label">🌐 Browsing (Live-Suche)</div>
+          <h4>Das Fenster nach draußen</h4>
+          <div class="brain-row">
+            <span class="brain-badge badge-pro">+</span>
+            <p>Brandaktuelle Infos, echte Quellen-Links, Markt-Updates in Echtzeit</p>
+          </div>
+          <div class="brain-row">
+            <span class="brain-badge badge-con">–</span>
+            <p>Etwas langsamer, abhängig von der Qualität der gefundenen Webseiten</p>
+          </div>
+          <div class="brain-row">
+            <span class="brain-badge badge-use">→</span>
+            <p>Marktforschung, aktuelle News, Software-Releases, Preisvergleiche, Quellen-Verifizierung</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Das gefährliche Halbwissen</strong>
+          <p>Viele KIs sind darauf programmiert, "hilfreich" zu sein. Wenn sie keine Live-Suche nutzen, versuchen sie oft, die Antwort aus ihrem Training zu <em>extrapolieren</em>. Das klingt dann sehr überzeugend, ist aber im schlimmsten Fall eine gut formulierte Lüge auf Basis veralteter Daten.</p>
+        </div>
+      </div>
+
+      <p>Die goldene Regel: Verlasse dich niemals darauf, dass die KI "schon weiß", was aktuell ist. Wenn es um Fakten geht, die sich innerhalb des letzten Jahres geändert haben könnten, starte deinen Prompt immer mit einer klaren Browsing-Anweisung.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>So aktivierst du das Browsing</strong>
+          <p>"Suche im Internet nach den aktuellsten Entwicklungen zu..." oder "Nutze die Live-Suche, um die jetzigen Preise von... zu finden." Diese Formulierungen signalisieren der KI klar, dass sie ihr Gedächtnis nicht reicht.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Preis-Falle Simulator -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Praxis-Case: Die Preis-Falle</h2>
+        <p>Warum Training bei Preisabfragen gefährlich ist</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Angenommen, du möchtest wissen, ob sich das Abo für ein bekanntes SEO-Tool noch lohnt, und ob die API-Preise für 2026 geändert wurden. Schau dir an, wie unterschiedlich die Ergebnisse ausfallen, je nachdem ob du Training oder Browsing nutzt.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle einen Modus und sieh, welche Antwort die KI liefert.</p>
+
+      <div class="preis-sim">
+        <div class="preis-toolbar">
+          <button class="preis-tab" id="tab-training" onclick="showPreis('training')">📚 Variante A: Training</button>
+          <button class="preis-tab" id="tab-browsing" onclick="showPreis('browsing')">🌐 Variante B: Live-Suche</button>
+        </div>
+        <div class="preis-body" id="preis-body">
+          <div style="font-size:13px;color:var(--text-muted);text-align:center;padding:20px 0;">Wähle einen Modus oben, um den Vergleich zu sehen.</div>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🚨</div>
+        <div class="callout-text">
+          <strong>Merksatz</strong>
+          <p>Wenn die Antwort Auswirkungen auf dein Geld, deine Verträge oder deine aktuelle Strategie hat, ist "Training" dein Feind und "Browsing" dein bester Freund.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Deep Search Prompt Builder -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Deep Search Prompts: Die Kunst des präzisen Suchauftrags</h2>
+        <p>Von der vagen Frage zum echten Researcher-Briefing</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein schlechter Recherche-Prompt lautet: "Suche nach Marketing-Trends für 2026." Das Ergebnis wird eine Liste von Allgemeinplätzen sein. Die KI nimmt hier den Weg des geringsten Widerstands.</p>
+
+      <p>Ein <strong>Deep Search Prompt</strong> ist ein echtes Briefing. Wir nutzen die <strong>Triangulations-Formel</strong>: denselben Sachverhalt aus verschiedenen Blickwinkeln beleuchten, um die Wahrheit zu finden.</p>
+
+      <div class="callout gray" style="margin-bottom:14px;">
+        <div class="callout-icon">🔺</div>
+        <div class="callout-text">
+          <strong>Die vier Bedingungen der Triangulations-Formel</strong>
+          <p><strong>1. Quellen-Vorgabe:</strong> Bestimme, wo gesucht werden soll.<br>
+          <strong>2. Synthese-Zwang:</strong> Die KI muss vergleichen, nicht nur auflisten.<br>
+          <strong>3. Das "Aber" erzwingen:</strong> Suche nach Widersprüchen und kritischen Stimmen.<br>
+          <strong>4. Belegpflicht:</strong> Explizite Quellenangaben fordern.</p>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Stelle deinen Deep Search Prompt zusammen. Wähle dein Thema und aktiviere die gewünschten Tiefenebenen.</p>
+
+      <div class="dsb-wrap">
+        <div class="dsb-toolbar">
+          <span>🔍 Deep Search Builder</span>
+          <button class="dsb-gen-btn" onclick="buildPrompt()">▶ Prompt generieren</button>
+        </div>
+        <div class="dsb-body">
+          <div class="dsb-left">
+            <div class="dsb-field">
+              <label>Thema</label>
+              <input type="text" id="dsb-topic" placeholder="z. B. KI-gestützte SEO-Tools 2026" />
+            </div>
+            <div class="dsb-field">
+              <label>Zeitraum</label>
+              <select id="dsb-zeitraum">
+                <option value="letzten 30 Tage">Letzte 30 Tage</option>
+                <option value="letzten 3 Monate" selected>Letzte 3 Monate</option>
+                <option value="letzten 6 Monate">Letzte 6 Monate</option>
+                <option value="letzten 12 Monate">Letztes Jahr</option>
+              </select>
+            </div>
+            <div class="dsb-field">
+              <label>Quellen-Fokus</label>
+              <select id="dsb-quellen">
+                <option value="hochwertigen Fachmagazinen und Branchen-Blogs">Fachmagazine &amp; Branchen-Blogs</option>
+                <option value="wissenschaftlichen Quellen (.edu, .gov)">Wissenschaftliche Quellen (.edu / .gov)</option>
+                <option value="offiziellen Unternehmens-Websites und Pressemitteilungen">Offizielle Unternehmensseiten</option>
+                <option value="einer Mischung aus Fachmagazinen, Statistikportalen und Experten-Blogs">Gemischte Premium-Quellen</option>
+              </select>
+            </div>
+            <div class="dsb-field">
+              <label>Tiefenebenen aktivieren</label>
+              <div class="dsb-checks">
+                <label class="dsb-check"><input type="checkbox" id="cb-synth" checked> Synthese-Zwang (Quellen vergleichen)</label>
+                <label class="dsb-check"><input type="checkbox" id="cb-aber" checked> Das "Aber" suchen (Widersprüche)</label>
+                <label class="dsb-check"><input type="checkbox" id="cb-belege"> Belegpflicht (URLs + Metadaten)</label>
+                <label class="dsb-check"><input type="checkbox" id="cb-linkcheck"> Link-Check aktivieren</label>
+              </div>
+            </div>
+          </div>
+          <div class="dsb-right">
+            <div class="dsb-preview-label">Dein Prompt</div>
+            <div class="dsb-preview" id="dsb-preview">Fülle die Felder links aus und klicke auf "Prompt generieren"...</div>
+            <button class="dsb-copy-btn" onclick="copyDsbPrompt()">Kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Warum Prozess-Design funktioniert</strong>
+          <p>Wenn die KI nach Widersprüchen suchen muss, findet sie Details, die bei einer Standard-Suche untergehen. Wenn sie Quellen vergleichen muss, erkennt sie, welche Informationen wirklich relevant sind. Du nimmst ihr die Möglichkeit, einfach nur "nett zu plaudern".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Link-Check Game -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Der Link-Check: Schluss mit fiktiven Quellen</h2>
+        <p>Warum KI-Links oft schöner aussehen als sie sind</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>KIs "denken" nicht in echten Verbindungen zum Internet, sondern in Wahrscheinlichkeiten. Wenn du nach einem Artikel der New York Times fragst, weiß die KI: <span class="inline-code">nytimes.com/jahr/monat/tag/artikelname.html</span> ist eine wahrscheinliche Struktur. Sie "bastelt" dir einen Link, der echt aussieht, aber nie existiert hat.</p>
+
+      <p>Die effektivste Methode, Fake-Links zu entlarven: Frage nicht nach dem Link, sondern nach den <strong>Metadaten</strong>. Konsistente Informationen wie Titel, Datum und ein Einleitungssatz machen eine Quelle glaubwürdig. Wenn diese Metadaten widersprüchlich sind, ist der Link sehr wahrscheinlich halluziniert.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Trainiere deinen Blick: Ist die folgende Quelle echt oder halluziniert? Analysiere die Metadaten und entscheide.</p>
+
+      <div class="linkcheck-wrap">
+        <div class="linkcheck-toolbar">
+          <span>🔗 Link-Check Training</span>
+          <button class="linkcheck-next-btn" id="lc-next-btn" onclick="lcNext()" style="display:none;">Nächste →</button>
+        </div>
+        <div class="linkcheck-body">
+          <div class="linkcheck-question" id="lc-question"></div>
+          <div class="linkcheck-link-display" id="lc-link"></div>
+          <div class="linkcheck-metadata" id="lc-meta"></div>
+          <div class="linkcheck-options" id="lc-options"></div>
+          <div class="linkcheck-feedback" id="lc-feedback"></div>
+          <div class="linkcheck-progress" id="lc-progress"></div>
+        </div>
+      </div>
+
+      <div class="callout blue">
+        <div class="callout-icon">📋</div>
+        <div class="callout-text">
+          <strong>Zwei Prompts gegen Fake-Links</strong>
+          <p><strong>Titel-Datum-Check:</strong> "Gib mir für jede Quelle den exakten Titel, das Veröffentlichungsdatum und einen Satz aus der Einleitung. Prüfe, ob die URL tatsächlich diesen Titel aufruft."<br><br>
+          <strong>Browsing-Pflicht:</strong> "Antworte ausschließlich auf Basis von Ergebnissen, die du JETZT gerade durch das Browsing gefunden hast. Nutze keine Links aus deinem internen Gedächtnis."</p>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Die 10%-Regel für kritische Recherchen</strong>
+          <p>Bei Zahlen für Kunden, rechtlichen Infos oder medizinischen Daten gilt: Prüfe mindestens jeden zehnten Link manuell. Wenn der erste Link ein 404-Fehler ist, ist die Wahrscheinlichkeit hoch, dass die gesamte Liste halluziniert wurde.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Training hat ein Ablaufdatum</strong>
+          <p>Das Gedächtnis der KI ist eingefroren. Für alles, was sich in den letzten Monaten geändert haben könnte, brauchst du Browsing, nicht Training.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Selbstbewusstsein ist kein Qualitätsmerkmal</strong>
+          <p>Eine KI, die veraltete Preise mit voller Überzeugung nennt, ist gefährlicher als eine, die sagt "ich weiß es nicht". Konfidenz ist kein Beweis für Aktualität.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Briefing schlägt Frage</strong>
+          <p>Ein präziser Deep Search Prompt mit Quellen-Vorgabe, Synthese-Zwang und Belegpflicht verhindert Oberflächlichkeit. Gib der KI ein Prozess-Design, keine offene Frage.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Struktur ist nicht Existenz</strong>
+          <p>Ein Link, der wie eine URL aussieht, führt nicht automatisch zu einer echten Seite. Fordere Metadaten (Titel, Datum, Einleitungssatz) und prüfe kritische Links manuell.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Skepsis ist Professionalität</strong>
+          <p>Behandle jeden KI-Link als Hypothese, bis du ihn geklickt hast. Die 10%-Regel schützt dich bei kritischen Recherchen vor peinlichen Fehlern gegenüber Kunden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PREIS-FALLE SIMULATOR
+var preisData = {
+  training: {
+    prompt: 'Wie viel kostet das Pro-Abo von Semrush und welche Features sind enthalten?',
+    output: '> Semrush Pro kostet 99,95 USD/Monat.\n\nFeatures:\n- 5 Projekte\n- 500 Keywords tracken\n- 10.000 Ergebnisse / Bericht\n- Site Audit, Position Tracking,\n  On-Page SEO Checker\n\nFuer Freelancer und kleine Teams\nempfohlen.',
+    verdict: 'danger',
+    verdictText: 'Diese Antwort klingt ueberzeugend, koennte aber veraltet sein. Preismodelle aendern sich. Wer auf Basis dieser Daten ein Budget plant, riskiert eine boese Ueberraschung beim Checkout.'
+  },
+  browsing: {
+    prompt: 'Durchsuche die offizielle Semrush-Website sowie aktuelle Testberichte aus dem letzten Monat. Nenne mir die exakten Preise fuer 2026 und pruefe, ob es seit dem Jahreswechsel Aenderungen bei den Limits gab.',
+    output: '> Surfe auf semrush.com/prices... [live]\n\nSemrush Pro (Stand April 2026):\n129,95 USD/Monat (+30 USD seit 2024)\n\nAenderungen seit Januar 2026:\n- Keyword-Limit: 500 -> 300 (Neukunden)\n- API-Credits nun separat abgerechnet\n- Jahresabo: 108,33 USD/Monat\n\nQuellen:\n[1] semrush.com/prices (aufgerufen heute)\n[2] searchengineland.com/semrush-2026',
+    verdict: 'safe',
+    verdictText: 'Echte Fakten fuer die Budgetplanung. Die Preiserhoehung und das geaenderte Limit sind kritische Infos, die das Training nicht kennen konnte. Das ist der Mehrwert des Browsings.'
+  }
+};
+
+function showPreis(mode) {
+  var d = preisData[mode];
+  document.getElementById('tab-training').className = 'preis-tab' + (mode === 'training' ? ' active-danger' : '');
+  document.getElementById('tab-browsing').className = 'preis-tab' + (mode === 'browsing' ? ' active-safe' : '');
+
+  var icon = mode === 'training' ? '📚' : '🌐';
+  var label = mode === 'training' ? 'Variante A: Training (Gedaechtnis)' : 'Variante B: Live-Suche (Browsing)';
+
+  document.getElementById('preis-body').innerHTML =
+    '<div class="preis-prompt-label">Dein Prompt</div>' +
+    '<div class="preis-prompt">' + d.prompt + '</div>' +
+    '<div class="preis-result-label">KI-Antwort</div>' +
+    '<div class="preis-output" id="preis-out"></div>' +
+    '<div class="preis-verdict ' + d.verdict + '" id="preis-verdict" style="display:none;">' + d.verdictText + '</div>';
+
+  var out = document.getElementById('preis-out');
+  var text = d.output;
+  var i = 0;
+  var interval = setInterval(function() {
+    if (i < text.length) {
+      out.textContent += text[i];
+      i++;
+    } else {
+      clearInterval(interval);
+      document.getElementById('preis-verdict').style.display = 'block';
+    }
+  }, 14);
+}
+
+// DEEP SEARCH BUILDER
+function buildPrompt() {
+  var topic = document.getElementById('dsb-topic').value.trim() || '[Thema eintragen]';
+  var zeitraum = document.getElementById('dsb-zeitraum').value;
+  var quellen = document.getElementById('dsb-quellen').value;
+  var synth = document.getElementById('cb-synth').checked;
+  var aber = document.getElementById('cb-aber').checked;
+  var belege = document.getElementById('cb-belege').checked;
+  var linkcheck = document.getElementById('cb-linkcheck').checked;
+
+  var step = 1;
+  var lines = [];
+  lines.push('Deine Aufgabe ist eine Tiefenrecherche zum Thema: ' + topic + '.');
+  lines.push('Gehe dabei wie ein wissenschaftlicher Analyst vor:');
+  lines.push('');
+  lines.push(step++ + '. Recherche: Scanne das Internet nach den aktuellsten Entwicklungen');
+  lines.push('   der ' + zeitraum + '. Fokus auf ' + quellen + '.');
+  lines.push('   Nutze mindestens 5 verschiedene, hochwertige Quellen.');
+
+  if (synth) {
+    lines.push('');
+    lines.push(step++ + '. Vergleich: Liste nicht einfach auf. Welche Gemeinsamkeiten');
+    lines.push('   nennen alle Quellen? Wo gibt es klare Widersprueche zwischen ihnen?');
+  }
+  if (aber) {
+    lines.push('');
+    lines.push(step++ + '. Kritische Pruefung: Suche gezielt nach einer kritischen Stimme');
+    lines.push('   oder einer Gegenmeinung zum aktuellen Konsens zu diesem Thema.');
+  }
+  if (belege) {
+    lines.push('');
+    lines.push(step++ + '. Output: Erstelle eine strukturierte Zusammenfassung. Gib fuer');
+    lines.push('   jede wichtige Behauptung den exakten Titel, das Datum und');
+    lines.push('   die URL der Quelle an.');
+  }
+  if (linkcheck) {
+    lines.push('');
+    lines.push(step++ + '. Link-Check: Ueberpruefe die Erreichbarkeit jeder URL durch');
+    lines.push('   Live-Browsing, bevor du die Antwort ausgibst. Nutze keine');
+    lines.push('   Links aus deinem internen Gedaechtnis.');
+  }
+
+  document.getElementById('dsb-preview').textContent = lines.join('\n');
+}
+
+function copyDsbPrompt() {
+  var text = document.getElementById('dsb-preview').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.dsb-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// LINK CHECK GAME
+var lcItems = [
+  {
+    q: 'Die KI liefert diese Quelle zu deiner Anfrage ueber Social-Media-Statistiken 2026. Echt oder halluziniert?',
+    link: 'https://www.statista.com/statistics/social-media-users-worldwide-2026',
+    meta: 'Titel: "Number of social media users worldwide 2026"\nDatum: 15. Januar 2026\nEinleitung: "As of early 2026, approximately 5.24 billion people use social media, representing a 4.2% year-over-year increase."',
+    answer: 'echt',
+    feedback: 'Richtig. Statista-URLs folgen genau diesem Muster, Datum und Inhalt sind konsistent, und die Einleitung passt plausibel zur Struktur. Trotzdem: Link immer klicken.'
+  },
+  {
+    q: 'Du fragst nach aktuellen Benchmarks fuer E-Mail-Marketing. Die KI gibt dir diese Quelle. Echt oder halluziniert?',
+    link: 'https://blog.hubspot.com/marketing/email-marketing-benchmarks-2026-q1-report',
+    meta: 'Titel: "Email Marketing Benchmarks Report Q1 2026"\nDatum: 3. Maerz 2026\nEinleitung: "Our analysis of 500 million emails shows average open rates have climbed to 38.7% across all industries."',
+    answer: 'verdaechtig',
+    feedback: 'Vorsicht. Die URL-Struktur klingt plausibel, aber HubSpot veroeffentlicht solche Reports normalerweise nicht unter diesem exakten Pfad. Der Link "bastelt" eine bekannte Domain mit einem plausiblen Pfad zusammen. Manuell pruefen!'
+  },
+  {
+    q: 'Fuer eine Wettbewerberanalyse liefert dir die KI diesen Techcrunch-Artikel. Echt oder halluziniert?',
+    link: 'https://techcrunch.com/2026/02/14/openai-acquires-figma-design-platform',
+    meta: 'Titel: "OpenAI acquires Figma in $20 billion deal"\nDatum: 14. Februar 2026\nEinleitung: "OpenAI confirmed today that it has reached an agreement to acquire design platform Figma, marking the largest acquisition in the companys history."',
+    answer: 'halluziniert',
+    feedback: 'Halluziniert. TechCrunch-URLs folgen zwar dem Datum-Format, aber diese Akquisition hat nicht stattgefunden. Die KI hat eine plausible URL-Struktur + eine spektakulaere Geschichte konstruiert. Klassisches Muster bei Fake-Links.'
+  },
+  {
+    q: 'Du recherchierst KI-Regulierung in der EU. Die KI gibt dir diese Quelle. Echt oder halluziniert?',
+    link: 'https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai',
+    meta: 'Titel: "Regulatory framework on AI"\nDatum: (kein Datum angegeben)\nEinleitung: "The AI Act is the first-ever legal framework on AI, which addresses the risks of AI and positions Europe to play a leading role globally."',
+    answer: 'echt',
+    feedback: 'Echt. Diese URL existiert wirklich auf der offiziellen EU-Website. Das fehlende Datum ist bei Regulatory-Seiten normal, da sie laufend aktualisiert werden. Offizielle .eu-Domains sind zuverlaessiger als Blog-URLs.'
+  },
+  {
+    q: 'Fuer ein Kundenprojekt zu Content-Marketing-ROI gibt dir die KI diese Quelle. Echt oder halluziniert?',
+    link: 'https://contentmarketinginstitute.com/articles/2026/content-marketing-roi-study-b2b',
+    meta: 'Titel: "2026 B2B Content Marketing ROI Study: Key Findings"\nDatum: 8. April 2026\nEinleitung: "Brands that invest in content marketing see an average 347% ROI over a 12-month period, according to our survey of 1,200 marketers."',
+    answer: 'verdaechtig',
+    feedback: 'Vorsicht. CMI veroeffentlicht echte Studien, aber diese URL-Struktur und die spezifische Zahl (347% ROI) klingen zu rund. CMI-Artikel haben ueblicherweise andere URL-Muster. Metadaten-Konsistenz allein reicht nicht: Link klicken.'
+  }
+];
+
+var lcCurrent = 0;
+var lcAnswered = false;
+
+function lcRender() {
+  var item = lcItems[lcCurrent];
+  document.getElementById('lc-question').textContent = item.q;
+  document.getElementById('lc-link').textContent = item.link;
+  document.getElementById('lc-meta').innerHTML = item.meta.replace(/\n/g, '<br>');
+  document.getElementById('lc-feedback').style.display = 'none';
+  document.getElementById('lc-feedback').className = 'linkcheck-feedback';
+  document.getElementById('lc-next-btn').style.display = 'none';
+  document.getElementById('lc-progress').textContent = (lcCurrent + 1) + ' / ' + lcItems.length;
+  lcAnswered = false;
+
+  var opts = document.getElementById('lc-options');
+  opts.innerHTML = '';
+  ['Echt', 'Verdaechtig', 'Halluziniert'].forEach(function(label) {
+    var btn = document.createElement('button');
+    btn.className = 'linkcheck-opt';
+    btn.textContent = label;
+    var val = label.toLowerCase().replace('\u00e4', 'ae');
+    btn.onclick = function() { lcAnswer(val, btn); };
+    opts.appendChild(btn);
+  });
+}
+
+function lcAnswer(pick, btn) {
+  if (lcAnswered) return;
+  lcAnswered = true;
+  var item = lcItems[lcCurrent];
+  var fb = document.getElementById('lc-feedback');
+  document.querySelectorAll('.linkcheck-opt').forEach(function(b) {
+    b.onclick = null;
+    b.style.opacity = '0.5';
+  });
+  btn.style.opacity = '1';
+
+  if (pick === item.answer) {
+    btn.className = 'linkcheck-opt correct-pick';
+    fb.className = 'linkcheck-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!</strong> ' + item.feedback;
+  } else {
+    btn.className = 'linkcheck-opt wrong-pick';
+    fb.className = 'linkcheck-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Nicht ganz.</strong> ' + item.feedback;
+    // highlight correct answer
+    document.querySelectorAll('.linkcheck-opt').forEach(function(b) {
+      var val = b.textContent.toLowerCase().replace('\u00e4', 'ae');
+      if (val === item.answer) b.className = 'linkcheck-opt correct-pick';
+    });
+  }
+  fb.style.display = 'block';
+  if (lcCurrent < lcItems.length - 1) {
+    document.getElementById('lc-next-btn').style.display = 'block';
+  } else {
+    document.getElementById('lc-next-btn').style.display = 'block';
+    document.getElementById('lc-next-btn').textContent = 'Neu starten';
+  }
+}
+
+function lcNext() {
+  if (lcCurrent < lcItems.length - 1) {
+    lcCurrent++;
+    lcRender();
+  } else {
+    lcCurrent = 0;
+    document.getElementById('lc-next-btn').textContent = 'Naechste \u2192';
+    lcRender();
+  }
+}
+
+lcRender();
+
+// QUIZ
+var questions = [
+  {
+    q: 'Was bedeutet "Knowledge Cut-off" bei einer KI?',
+    options: [
+      'Die maximale Anzahl an Zeichen, die die KI verarbeiten kann.',
+      'Das Datum, nach dem keine neuen Informationen mehr ins Training eingeflossen sind.',
+      'Der Zeitpunkt, ab dem die KI keine weiteren Anfragen beantwortet.',
+      'Die Grenze, ab der die KI unzuverlaessige Antworten liefert.'
+    ],
+    correct: 1,
+    feedback: 'Der Knowledge Cut-off ist das "Einfrierdatum" des KI-Wissens. Was danach passiert ist, kennt die KI schlicht nicht, auch wenn sie so tut, als ob.'
+  },
+  {
+    q: 'Wofuer ist "Training" (Gedaechtnis) besonders gut geeignet?',
+    options: [
+      'Aktuelle Preisabfragen und Software-Releases.',
+      'Strategie-Konzepte, Code-Erstellung und historische Fakten.',
+      'Marktforschung und aktuelle Wettbewerber-Analysen.',
+      'Quellen-Verifizierung und Link-Checks.'
+    ],
+    correct: 1,
+    feedback: 'Das Training glaenzt bei Aufgaben, bei denen Aktualitaet keine Rolle spielt: Logik, Code, Konzepte, Geschichte. Sobald es um die Gegenwart geht, braucht man Browsing.'
+  },
+  {
+    q: 'Warum ist eine KI, die veraltete Infos sehr selbstbewusst praesentiert, besonders gefaehrlich?',
+    options: [
+      'Weil sie dann mehr Strom verbraucht als eine unsichere KI.',
+      'Weil Konfidenz faelschlicherweise als Qualitaetsmerkmal interpretiert wird und falsche Entscheidungen triggert.',
+      'Weil selbstbewusste Antworten immer laenger sind und mehr Zeit kosten.',
+      'Weil die KI dann grundsaetzlich alle Quellen erfindet.'
+    ],
+    correct: 1,
+    feedback: 'Konfidenz ist kein Beweis fuer Aktualitaet. Eine KI, die veraltete Preise mit voller Ueberzeugung nennt, ist gefaehrlicher als eine, die ihre Unsicherheit signalisiert.'
+  },
+  {
+    q: 'Was ist der Kern der Triangulations-Formel fuer Deep Search Prompts?',
+    options: [
+      'Einen Sachverhalt aus verschiedenen Blickwinkeln beleuchten, um die Wahrheit zu finden.',
+      'Genau drei Quellen fuer jede Recherche anzufordern.',
+      'Die KI immer auf drei verschiedenen Tabs gleichzeitig zu nutzen.',
+      'Erst nach dem Ergebnis zu fragen, dann nach der Quelle.'
+    ],
+    correct: 0,
+    feedback: 'Triangulieren bedeutet, denselben Sachverhalt aus verschiedenen Winkeln zu beleuchten: Quellen vergleichen, Widersprueche suchen, Belege fordern. Das verhindert Oberflachlichkeit.'
+  },
+  {
+    q: 'Was bedeutet "Synthese-Zwang" in einem Deep Search Prompt?',
+    options: [
+      'Die KI muss die Antwort in einem bestimmten Format ausgeben.',
+      'Die KI darf nicht nur auflisten, sie muss Quellen vergleichen und bewerten.',
+      'Die KI muss ihre Antwort mit einer anderen KI abgleichen.',
+      'Der Nutzer muss die Quellen selbst zusammenfassen.'
+    ],
+    correct: 1,
+    feedback: 'Ohne Synthese-Zwang listet die KI einfach Stichpunkte. Der Mehrwert entsteht erst, wenn sie Quellen vergleicht und erkennt, welche Informationen wirklich relevant sind.'
+  },
+  {
+    q: 'Warum kann eine KI Links generieren, die wie echte URLs aussehen, aber auf nicht existierende Seiten fuehren?',
+    options: [
+      'Weil die KI keinen Internetzugang hat und alle Links erfindet.',
+      'Weil KIs in Wahrscheinlichkeiten denken und plausible URL-Strukturen konstruieren koennen, ohne die Existenz zu pruefen.',
+      'Weil die Webseiten nach der Generierung geloescht werden.',
+      'Weil KIs nur Links aus ihren Trainingsdaten ausgeben duerfen.'
+    ],
+    correct: 1,
+    feedback: 'KIs kennen die typischen URL-Strukturen grosser Websites. Sie "basteln" daraus plausible Links, ohne zu pruefen, ob die Seite wirklich existiert. Struktur ist nicht Existenz.'
+  },
+  {
+    q: 'Was sind die drei Metadaten, die du laut Titel-Datum-Check von der KI fordern solltest?',
+    options: [
+      'Domain-Name, Seitenrang und letztes Update.',
+      'Autor, Verlag und Kategorie.',
+      'Exakter Titel, Veroeffentlichungsdatum und ein Satz aus der Einleitung.',
+      'Wortanzahl, Sprache und Erscheinungsland.'
+    ],
+    correct: 2,
+    feedback: 'Titel, Datum und Einleitungssatz muessen konsistent zueinander sein und zur angegebenen URL passen. Wenn diese drei Informationen widerspruchsfrei sind, steigt die Glaubwuerdigkeit der Quelle.'
+  },
+  {
+    q: 'Wann gilt die 10%-Regel beim Link-Check?',
+    options: [
+      'Bei allen Recherchen, egal wie unwichtig.',
+      'Nur bei Recherchen mit mehr als 100 Links.',
+      'Bei kritischen Recherchen wie Zahlen fuer Kunden, rechtlichen Infos oder medizinischen Daten.',
+      'Nur wenn der erste Link bereits ein Fehler war.'
+    ],
+    correct: 2,
+    feedback: 'Bei kritischen Informationen, die Konsequenzen haben, prufst du mindestens jeden zehnten Link manuell. Bei kurzen Listen jeden. Ein einziger 404-Fehler am Anfang kann die ganze Liste entwerten.'
+  },
+  {
+    q: 'Was sollte der erste Schritt sein, wenn du aktuelle Preisinformationen eines Tools benotigst?',
+    options: [
+      'Die KI ohne weiteren Kontext nach dem Preis fragen.',
+      'Den Preis aus einem alten Screenshot schaetzen.',
+      'Explizit die Live-Suche aktivieren und die offizielle Website sowie aktuelle Testberichte durchsuchen lassen.',
+      'Immer direkt auf der Website nachschauen, ohne KI zu nutzen.'
+    ],
+    correct: 2,
+    feedback: 'Explizite Browsing-Anweisung plus Quellenspezifikation ist die richtige Vorgehensweise. Das Training kennt den aktuellen Preis nicht und wuerde mit Konfidenz veraltete Daten nennen.'
+  },
+  {
+    q: 'Welche Formulierung aktiviert am deutlichsten das Browsing der KI?',
+    options: [
+      '"Weisst du, was heute ueber X berichtet wird?"',
+      '"Nutze die Live-Suche, um die aktuellen Entwicklungen zu X zu finden."',
+      '"Was denkst du ueber die aktuelle Situation bei X?"',
+      '"Erinnere dich an die neuesten Infos zu X."'
+    ],
+    correct: 1,
+    feedback: 'Eine klare, direkte Anweisung wie "Nutze die Live-Suche" oder "Suche im Internet" signalisiert der KI unmissverstaendlich, dass das interne Gedaechtnis nicht ausreicht.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "recherche-02";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

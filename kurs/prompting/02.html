@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul 2: Fortgeschrittene Formatierung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* ═══════════════════════════════════
+   INTERACTIVE: DELIMITER BUILDER
+═══════════════════════════════════ */
+.delim-builder {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.delim-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.delim-toolbar-label {
+  font-size: 11px; font-weight: 500; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-right: 4px;
+}
+.delim-btn {
+  padding: 4px 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.delim-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.delim-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.delim-panels { display: grid; grid-template-columns: 1fr 1fr; }
+.delim-panel {
+  padding: 14px;
+}
+.delim-panel:first-child { border-right: 1px solid var(--border); }
+.delim-panel-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace;
+}
+.delim-textarea {
+  width: 100%; min-height: 120px; resize: vertical;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; outline: none; line-height: 1.7;
+  color: var(--text); background: var(--surface);
+  transition: border-color 0.15s;
+}
+.delim-textarea:focus { border-color: var(--accent); }
+.delim-preview {
+  min-height: 120px; background: #0D1117;
+  border-radius: var(--radius); padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.75; color: #C9D1D9; border: 1px solid #21262D;
+  white-space: pre-wrap; overflow-x: auto;
+}
+.delim-preview .xml-tag { color: #58A6FF; }
+.delim-preview .xml-content { color: #C9D1D9; }
+.delim-preview .hash-delim { color: #FFA657; }
+.delim-preview .quote-delim { color: #3FB950; }
+
+/* ═══════════════════════════════════
+   INTERACTIVE: BRIEFING BUILDER
+═══════════════════════════════════ */
+.briefing-grid { display: grid; gap: 10px; margin: 14px 0; }
+.briefing-row {
+  display: grid; grid-template-columns: 120px 1fr; gap: 0;
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.briefing-key {
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500;
+  color: var(--accent); display: flex; align-items: center;
+}
+.briefing-input {
+  width: 100%; padding: 10px 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px;
+  border: none; outline: none; background: var(--surface); color: var(--text);
+}
+.briefing-preview-wrap { margin-top: 14px; }
+.briefing-preview {
+  background: #0D1117; border: 1px solid #21262D;
+  border-radius: var(--radius); padding: 16px 18px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.9; color: #C9D1D9; min-height: 80px;
+  position: relative;
+}
+.bp-h1 { color: #FFA657; font-weight: 500; }
+.bp-h2 { color: #58A6FF; }
+.bp-body { color: #C9D1D9; }
+.bp-empty { color: rgba(201,209,217,0.25); }
+.briefing-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.briefing-copy-btn:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+
+/* ═══════════════════════════════════
+   INTERACTIVE: POSITIVE FLIPPER
+═══════════════════════════════════ */
+.flipper-grid { display: grid; gap: 10px; margin: 14px 0; }
+.flipper-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.flipper-card:hover { border-color: var(--accent); }
+.flipper-card.flipped { border-color: var(--accent-2); }
+.flipper-front, .flipper-back {
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.flipper-back { display: none; background: var(--accent-2-light); }
+.flipper-card.flipped .flipper-front { display: none; }
+.flipper-card.flipped .flipper-back { display: flex; }
+.flip-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: var(--radius); flex-shrink: 0; margin-top: 1px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.flip-badge.bad { background: var(--red-light); color: var(--red); border: 1px solid #FFBDAD; }
+.flip-badge.good { background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1; }
+.flip-text { font-size: 13px; line-height: 1.55; flex: 1; }
+.flip-hint {
+  font-size: 11px; color: var(--text-subtle); margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.flipper-card.flipped .flip-text { color: var(--green); font-weight: 500; }
+.flipper-all-btn {
+  margin-top: 10px;
+  padding: 8px 18px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.flipper-all-btn:hover { background: var(--surface-2); color: var(--text); }
+
+/* ═══════════════════════════════════
+   INTERACTIVE: VARIABLE TEMPLATE BUILDER
+═══════════════════════════════════ */
+.var-builder { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 14px 0; }
+.var-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.var-toolbar-label { font-size: 11px; font-weight: 500; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.var-pill-btn {
+  padding: 4px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--accent); cursor: pointer; transition: all 0.15s;
+}
+.var-pill-btn:hover { background: var(--accent-light); border-color: var(--accent); }
+.var-textarea {
+  width: 100%; min-height: 100px; resize: vertical;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  border: none; outline: none; padding: 14px 16px;
+  line-height: 1.75; color: var(--text); background: var(--surface);
+}
+.var-divider { height: 1px; background: var(--border); }
+.var-fill-section { padding: 14px 16px; background: var(--surface-2); border-top: 1px solid var(--border); }
+.var-fill-label { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.var-fill-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.var-fill-row { display: flex; align-items: center; gap: 6px; }
+.var-fill-key {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
+  color: var(--accent); background: var(--accent-light); border: 1px solid #C0D9FF;
+  padding: 3px 8px; border-radius: var(--radius); white-space: nowrap;
+}
+.var-fill-input {
+  font-family: 'Plus Jakarta Sans', monospace; font-size: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 4px 10px; outline: none; width: 140px;
+  background: var(--surface); color: var(--text);
+}
+.var-fill-input:focus { border-color: var(--accent); }
+.var-preview-wrap { border-top: 1px solid var(--border); }
+.var-preview {
+  background: #0D1117; padding: 14px 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.75; color: #C9D1D9; min-height: 60px;
+}
+.var-highlight { color: #FFA657; }
+
+/* ═══════════════════════════════════
+   INTERACTIVE: JSON SIMULATOR
+═══════════════════════════════════ */
+.json-sim { margin: 14px 0; }
+.json-scenarios { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.json-scenario-btn {
+  padding: 6px 14px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.json-scenario-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.json-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.json-col-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace;
+}
+.json-freetext {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+  font-size: 13px; line-height: 1.6; color: var(--text-muted);
+  min-height: 140px;
+}
+.json-structured {
+  background: #0D1117; border: 1px solid #21262D;
+  border-radius: var(--radius); padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.8; color: #C9D1D9; min-height: 140px;
+}
+.json-key { color: #58A6FF; }
+.json-str { color: #3FB950; }
+.json-num { color: #FFA657; }
+.json-bool-true { color: #3FB950; }
+.json-bool-false { color: #F85149; }
+.json-prompt-preview {
+  margin-top: 10px;
+  background: var(--accent-light); border: 1px solid #C0D9FF;
+  border-radius: var(--radius); padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.7; color: var(--accent);
+}
+.json-prompt-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-subtle); margin-bottom: 4px; }
+
+@media(max-width: 600px) {
+  .delim-panels { grid-template-columns: 1fr; }
+  .json-cols { grid-template-columns: 1fr; }
+  .briefing-row { grid-template-columns: 90px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Modul 3 · Prompting</div>
+    <h1>Fortgeschrittene Formatierung</h1>
+    <p>Vom losen Chat zur präzisen Prompt-Architektur. Struktur, die die KI versteht und dein Team skalieren kann.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~12 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>5 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- CALLOUTS -->
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Du lernst, wie du Prompts so strukturierst, dass sie für die KI unmissverständlich sind und als professionelle, skalierbare Vorlagen für dein Team funktionieren.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du beherrschst Delimiter, XML-Tags, Variablen und JSON-Output-Erzwingung für reproduzierbare, halluzinations-arme Ergebnisse.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 1: WARUM STRUKTUR
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Warum KI Struktur liebt</h2>
+        <p>Das Aufmerksamkeits-Problem unstrukturierter Prompts</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn du einen unstrukturierten Textblock eingibst, muss die KI einen Teil ihrer Rechenleistung allein dafür aufwenden, zu sortieren:</p>
+      <ul>
+        <li>Was ist die Anweisung?</li>
+        <li>Was ist der zu bearbeitende Text?</li>
+        <li>Was ist nur Hintergrund-Info?</li>
+        <li>Was ist nur Grammatik?</li>
+      </ul>
+      <p><strong>Struktur im Prompt ist wie ein gut sortierter Werkzeugkoffer.</strong> Klare Trennungen signalisieren der KI sofort, welche Informationen welche Priorität haben.</p>
+
+      <hr class="divider">
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Fokus auf das Wesentliche</strong>
+          <p>Klare Trennungen signalisieren der KI sofort, welche Informationen welche Priorität haben.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Kein Aufmerksamkeits-Verlust</strong>
+          <p>In langen Chats fallen Infos „hinten runter" (<span class="tooltip-word">Kontext-Fenster<span class="tooltip-popup">Das Kontext-Fenster ist der maximale Text, den ein LLM gleichzeitig im Blick hat. Ältere Informationen fallen raus, sobald es voll ist.</span></span>). Strukturierte Prompts fassen Wissen kompakt zusammen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Präzise Navigation im Vektorraum</strong>
+          <p>Je klarer du Kontext abgrenzt, desto genauer steuerst du die KI in die gewünschte Experten-Ecke ihres Wissens.</p>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">☝️</div>
+        <div class="callout-text">
+          <strong>Wann Struktur wirklich Sinn macht</strong>
+          <p>Je komplexer die Aufgabe, desto wichtiger die Struktur. Für eine schnelle Headline-Idee reicht ein einfacher Prompt. Für eine Markenstrategie brauchst du das volle Briefing-Format.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2: DELIMITER & XML
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Delimiter &amp; XML-Tags</h2>
+        <p>Klare Grenzen für klare Ergebnisse</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ohne Trennzeichen muss die KI mühsam filtern, wo deine Anweisung aufhört und der zu bearbeitende Text anfängt. Das erhöht die Fehlerquote.</p>
+      <p><span class="tooltip-word">XML-Tags<span class="tooltip-popup">XML-Tags sind Markierungen wie &lt;instruction&gt;...&lt;/instruction&gt;. LLMs erkennen sie sofort, weil sie ein fundamentales Muster in ihren Trainingsdaten sind.</span></span> sind für LLMs besonders leicht zu erkennen, da sie ein fundamentales Muster in ihren Trainingsdaten sind.</p>
+
+      <h3>Delimiter Builder — Live ausprobieren</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Schreibe deinen Prompt links, wähle einen Delimiter-Stil, und sieh rechts, wie er strukturiert aussieht.</p>
+
+      <div class="delim-builder">
+        <div class="delim-toolbar">
+          <span class="delim-toolbar-label">Stil:</span>
+          <button class="delim-btn active" onclick="setDelimStyle('xml', this)">XML-Tags</button>
+          <button class="delim-btn" onclick="setDelimStyle('hash', this)">### Hash</button>
+          <button class="delim-btn" onclick="setDelimStyle('quote', this)">""" Quotes</button>
+        </div>
+        <div class="delim-panels">
+          <div class="delim-panel">
+            <div class="delim-panel-label">Dein Input</div>
+            <div style="display:grid;gap:8px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;margin-bottom:4px;">ANWEISUNG</div>
+                <textarea class="delim-textarea" id="delim-instruction" placeholder="z.B. Fasse die folgende Kundenbewertung zusammen und extrahiere das Hauptproblem." oninput="updateDelimPreview()" style="min-height:70px;"></textarea>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;margin-bottom:4px;">INHALT</div>
+                <textarea class="delim-textarea" id="delim-content" placeholder="z.B. Der Service war okay, aber die Lieferzeit eine Katastrophe! Drei Wochen gewartet, kein Update." oninput="updateDelimPreview()" style="min-height:70px;"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="delim-panel">
+            <div class="delim-panel-label">Strukturierter Prompt</div>
+            <div class="delim-preview" id="delim-preview">Fülle die Felder links aus...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top:4px;">
+        <strong>Profi-Tipp:</strong> XML-Tags sind die erste Wahl. Sie sind klar, maschinenlesbar und minimieren Verwechslungen mit dem eigentlichen Inhalt.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3: MARKDOWN BRIEFING
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Markdown als Hierarchie-Turbo</h2>
+        <p>Das professionelle Briefing-Format</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>LLMs lieben logische Hierarchien. Markdown-Header (<code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surface-2);padding:1px 6px;border-radius:var(--radius);border:1px solid var(--border);">#</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surface-2);padding:1px 6px;border-radius:var(--radius);border:1px solid var(--border);">##</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surface-2);padding:1px 6px;border-radius:var(--radius);border:1px solid var(--border);">###</code>) helfen der KI, die Wichtigkeit von Informationen zu gewichten.</p>
+      <p>Ein gut strukturierter Prompt sollte wie ein kurzes, professionelles Briefing aufgebaut sein:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Header</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
+          <tbody>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;"># Identity</code></td><td>Wer ist die KI?</td><td>Senior Brand Strategist</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;"># Context</code></td><td>Was ist das Projekt?</td><td>Markteintritt Deutschland, B2B SaaS</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;"># Task</code></td><td>Was soll passieren?</td><td>Schreibe 3 LinkedIn-Posts</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;"># Constraints</code></td><td>Was muss beachtet werden?</td><td>Kein Fachjargon, max. 150 Wörter</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Briefing Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Fülle die vier Sektionen aus und sieh deinen fertigen Prompt in Echtzeit.</p>
+
+      <div class="briefing-grid">
+        <div class="briefing-row">
+          <div class="briefing-key"># Identity</div>
+          <input class="briefing-input" id="b-identity" placeholder="z.B. Senior Brand Strategist, direkt und datengetrieben" oninput="updateBriefing()">
+        </div>
+        <div class="briefing-row">
+          <div class="briefing-key"># Context</div>
+          <input class="briefing-input" id="b-context" placeholder="z.B. Markteintritt Deutschland, B2B SaaS, 50–200 MA" oninput="updateBriefing()">
+        </div>
+        <div class="briefing-row">
+          <div class="briefing-key"># Task</div>
+          <input class="briefing-input" id="b-task" placeholder="z.B. Schreibe 3 LinkedIn-Posts für den Launch" oninput="updateBriefing()">
+        </div>
+        <div class="briefing-row">
+          <div class="briefing-key"># Constraints</div>
+          <input class="briefing-input" id="b-constraints" placeholder="z.B. Kein Jargon, duzen, max. 150 Wörter je Post" oninput="updateBriefing()">
+        </div>
+      </div>
+
+      <div class="briefing-preview-wrap">
+        <div style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Live-Vorschau</div>
+        <div class="briefing-preview" id="briefing-preview">
+          <button class="briefing-copy-btn" onclick="copyBriefing()">Kopieren</button>
+          <span id="briefing-preview-text" style="color:rgba(201,209,217,0.25);">Fülle die Felder aus...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4: VARIABLEN
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Variablen: Prompts als skalierbare Templates</h2>
+        <p>Einmal bauen, immer wieder verwenden</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Du musst das Rad nicht jedes Mal neu erfinden. Platzhalter wie <code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surface-2);padding:1px 6px;border-radius:var(--radius);border:1px solid var(--border);">[PRODUKT_NAME]</code> machen deine Prompts zu dynamischen Werkzeugen.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+        <div class="callout green" style="margin:0;">
+          <div class="callout-icon">♻️</div>
+          <div class="callout-text">
+            <strong>Wiederverwendbarkeit</strong>
+            <p>Tausch nur die Variablen aus. Der logische Kern bleibt gleich.</p>
+          </div>
+        </div>
+        <div class="callout green" style="margin:0;">
+          <div class="callout-icon">👥</div>
+          <div class="callout-text">
+            <strong>Teamfähigkeit</strong>
+            <p>Jeder im Team kann das Template nutzen, auch ohne Prompt-Expertise.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Variable Template Builder</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Schreibe deinen Prompt, markiere Wörter die du variabel machen willst und klicke auf einen Button um sie in Variablen zu verwandeln. Oder füge direkt vordefinierte Variablen ein.</p>
+
+      <div class="var-builder">
+        <div class="var-toolbar">
+          <span class="var-toolbar-label">Einfügen:</span>
+          <button class="var-pill-btn" onclick="insertVar('[PRODUKT]')">[PRODUKT]</button>
+          <button class="var-pill-btn" onclick="insertVar('[ZIELGRUPPE]')">[ZIELGRUPPE]</button>
+          <button class="var-pill-btn" onclick="insertVar('[PLATTFORM]')">[PLATTFORM]</button>
+          <button class="var-pill-btn" onclick="insertVar('[TONALITÄT]')">[TONALITÄT]</button>
+          <button class="var-pill-btn" onclick="insertVar('[USP]')">[USP]</button>
+          <button class="var-pill-btn" onclick="wrapSelection()">[Auswahl → Variable]</button>
+        </div>
+        <textarea class="var-textarea" id="var-input" placeholder="Agiere als Social Media Manager. Schreibe 3 LinkedIn-Posts für das Produkt [PRODUKT]. Die Zielgruppe sind [ZIELGRUPPE]. Der Fokus soll auf dem Benefit [USP] liegen." oninput="updateVarPreview()"></textarea>
+        <div class="var-divider"></div>
+        <div class="var-fill-section" id="var-fill-section" style="display:none;">
+          <div class="var-fill-label">Variablen befüllen</div>
+          <div class="var-fill-grid" id="var-fill-grid"></div>
+        </div>
+        <div class="var-preview-wrap" id="var-preview-wrap" style="display:none;">
+          <div class="var-preview" id="var-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5: POSITIV VS. NEGATIV
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Positive Instruktionen vs. Verbote</h2>
+        <p>Führe die KI, statt sie zu bremsen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>LLMs reagieren deutlich besser auf <strong>positive Anweisungen</strong> als auf Verbote. Wenn du sagst „Benutze keine Fachbegriffe", muss die KI das Konzept „Fachbegriffe" trotzdem verarbeiten. Das verwirrt.</p>
+      <p>Sag der KI präzise, welchen Pfad sie einschlagen soll, statt nur zu sagen, wo sie nicht langlaufen darf.</p>
+
+      <h3>Flipper — Klicke auf eine Karte um sie umzudrehen</h3>
+
+      <div class="flipper-grid" id="flipper-grid"></div>
+      <button class="flipper-all-btn" onclick="flipAll()">Alle umdrehen</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 6: JSON OUTPUT
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <h2>Output-Erzwingung durch JSON</h2>
+        <p>Strukturierte Daten statt Fließtext</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Für analytische Aufgaben (SEO-Keyword-Analyse, Sentiment, Wettbewerbs-Monitoring) ist Fließtext unpraktisch. Mit <span class="tooltip-word">JSON<span class="tooltip-popup">JSON (JavaScript Object Notation) ist ein standardisiertes Datenformat mit Schlüssel-Wert-Paaren. Fast jedes Tool, von Excel bis Zapier, versteht es direkt.</span></span> erzwingst du strukturierte, weiterverarbeitbare Daten.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+        <div class="callout green" style="margin:0;">
+          <div class="callout-icon">🛡️</div>
+          <div class="callout-text">
+            <strong>Halluzinations-Schutz</strong>
+            <p>Die KI muss sich an das Schema halten, was Fehler reduziert.</p>
+          </div>
+        </div>
+        <div class="callout green" style="margin:0;">
+          <div class="callout-icon">⚙️</div>
+          <div class="callout-text">
+            <strong>Weiterverarbeitung</strong>
+            <p>JSON direkt in Excel, Google Sheets oder Zapier importierbar.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>JSON Simulator</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle ein Szenario und sieh den Unterschied zwischen unstrukturiertem Fließtext und sauberem JSON-Output.</p>
+
+      <div class="json-sim">
+        <div class="json-scenarios" id="json-scenarios"></div>
+        <div class="json-cols">
+          <div>
+            <div class="json-col-label">❌ Ohne JSON-Anweisung</div>
+            <div class="json-freetext" id="json-free"></div>
+          </div>
+          <div>
+            <div class="json-col-label">✅ Mit JSON-Anweisung</div>
+            <div class="json-structured" id="json-struct"></div>
+          </div>
+        </div>
+        <div class="json-prompt-preview" id="json-prompt-preview" style="display:none;">
+          <div class="json-prompt-label">Prompt der diesen Output erzeugt</div>
+          <span id="json-prompt-text"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       KEY LEARNINGS
+  ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">✓</div>
+      <div>
+        <h2>Key Learnings</h2>
+        <p>Die wichtigsten Prinzipien auf einen Blick</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">1</div>
+        <div class="chain-content">
+          <strong>Struktur schlägt Chaos</strong>
+          <p>Nutze XML-Tags und Markdown-Header für maximale Klarheit. Ein Profi-Prompt ist ein präzises Briefing, kein loser Chat.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">2</div>
+        <div class="chain-content">
+          <strong>Denke in Templates</strong>
+          <p>Variablen wie <code style="font-family:'JetBrains Mono',monospace;font-size:12px;">[KLIENT]</code> machen Prompts skalierbar und teamfähig.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">3</div>
+        <div class="chain-content">
+          <strong>Führe die KI positiv</strong>
+          <p>Sag präzise, was sie tun soll, statt zu sagen was sie lassen soll.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num" style="background:var(--accent-2);">4</div>
+        <div class="chain-content">
+          <strong>Erzwinge Formate</strong>
+          <p>JSON für analytische Aufgaben: höhere Genauigkeit, direkte Weiterverarbeitung.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       QUIZ
+  ══════════════════════════════════ -->
+  <div class="quiz-section">
+    <h2>🧠 Wissenscheck</h2>
+    <p>Teste, was du über Prompt-Struktur und Formatierung gelernt hast.</p>
+    <div class="quiz-progress">
+      <div class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</div>
+      <div class="quiz-streak" id="streak-display">🔥 Streak: <span id="streak-count">0</span></div>
+    </div>
+    <div id="quiz-game">
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">richtige Antworten</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Quiz wiederholen</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════
+// DELIMITER BUILDER
+// ═══════════════════════════════════
+let delimStyle = 'xml';
+
+function setDelimStyle(style, btn) {
+  delimStyle = style;
+  document.querySelectorAll('.delim-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateDelimPreview();
+}
+
+function updateDelimPreview() {
+  const instruction = document.getElementById('delim-instruction').value.trim();
+  const content = document.getElementById('delim-content').value.trim();
+  const preview = document.getElementById('delim-preview');
+  if (!instruction && !content) {
+    preview.innerHTML = '<span style="color:rgba(201,209,217,0.3)">Fülle die Felder links aus...</span>';
+    return;
+  }
+  let html = '';
+  if (delimStyle === 'xml') {
+    if (instruction) html += `<span class="xml-tag">&lt;instruction&gt;</span>\n<span class="xml-content">${esc(instruction)}</span>\n<span class="xml-tag">&lt;/instruction&gt;</span>`;
+    if (instruction && content) html += '\n\n';
+    if (content) html += `<span class="xml-tag">&lt;content&gt;</span>\n<span class="xml-content">${esc(content)}</span>\n<span class="xml-tag">&lt;/content&gt;</span>`;
+  } else if (delimStyle === 'hash') {
+    if (instruction) html += `<span class="hash-delim">### ANWEISUNG ###</span>\n<span class="xml-content">${esc(instruction)}</span>`;
+    if (instruction && content) html += '\n\n';
+    if (content) html += `<span class="hash-delim">### INHALT ###</span>\n<span class="xml-content">${esc(content)}</span>`;
+  } else {
+    if (instruction) html += `<span class="quote-delim">"""</span>\n<span class="xml-content">${esc(instruction)}</span>\n<span class="quote-delim">"""</span>`;
+    if (instruction && content) html += '\n\n';
+    if (content) html += `<span class="quote-delim">"""</span>\n<span class="xml-content">${esc(content)}</span>\n<span class="quote-delim">"""</span>`;
+  }
+  preview.innerHTML = html;
+}
+
+function esc(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════
+// BRIEFING BUILDER
+// ═══════════════════════════════════
+function updateBriefing() {
+  const identity = document.getElementById('b-identity').value.trim();
+  const context = document.getElementById('b-context').value.trim();
+  const task = document.getElementById('b-task').value.trim();
+  const constraints = document.getElementById('b-constraints').value.trim();
+  const el = document.getElementById('briefing-preview-text');
+  const parts = [];
+  if (identity) parts.push(`<span class="bp-h1"># Identity</span>\n<span class="bp-body">${esc(identity)}</span>`);
+  if (context) parts.push(`<span class="bp-h1"># Context</span>\n<span class="bp-body">${esc(context)}</span>`);
+  if (task) parts.push(`<span class="bp-h1"># Task</span>\n<span class="bp-body">${esc(task)}</span>`);
+  if (constraints) parts.push(`<span class="bp-h1"># Constraints</span>\n<span class="bp-body">${esc(constraints)}</span>`);
+  if (parts.length === 0) {
+    el.innerHTML = '<span style="color:rgba(201,209,217,0.25)">Fülle die Felder aus...</span>';
+  } else {
+    el.innerHTML = parts.join('\n\n');
+    el.style.color = '';
+  }
+}
+
+function copyBriefing() {
+  const text = document.getElementById('briefing-preview-text').innerText;
+  navigator.clipboard.writeText(text);
+  const btn = document.querySelector('.briefing-copy-btn');
+  btn.textContent = 'Kopiert ✓';
+  setTimeout(() => btn.textContent = 'Kopieren', 1500);
+}
+
+// ═══════════════════════════════════
+// VARIABLE BUILDER
+// ═══════════════════════════════════
+function insertVar(v) {
+  const ta = document.getElementById('var-input');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const val = ta.value;
+  ta.value = val.slice(0, start) + v + val.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + v.length;
+  ta.focus();
+  updateVarPreview();
+}
+
+function wrapSelection() {
+  const ta = document.getElementById('var-input');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  if (start === end) { alert('Markiere zuerst ein Wort im Textfeld.'); return; }
+  const selected = ta.value.slice(start, end).toUpperCase().replace(/\s+/g,'_');
+  const varName = '[' + selected + ']';
+  ta.value = ta.value.slice(0, start) + varName + ta.value.slice(end);
+  updateVarPreview();
+}
+
+function updateVarPreview() {
+  const text = document.getElementById('var-input').value;
+  const matches = [...new Set(text.match(/\[[A-ZÄÖÜ_]+\]/g) || [])];
+  const fillSection = document.getElementById('var-fill-section');
+  const previewWrap = document.getElementById('var-preview-wrap');
+
+  if (matches.length === 0) {
+    fillSection.style.display = 'none';
+    previewWrap.style.display = 'none';
+    return;
+  }
+
+  fillSection.style.display = 'block';
+  previewWrap.style.display = 'block';
+
+  const grid = document.getElementById('var-fill-grid');
+  const existing = {};
+  grid.querySelectorAll('input').forEach(inp => { existing[inp.dataset.var] = inp.value; });
+  grid.innerHTML = '';
+  matches.forEach(v => {
+    const row = document.createElement('div');
+    row.className = 'var-fill-row';
+    row.innerHTML = `<div class="var-fill-key">${v}</div><input class="var-fill-input" data-var="${v}" placeholder="Wert eingeben..." value="${existing[v]||''}" oninput="renderVarPreview()">`;
+    grid.appendChild(row);
+  });
+  renderVarPreview();
+}
+
+function renderVarPreview() {
+  const text = document.getElementById('var-input').value;
+  const inputs = document.querySelectorAll('.var-fill-input');
+  let result = esc(text);
+  inputs.forEach(inp => {
+    const varKey = esc(inp.dataset.var);
+    const val = inp.value.trim();
+    if (val) {
+      result = result.split(varKey).join(`<span class="var-highlight">${esc(val)}</span>`);
+    }
+  });
+  document.getElementById('var-preview').innerHTML = result;
+}
+
+// ═══════════════════════════════════
+// POSITIVE FLIPPER
+// ═══════════════════════════════════
+const flipperData = [
+  {
+    bad: 'Schreibe nicht so kompliziert.',
+    good: 'Schreibe in einfacher Sprache, die ein 12-Jähriger sofort versteht.'
+  },
+  {
+    bad: 'Benutze keine Fachbegriffe.',
+    good: 'Erkläre alle Konzepte so, als würdest du sie einem Nicht-Experten erklären. Nutze Alltagssprache.'
+  },
+  {
+    bad: 'Mach den Text nicht zu lang.',
+    good: 'Schreibe maximal 150 Wörter. Jeder Satz muss direkt zur Aussage beitragen.'
+  },
+  {
+    bad: 'Klingt nicht nach KI.',
+    good: 'Schreibe aktiv, direkt und mit konkreten Beispielen. Vermeide abstrakte Phrasen wie "in der heutigen Zeit".'
+  },
+  {
+    bad: 'Keine Werbung.',
+    good: 'Schreibe informativ und faktenbasiert. Der Leser soll am Ende klüger sein, nicht zum Kauf gedrängt.'
+  }
+];
+
+function buildFlipper() {
+  const grid = document.getElementById('flipper-grid');
+  flipperData.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'flipper-card';
+    card.id = 'flip-' + i;
+    card.onclick = () => toggleFlip(i);
+    card.innerHTML = `
+      <div class="flipper-front">
+        <span class="flip-badge bad">Negativ</span>
+        <div><div class="flip-text">${item.bad}</div><div class="flip-hint">Klicken zum Aufdecken</div></div>
+      </div>
+      <div class="flipper-back">
+        <span class="flip-badge good">Positiv</span>
+        <div class="flip-text">${item.good}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function toggleFlip(i) {
+  document.getElementById('flip-' + i).classList.toggle('flipped');
+}
+
+let allFlipped = false;
+function flipAll() {
+  allFlipped = !allFlipped;
+  flipperData.forEach((_, i) => {
+    const card = document.getElementById('flip-' + i);
+    if (allFlipped) card.classList.add('flipped');
+    else card.classList.remove('flipped');
+  });
+  document.querySelector('.flipper-all-btn').textContent = allFlipped ? 'Alle zurückdrehen' : 'Alle umdrehen';
+}
+
+buildFlipper();
+
+// ═══════════════════════════════════
+// JSON SIMULATOR
+// ═══════════════════════════════════
+const jsonScenarios = [
+  {
+    label: 'Sentiment-Analyse',
+    free: 'Die Bewertung klingt insgesamt eher negativ. Der Kunde scheint vor allem mit der Lieferzeit unzufrieden zu sein, obwohl er den Service als okay bezeichnet. Das Hauptproblem scheint die Wartezeit und fehlende Kommunikation zu sein.',
+    struct: `<span class="json-key">"sentiment"</span>: <span class="json-str">"negativ"</span>,\n<span class="json-key">"score"</span>: <span class="json-num">2.1</span>,\n<span class="json-key">"hauptproblem"</span>: <span class="json-str">"Lieferzeit"</span>,\n<span class="json-key">"themen"</span>: [<span class="json-str">"Lieferzeit"</span>, <span class="json-str">"Kommunikation"</span>],\n<span class="json-key">"handlungsbedarf"</span>: <span class="json-bool-true">true</span>`,
+    prompt: 'Analysiere die Bewertung und antworte NUR als valides JSON: {"sentiment": "positiv/negativ/neutral", "score": 1-5, "hauptproblem": "text", "themen": [], "handlungsbedarf": true/false}'
+  },
+  {
+    label: 'Keyword-Analyse',
+    free: 'Die wichtigsten Keywords sind wahrscheinlich "Projektmanagement Software", "Team Kollaboration" und "Aufgabenverwaltung". Das Suchvolumen ist schwer einzuschätzen, aber der Begriff scheint relevant zu sein. Es gibt auch einige Longtail-Varianten.',
+    struct: `<span class="json-key">"keywords"</span>: [\n  {\n    <span class="json-key">"term"</span>: <span class="json-str">"Projektmanagement Software"</span>,\n    <span class="json-key">"intent"</span>: <span class="json-str">"commercial"</span>,\n    <span class="json-key">"prioritaet"</span>: <span class="json-str">"hoch"</span>\n  },\n  {\n    <span class="json-key">"term"</span>: <span class="json-str">"Team Kollaboration Tool"</span>,\n    <span class="json-key">"intent"</span>: <span class="json-str">"informational"</span>,\n    <span class="json-key">"prioritaet"</span>: <span class="json-str">"mittel"</span>\n  }\n]`,
+    prompt: 'Analysiere die Keywords und antworte NUR als JSON: {"keywords": [{"term": "...", "intent": "commercial/informational/navigational", "prioritaet": "hoch/mittel/niedrig"}]}'
+  },
+  {
+    label: 'Wettbewerbs-Check',
+    free: 'Das Unternehmen scheint im Markt gut positioniert zu sein. Die Preise liegen im mittleren Segment. Der Hauptvorteil gegenüber der Konkurrenz scheint die einfache Bedienung zu sein, aber es fehlen einige Features die Konkurrenten anbieten.',
+    struct: `<span class="json-key">"position"</span>: <span class="json-str">"mid-market"</span>,\n<span class="json-key">"preis_segment"</span>: <span class="json-str">"mittel"</span>,\n<span class="json-key">"staerken"</span>: [<span class="json-str">"UX/Bedienbarkeit"</span>],\n<span class="json-key">"schwaechen"</span>: [<span class="json-str">"Feature-Gap"</span>],\n<span class="json-key">"bedrohung"</span>: <span class="json-str">"mittel"</span>,\n<span class="json-key">"empfehlung"</span>: <span class="json-str">"Feature-Roadmap priorisieren"</span>`,
+    prompt: 'Führe einen Wettbewerbs-Check durch. Antworte NUR als JSON: {"position": "...", "preis_segment": "...", "staerken": [], "schwaechen": [], "bedrohung": "niedrig/mittel/hoch", "empfehlung": "..."}'
+  }
+];
+
+function buildJsonSim() {
+  const scenWrap = document.getElementById('json-scenarios');
+  jsonScenarios.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'json-scenario-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = s.label;
+    btn.onclick = () => selectJsonScenario(i, btn);
+    scenWrap.appendChild(btn);
+  });
+  loadJsonScenario(0);
+}
+
+function selectJsonScenario(i, btn) {
+  document.querySelectorAll('.json-scenario-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadJsonScenario(i);
+}
+
+function loadJsonScenario(i) {
+  const s = jsonScenarios[i];
+  document.getElementById('json-free').textContent = s.free;
+  document.getElementById('json-struct').innerHTML = '{\n' + s.struct + '\n}';
+  document.getElementById('json-prompt-text').textContent = s.prompt;
+  document.getElementById('json-prompt-preview').style.display = 'block';
+}
+
+buildJsonSim();
+
+// ═══════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════
+const questions = [
+  {
+    q: 'Warum verarbeitet eine KI strukturierte Prompts besser als unstrukturierte?',
+    options: ['Weil sie schneller laden', 'Weil weniger Rechenleistung für das Sortieren von Anweisung und Inhalt benötigt wird', 'Weil strukturierte Prompts kürzer sind', 'Weil KI nur XML versteht'],
+    correct: 1,
+    feedback: 'Richtig. Ohne Struktur muss die KI einen Teil ihrer Aufmerksamkeit dafür aufwenden, Anweisung, Inhalt und Kontext zu unterscheiden. Das kostet Genauigkeit.'
+  },
+  {
+    q: 'Warum sind XML-Tags besonders effektiv als Delimiter?',
+    options: ['Weil sie kürzer als andere Delimiter sind', 'Weil sie ein fundamentales Muster in den Trainingsdaten von LLMs sind', 'Weil sie nur für Code verwendet werden', 'Weil KI sie ignoriert'],
+    correct: 1,
+    feedback: 'Korrekt. XML-Tags sind in enormen Mengen in den Trainingsdaten von LLMs vorhanden, was ihre Erkennung besonders zuverlässig macht.'
+  },
+  {
+    q: 'Was steht im "# Identity"-Abschnitt eines Markdown-Briefings?',
+    options: ['Der Name des Nutzers', 'Die Rolle oder Persona, die die KI einnehmen soll', 'Das Ziel des Projekts', 'Das gewünschte Output-Format'],
+    correct: 1,
+    feedback: 'Genau. Identity definiert die Persona der KI, z.B. "Senior Brand Strategist, direkt und datengetrieben". Das steuert den Expertenmodus.'
+  },
+  {
+    q: 'Was ist der Hauptvorteil von Variablen wie [PRODUKT] in Prompts?',
+    options: ['Sie machen Prompts länger und genauer', 'Sie ermöglichen Wiederverwendbarkeit und Teamfähigkeit ohne Neuformulierung', 'Sie verbessern die KI-Kreativität', 'Sie ersetzen XML-Tags'],
+    correct: 1,
+    feedback: 'Richtig. Variablen machen Prompts zu skalierbare Templates. Der logische Kern bleibt gleich, nur die Werte werden ausgetauscht.'
+  },
+  {
+    q: 'Welche Instruktion ist effektiver?',
+    options: ['"Schreibe nicht so kompliziert."', '"Schreibe in einfacher Sprache, die ein 12-Jähriger sofort versteht."', 'Beide sind gleich gut', '"Kein Fachjargon bitte."'],
+    correct: 1,
+    feedback: 'Richtig. Positive Anweisungen geben der KI einen klaren Pfad. Verbote zwingen die KI, das verbotene Konzept zu verarbeiten, was die Qualität senkt.'
+  },
+  {
+    q: 'Was ist JSON im Kontext von Prompt Engineering?',
+    options: ['Eine KI-Modell-Variante', 'Ein Bildformat', 'Ein strukturiertes Datenformat mit Schlüssel-Wert-Paaren', 'Ein Synonym für XML'],
+    correct: 2,
+    feedback: 'Korrekt. JSON steht für JavaScript Object Notation und organisiert Daten in klar beschrifteten Schlüssel-Wert-Paaren. Fast jedes Tool versteht es direkt.'
+  },
+  {
+    q: 'Wie hilft JSON-Output gegen Halluzinationen?',
+    options: ['JSON wird nie halluziniert', 'Die KI muss sich an ein definiertes Schema halten, was willkürliche Erfindungen einschränkt', 'JSON ist kürzer und daher genauer', 'Die KI erkennt JSON als Fakten'],
+    correct: 1,
+    feedback: 'Genau. Ein festes JSON-Schema funktioniert wie ein Korsett. Die KI kann nicht einfach Felder erfinden oder weglassen, was die Fehlerquote senkt.'
+  },
+  {
+    q: 'Wann macht ein strukturierter Prompt mit XML-Tags und Markdown-Headern besonders viel Sinn?',
+    options: ['Immer, bei jedem Prompt', 'Nur bei Prompts auf Englisch', 'Bei komplexen Aufgaben wie tiefen Analysen oder mehrstufigen Briefings', 'Nur wenn man die API direkt nutzt'],
+    correct: 2,
+    feedback: 'Richtig. Für einfache Aufgaben wie eine schnelle Headline reicht ein einfacher Prompt. Bei komplexen Aufgaben zahlt sich der Aufwand klar aus.'
+  },
+  {
+    q: 'Welche "Befehls-Methode" eignet sich am besten für Teammitglieder ohne Prompt-Expertise?',
+    options: ['XML-Tags manuell einfügen', 'Die interaktive Methode: KI fragt die Werte ab', 'Copy & Paste aus einer Prompt-Library', 'JSON-Schema verwenden'],
+    correct: 1,
+    feedback: 'Korrekt. Bei der Befehls-Methode gibt man der KI ein leeres Template und sie fragt die Variablen ab. Das macht Prompts für alle im Team zugänglich.'
+  },
+  {
+    q: 'Was bedeutet "Aufmerksamkeits-Verlust" im Kontext von Kontext-Fenstern?',
+    options: ['Der Nutzer verliert die Aufmerksamkeit beim Lesen', 'Die KI vergisst ältere Informationen, wenn das Kontext-Fenster voll ist', 'Die KI wird mit der Zeit langsamer', 'Strukturierte Prompts lenken die KI ab'],
+    correct: 1,
+    feedback: 'Richtig. Das Kontext-Fenster ist endlich. Wenn es voll ist, fallen ältere Informationen heraus. Kompakte, strukturierte Prompts reduzieren dieses Risiko.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<div class="opt-indicator">${labels[i]}</div><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const labels = ['A', 'B', 'C', 'D'];
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '✓';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = `<strong>✓ Richtig!${streak >= 3 ? ' 🔥 ' + streak + 'er-Streak!' : ''}</strong>${q.feedback}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '✗';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '✓';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = `<strong>✗ Leider falsch.</strong>${q.feedback}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  const rc = document.getElementById('result-card');
+  rc.style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1) { badge = '🏆'; title = 'Prompt-Architekt!'; sub = 'Perfekte Punktzahl. Vollständig verstanden.'; }
+  else if (pct >= 0.8) { badge = '🥇'; title = 'Sehr solide!'; sub = 'Fast perfekt. Du hast die Konzepte drauf.'; }
+  else if (pct >= 0.6) { badge = '🥈'; title = 'Guter Ansatz.'; sub = 'Nochmal durchlesen und du bist oben.'; }
+  else { badge = '📚'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// ─── TOOLTIP POSITIONING ─────────────────────
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var triggerRect = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var popupW = popup.offsetWidth;
+    var popupH = popup.offsetHeight;
+    var triggerCenterX = triggerRect.left + triggerRect.width / 2;
+    var rawLeft = triggerCenterX - popupW / 2;
+    var clampedLeft = Math.max(8, Math.min(rawLeft, vw - popupW - 8));
+    popup.style.left = clampedLeft + 'px';
+    popup.style.top = (triggerRect.top - popupH - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (triggerCenterX - clampedLeft) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "prompting-02";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

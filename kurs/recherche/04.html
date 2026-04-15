@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typische Fehler &amp; Halluzinationen: Dein KI-Immunsystem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* KI-Realitaets-Tabelle */
+.reality-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.reality-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--surface);
+}
+.reality-header {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px; color: var(--text-subtle);
+}
+.reality-row { margin-bottom: 8px; }
+.reality-label {
+  font-size: 10px; font-weight: 600; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 2px;
+}
+.reality-expect { font-size: 12px; color: var(--green); line-height: 1.5; }
+.reality-actual { font-size: 12px; color: var(--red); line-height: 1.5; margin-top: 4px; }
+
+/* Halluzinations-Typen Tabs */
+.halluz-sim {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.halluz-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.halluz-tab {
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.halluz-tab.active { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.halluz-body { padding: 14px; }
+.halluz-scenario {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; font-size: 13px; color: var(--text-muted);
+  line-height: 1.65; margin-bottom: 12px;
+}
+.halluz-output {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.75; color: #C9D1D9;
+  min-height: 80px; margin-bottom: 10px; white-space: pre-wrap; position: relative;
+}
+.halluz-output-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.halluz-explain {
+  padding: 10px 14px; border-radius: var(--radius); font-size: 12px;
+  line-height: 1.6; background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red);
+}
+.halluz-signal-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+  margin: 10px 0 6px;
+}
+.halluz-signal {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 4px; background: var(--accent-light);
+  color: var(--accent); border: 1px solid var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Sicherheitssystem-Builder */
+.sec-builder {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.sec-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.sec-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.sec-gen-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.sec-gen-btn:hover { background: var(--accent-2); color: white; }
+.sec-body { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sec-left { display: flex; flex-direction: column; gap: 10px; }
+.sec-checks { display: flex; flex-direction: column; gap: 8px; }
+.sec-check-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface); cursor: pointer;
+  transition: all 0.15s;
+}
+.sec-check-item:hover { border-color: var(--accent); }
+.sec-check-item.selected { border-color: var(--accent); background: var(--accent-light); }
+.sec-check-item input[type="checkbox"] { margin-top: 2px; cursor: pointer; flex-shrink: 0; }
+.sec-check-text strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); }
+.sec-check-text span { font-size: 11px; color: var(--text-muted); }
+.sec-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.sec-preview {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px; line-height: 1.75; color: #C9D1D9;
+  min-height: 180px; white-space: pre-wrap; position: relative;
+}
+.sec-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.sec-copy-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* 60-Sekunden-Check */
+.check60-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.check60-header {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.check60-header span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.check60-reset {
+  padding: 4px 12px; font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace;
+}
+.check60-body { padding: 14px; }
+.check60-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: all 0.1s;
+}
+.check60-item:last-child { border-bottom: none; }
+.check60-box {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 4px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; transition: all 0.15s; margin-top: 2px;
+}
+.check60-item.checked .check60-box {
+  background: var(--accent-2); border-color: var(--accent-2); color: white;
+}
+.check60-content strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.check60-content p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+.check60-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+}
+.check60-progress-bar { flex: 1; height: 6px; background: var(--surface); border-radius: 4px; overflow: hidden; }
+.check60-progress-fill { height: 6px; background: var(--accent-2); border-radius: 4px; transition: width 0.3s ease; }
+.check60-score { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .reality-grid { grid-template-columns: 1fr; }
+  .sec-body { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 6 · Recherche &amp; Analyse</div>
+    <h1>Typische Fehler &amp; Halluzinationen: Dein KI-Immunsystem</h1>
+    <p>Warum die KI gerade dann am überzeugendsten klingt, wenn sie komplett falsch liegt, und wie du das systematisch entlarvst.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~20 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir bauen dein digitales Immunsystem auf. Du verstehst nicht nur, dass die KI Fehler macht, sondern warum, und lernst, sie mit einem wasserdichten Verifizierungssystem zu kontrollieren.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du erkennst die subtilen roten Flaggen in KI-Antworten, bevor du den ersten Link klickst, und beherrschst Techniken, die Halluzinationen drastisch reduzieren.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Anatomie der Halluzination -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die Anatomie der Halluzination: Warum die KI "lügt"</h2>
+        <p>Wahrscheinlichkeit vs. Wahrheit</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Das Problem ist ein psychologisches Paradoxon: Die KI klingt gerade dann am überzeugendsten, wenn sie komplett falsch liegt. In der kreativen Texterstellung ist eine Halluzination vielleicht eine nette Metapher. In der Recherche ist sie ein potenzieller Strategie-Killer.</p>
+
+      <p>Das wichtigste Konzept: Eine KI weiß nicht, was ein "Fakt" ist. Sie berechnet bei jedem Wort, welches als nächstes am wahrscheinlichsten folgen sollte. Stell dir das wie ein
+        <span class="tooltip-word">Autocomplete auf Steroiden
+          <span class="tooltip-popup">Dieses Bild beschreibt, wie KI grundsätzlich funktioniert: Sie sagt nicht Wahrheit voraus, sondern das statistisch wahrscheinlichste nächste Wort. Wenn keine Fakten vorhanden sind, wird das plausibel klingende Wort gewählt.</span>
+        </span> vor.</p>
+
+      <p>Dazu kommt der
+        <span class="tooltip-word">Pleaser-Effekt
+          <span class="tooltip-popup">KIs werden darauf trainiert, hilfreich zu sein. Das bedeutet: Eine Antwort gilt in der KI-Programmierung als fast immer "besser" als keine Antwort. Das treibt die KI dazu, Lücken zu füllen, statt sie zuzugeben.</span>
+        </span>: KIs werden darauf trainiert, hilfreich zu sein. Anstatt zuzugeben "Dazu habe ich keine Daten", konstruiert die KI eine Antwort, die zufriedenstellt. Je komplexer die Frage, desto größer die Gefahr.</p>
+
+      <div class="reality-grid">
+        <div class="reality-card">
+          <div class="reality-header">📚 Wissen</div>
+          <div class="reality-row">
+            <div class="reality-label">Erwartung</div>
+            <div class="reality-expect">Abruf von Fakten aus dem Speicher</div>
+          </div>
+          <div class="reality-row">
+            <div class="reality-label">KI-Realität</div>
+            <div class="reality-actual">Berechnung von Wort-Wahrscheinlichkeiten</div>
+          </div>
+        </div>
+        <div class="reality-card">
+          <div class="reality-header">🤝 Ehrlichkeit</div>
+          <div class="reality-row">
+            <div class="reality-label">Erwartung</div>
+            <div class="reality-expect">Sagt "Ich weiß es nicht" bei Unsicherheit</div>
+          </div>
+          <div class="reality-row">
+            <div class="reality-label">KI-Realität</div>
+            <div class="reality-actual">Versucht "hilfreich" zu sein und füllt Lücken</div>
+          </div>
+        </div>
+        <div class="reality-card">
+          <div class="reality-header">🧮 Logik</div>
+          <div class="reality-row">
+            <div class="reality-label">Erwartung</div>
+            <div class="reality-expect">Logik folgt der Wahrheit</div>
+          </div>
+          <div class="reality-row">
+            <div class="reality-label">KI-Realität</div>
+            <div class="reality-actual">Wahrheit wird der grammatischen Logik geopfert</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Das Vakuum-Beispiel</strong>
+          <p>Du lädst einen Vertrag hoch, in dem die Kündigungsfrist fehlt. Du fragst: "Wie hoch ist die Kündigungsfrist?" Die KI findet nichts, weiß aber aus Millionen anderer Verträge, dass "3 Monate zum Quartalsende" ein Standardwert ist. Sie antwortet: "Die Kündigungsfrist beträgt 3 Monate." Sie hat die Lücke mit Wahrscheinlichkeit gefüllt, statt das Fehlen zu melden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Halluzinations-Typen -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Die drei häufigsten Halluzinations-Typen</h2>
+        <p>Phantom-Quellen, Ghost-Quotes und Zahlen-Akrobatik</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Halluzinationen kommen nicht alle gleich. Jeder Typ hat ein anderes Erscheinungsbild und ein anderes Erkennungsmerkmal. Lerne die drei wichtigsten kennen.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf einen Halluzinations-Typ und sieh, wie er in der Praxis aussieht.</p>
+
+      <div class="halluz-sim">
+        <div class="halluz-toolbar">
+          <button class="halluz-tab active" onclick="setHalluz(0, this)">👻 Phantom-Quellen</button>
+          <button class="halluz-tab" onclick="setHalluz(1, this)">💬 Ghost-Quotes</button>
+          <button class="halluz-tab" onclick="setHalluz(2, this)">🔢 Zahlen-Akrobatik</button>
+        </div>
+        <div class="halluz-body" id="halluz-body"></div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🚩</div>
+        <div class="callout-text">
+          <strong>Red-Flag-Liste: Wann sofort misstrauisch sein</strong>
+          <p><strong>Zu perfekte Übereinstimmung:</strong> Die Quelle stützt deine These zu 100 %.<br>
+          <strong>Generische Link-Struktur:</strong> Der Link endet auf Standard-Phrasen wie <span style="font-family:monospace">/report-2026</span> oder <span style="font-family:monospace">/study-summary</span>.<br>
+          <strong>Fehlende Details:</strong> Die KI nennt den Experten, aber kein genaues Datum oder keinen Ort.<br>
+          <strong>"Aalglatte" Sätze:</strong> Ein Zitat klingt so perfekt auf dein Problem zugeschnitten, dass es fast zu schön ist.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Analyse-Fallen -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Die Analysten-Fallen: Fehler jenseits der Halluzination</h2>
+        <p>Aufmerksamkeits-Loch, Mathe-Schwäche, Bestätigungs-Bias</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Neben klassischen Halluzinationen gibt es drei strukturelle Schwächen, die bei der Dokumentenanalyse besonders gefährlich sind.</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>"Lost in the Middle": Das Aufmerksamkeits-Loch</strong>
+          <p>KIs erinnern sich gut an Anfang und Ende langer Dokumente, verlieren aber im Mittelteil oft den Fokus. Du fragst nach einem Detail auf Seite 45 eines 100-seitigen Dokuments. Die KI behauptet felsenfest, die Info stehe nicht drin. Lösung: Weise die KI explizit hin ("Konzentriere dich auf Kapitel X") oder zerlege das Dokument in kleinere Abschnitte.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Die Mathe-Schwäche: Sprachmodell ist kein Taschenrechner</strong>
+          <p>Eine KI "rechnet" nicht wirklich. Sie sagt das wahrscheinlich richtige Ergebnis voraus. Du lässt eine Tabelle mit 20 Posten summieren. Die KI schätzt eine Summe, die im Kontext plausibel klingt, liegt aber oft um ein paar Prozent daneben. Lösung: "Nutze Python (Code Interpreter), um die exakte Summe zu berechnen" oder manuell in Excel prüfen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Der Bestätigungs-Bias: Die KI als Ja-Sager</strong>
+          <p>Wenn deine Frage bereits eine These enthält, bestätigt die KI sie. "Beweise mir, dass Social Media effektiver ist als SEO." Die KI findet Belege für deine These, egal ob sie stimmt. Lösung: Fragen neutral formulieren und explizit beide Seiten fordern: "Vergleiche die Effektivität von Social Media und SEO. Zeige Stärken und Schwächen beider Ansätze."</p>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Zahlen sind Text</strong>
+          <p>Behandle jede von der KI berechnete Zahl als Schätzung, bis sie durch ein Rechen-Tool oder manuell geprüft wurde. Das ist besonders kritisch bei Finanzberichten, Budgets und Statistiken.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Sicherheits-System Builder -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Dein Sicherheits-System: Vier Strategien zur Fehlervermeidung</h2>
+        <p>Grounding, Adversarial Prompting, CoVe und Cross-Check</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wechsle jetzt vom Modus "Begeisterter Nutzer" zum Modus "Souveräner Pilot". Ein guter Pilot vertraut seinen Instrumenten, weiß aber genau, wann sie bei Turbulenzen falsche Werte liefern könnten.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle deine Sicherheitsebenen und generiere deinen persönlichen Sicherheits-Prompt.</p>
+
+      <div class="sec-builder">
+        <div class="sec-toolbar">
+          <span>🛡 Sicherheits-Prompt-Builder</span>
+          <button class="sec-gen-btn" onclick="buildSecPrompt()">▶ Prompt generieren</button>
+        </div>
+        <div class="sec-body">
+          <div class="sec-left">
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">Wähle die Sicherheitsebenen, die du aktivieren willst:</div>
+            <div class="sec-checks" id="sec-checks">
+              <div class="sec-check-item" onclick="toggleSec(this, 0)">
+                <input type="checkbox" id="sc-0" onclick="event.stopPropagation()">
+                <div class="sec-check-text">
+                  <strong>Grounding-Regel</strong>
+                  <span>KI darf nur aus dem Quelldokument antworten, kein externes Wissen</span>
+                </div>
+              </div>
+              <div class="sec-check-item" onclick="toggleSec(this, 1)">
+                <input type="checkbox" id="sc-1" onclick="event.stopPropagation()">
+                <div class="sec-check-text">
+                  <strong>Belegpflicht</strong>
+                  <span>Jede Aussage muss mit direktem Zitat und Seitenzahl belegt sein</span>
+                </div>
+              </div>
+              <div class="sec-check-item" onclick="toggleSec(this, 2)">
+                <input type="checkbox" id="sc-2" onclick="event.stopPropagation()">
+                <div class="sec-check-text">
+                  <strong>Chain of Verification</strong>
+                  <span>KI muss Zitat, Analyse und Antwort in drei Schritten liefern</span>
+                </div>
+              </div>
+              <div class="sec-check-item" onclick="toggleSec(this, 3)">
+                <input type="checkbox" id="sc-3" onclick="event.stopPropagation()">
+                <div class="sec-check-text">
+                  <strong>Interpretations-Markierung</strong>
+                  <span>Alle Schätzungen müssen explizit als "Interpretation" gekennzeichnet sein</span>
+                </div>
+              </div>
+              <div class="sec-check-item" onclick="toggleSec(this, 4)">
+                <input type="checkbox" id="sc-4" onclick="event.stopPropagation()">
+                <div class="sec-check-text">
+                  <strong>Vakuum-Pflicht</strong>
+                  <span>Fehlende Informationen müssen als solche gemeldet, nicht gefüllt werden</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-preview-label">Dein Sicherheits-Prompt</div>
+            <div class="sec-preview" id="sec-preview">Waehle mindestens eine Ebene und klicke auf "Prompt generieren"...</div>
+            <button class="sec-copy-btn" onclick="copySecPrompt()">Kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Adversarial Prompting: Die KI gegen sich selbst einsetzen</strong>
+          <p>1. KI erstellt die Analyse. 2. Neuen Chat öffnen. 3. Auditor-Prompt: "Du bist ein extrem kritischer Faktenprüfer. Hier ist eine Analyse. Vergleiche jeden Punkt mit dem Originaldokument. Markiere alle Aussagen, die nicht direkt belegbar sind oder überinterpretiert wurden." Die KI wechselt vom "kreativen Ersteller" zum "strengen Prüfer".</p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">🔀</div>
+        <div class="callout-text">
+          <strong>Multi-Modell-Cross-Check bei kritischen Daten</strong>
+          <p>Schicke denselben Prompt an zwei verschiedene KI-Modelle. Wo beide übereinstimmen, liegt die Wahrheit. Wo sie voneinander abweichen, liegt das Risiko. Genau dort manuell nachschauen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: 60-Sekunden-Check -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Der 60-Sekunden-Check</h2>
+        <p>Das Schnell-Raster für jedes Analyse-Ergebnis</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Gewöhne dir an, jedes Analyse-Ergebnis durch dieses Kurz-Raster laufen zu lassen. Vier Checks, unter einer Minute, schützen dich vor den häufigsten Fehlern.</p>
+
+      <div class="check60-wrap">
+        <div class="check60-header">
+          <span>⏱ 60-Sekunden-Check</span>
+          <button class="check60-reset" onclick="resetCheck60()">Zurücksetzen</button>
+        </div>
+        <div class="check60-body" id="check60-body">
+          <div class="check60-item" onclick="toggleCheck60(this, 0)">
+            <div class="check60-box" id="cb60-0"></div>
+            <div class="check60-content">
+              <strong>🔗 Link-Check</strong>
+              <p>Führt jeder Link wirklich zum Ziel? Klicke mindestens den ersten, bei kritischen Recherchen jeden.</p>
+            </div>
+          </div>
+          <div class="check60-item" onclick="toggleCheck60(this, 1)">
+            <div class="check60-box" id="cb60-1"></div>
+            <div class="check60-content">
+              <strong>💬 Zitat-Check</strong>
+              <p>Findest du das Zitat per Google-Suche? Wenn nein, ist es sehr wahrscheinlich ein Ghost-Quote.</p>
+            </div>
+          </div>
+          <div class="check60-item" onclick="toggleCheck60(this, 2)">
+            <div class="check60-box" id="cb60-2"></div>
+            <div class="check60-content">
+              <strong>🔢 Logik-Check</strong>
+              <p>Klingen die Zahlen "zu rund" oder zu perfekt? Nachkommastellen sind kein Beweis für Korrektheit.</p>
+            </div>
+          </div>
+          <div class="check60-item" onclick="toggleCheck60(this, 3)">
+            <div class="check60-box" id="cb60-3"></div>
+            <div class="check60-content">
+              <strong>🪞 Bias-Check</strong>
+              <p>Bestätigt die KI nur das, was du hören wolltest? Wenn die Antwort zu perfekt passt, doppelt prüfen.</p>
+            </div>
+          </div>
+        </div>
+        <div class="check60-footer">
+          <div class="check60-progress-bar">
+            <div class="check60-progress-fill" id="check60-fill" style="width:0%"></div>
+          </div>
+          <div class="check60-score" id="check60-score">0 / 4 erledigt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Statistik schlägt Fakt</strong>
+          <p>Die KI priorisiert den plausiblen Satzbau über den faktischen Gehalt. Sie "fühlt" nicht, dass sie etwas erfindet. Für sie ist die halluzinierte Antwort mathematisch genauso valide wie die richtige.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Konfidenz ist kein Qualitätsmerkmal</strong>
+          <p>Eine KI, die falsche Preise mit voller Überzeugung nennt, ist gefährlicher als eine, die ihre Unsicherheit signalisiert. Überzeugungsgrad und Korrektheit sind voneinander unabhängig.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Präzision ist kein Beweis</strong>
+          <p>Eine Nachkommastelle macht eine Zahl nicht korrekt. Zahlen-Akrobatik nutzt Scheinpräzision, um Glaubwürdigkeit vorzutäuschen. Frage nach der Quelle für jede exakte Zahl.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Isolation ist Sicherheit</strong>
+          <p>Trenne externe Suche und interne Dokumentenanalyse strikt voneinander. Die Grounding-Regel gibt der KI die Erlaubnis, eine Lücke zuzugeben, statt sie zu füllen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Der souveräne Pilot prüft</strong>
+          <p>60-Sekunden-Check, Adversarial Prompting, Cross-Check: Diese Techniken machen aus einem "begeisterten Nutzer" einen Profi, der KI wirklich beherrscht.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// HALLUZINATIONS SIMULATOR
+var halluzData = [
+  {
+    label: 'Phantom-Quellen',
+    scenario: 'Du bittest die KI um drei Studien, die den ROI von KI-gestütztem E-Mail-Marketing belegen.',
+    output: 'Hier sind drei relevante Studien:\n\n[1] "AI-Driven Email Marketing ROI Study 2024"\n    Autor: Harvard Business Review Research Lab\n    URL: hbr.org/research/ai-email-roi-2024\n    Kernaussage: +340% ROI vs. traditionellem E-Mail-Marketing\n\n[2] McKinsey Report: "Marketing Automation Impact"\n    URL: mckinsey.com/insights/ai-marketing-2024\n    Ergebnis: 67% der Unternehmen berichten...',
+    explain: 'Diese Studie existiert nicht. Die KI hat die URL so konstruiert, wie sie auf hbr.org logischerweise aussehen muesste. Wenn du klickst, landest du auf einer 404-Seite oder der Startseite.',
+    signal: 'Link endet auf /ai-email-roi-2024 (generische Struktur)'
+  },
+  {
+    label: 'Ghost-Quotes',
+    scenario: 'Du bittest die KI um ein starkes Zitat von Gary Vaynerchuk zum Thema KI im Marketing.',
+    output: '"Die meisten Marketer schauen auf KI wie auf ein Tool. Das ist der groesste Fehler. KI ist kein Tool. KI ist eine Verschiebung der gesamten Spielregeln. Wer das jetzt noch nicht kapiert, wird in drei Jahren fragen, warum er seinen Job verloren hat."\n\n— Gary Vaynerchuk, 2024 bei der\n   Marketing Nation Conference, San Francisco',
+    explain: 'Dieses Zitat klingt exakt nach GaryVee, wurde aber nie so gesagt. Die KI hat seinen typischen Sprachstil imitiert und eine Aussage generiert, die inhaltlich zur Frage passt. Die Veranstaltung "Marketing Nation Conference" ist ebenfalls erfunden.',
+    signal: 'Zitat ist nirgendwo im Netz auffindbar, Veranstaltung nicht verifizierbar'
+  },
+  {
+    label: 'Zahlen-Akrobatik',
+    scenario: 'Du fragst nach der aktuellen Wachstumsrate des Markts fuer KI-Marketing-Software.',
+    output: 'Der globale Markt fuer KI-Marketing-Software waechst derzeit mit einer jaehrlichen Wachstumsrate (CAGR) von 28,47 % und wird bis 2028 ein Volumen von 47,3 Milliarden USD erreichen.\n\nAufschluesslung nach Segment:\n- E-Mail-Automatisierung: 31,2 %\n- Predictive Analytics: 26,8 %\n- Content-Generierung: 29,1 %',
+    explain: 'Die Tendenz (starkes Wachstum) mag stimmen, aber "28,47 %" ist frei erfunden. Die KI nutzt Nachkommastellen, um Praezision vorzutaeuschen. Frag nach der Quelle fuer diese exakte Zahl. Die Antwort wird vage sein.',
+    signal: 'Zu viele Nachkommastellen (28,47%), keine Quelle genannt'
+  }
+];
+
+var currentHalluz = 0;
+
+function renderHalluz() {
+  var d = halluzData[currentHalluz];
+  document.getElementById('halluz-body').innerHTML =
+    '<div style="font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-subtle);font-family:JetBrains Mono,monospace;margin-bottom:6px;">Szenario</div>' +
+    '<div class="halluz-scenario">' + d.scenario + '</div>' +
+    '<div class="halluz-output-label">KI-Antwort (halluziniert)</div>' +
+    '<div class="halluz-output">' + d.output + '</div>' +
+    '<div class="halluz-explain"><strong>Warum das eine Halluzination ist:</strong> ' + d.explain + '</div>' +
+    '<div class="halluz-signal-label">Erkennungsmerkmal</div>' +
+    '<span class="halluz-signal">🚩 ' + d.signal + '</span>';
+}
+
+function setHalluz(idx, btn) {
+  currentHalluz = idx;
+  document.querySelectorAll('.halluz-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  renderHalluz();
+}
+
+renderHalluz();
+
+// SECURITY BUILDER
+var secOptions = [
+  {
+    id: 'sc-0',
+    lines: [
+      'GROUNDING-REGEL:',
+      'Antworte ausschliesslich auf Basis der bereitgestellten Daten.',
+      'Nutze kein externes Wissen aus deinem Training.',
+      'Wenn eine Information nicht im Text steht, antworte zwingend mit:',
+      '"Information im Quelldokument nicht enthalten". Fantasiere nicht.'
+    ]
+  },
+  {
+    id: 'sc-1',
+    lines: [
+      'BELEGPFLICHT:',
+      'Belege jede Kernaussage mit einem direkten Zitat aus dem Dokument.',
+      'Nenne die Seitenzahl oder den Abschnitt.',
+      'Ohne Beleg ist eine Information nur eine Behauptung.'
+    ]
+  },
+  {
+    id: 'sc-2',
+    lines: [
+      'CHAIN OF VERIFICATION:',
+      'Beantworte meine Frage in drei Schritten:',
+      '1. Extrahiere die relevanten Textstellen als Zitate.',
+      '2. Analysiere diese Zitate im Hinblick auf meine Frage.',
+      '3. Formuliere erst dann die finale Antwort.'
+    ]
+  },
+  {
+    id: 'sc-3',
+    lines: [
+      'INTERPRETATIONS-MARKIERUNG:',
+      'Wenn du eine Schaetzung oder Schlussfolgerung abgibst,',
+      'markiere sie explizit als "[INTERPRETATION]" vor der Aussage.'
+    ]
+  },
+  {
+    id: 'sc-4',
+    lines: [
+      'VAKUUM-PFLICHT:',
+      'Wenn eine gesuchte Information nicht im Dokument steht,',
+      'melde das klar. Fuell keine Luecken mit Standardwerten',
+      'oder logischen Vermutungen.'
+    ]
+  }
+];
+
+function toggleSec(item, idx) {
+  var cb = document.getElementById('sc-' + idx);
+  cb.checked = !cb.checked;
+  if (cb.checked) { item.classList.add('selected'); }
+  else { item.classList.remove('selected'); }
+}
+
+function buildSecPrompt() {
+  var selected = [];
+  secOptions.forEach(function(opt) {
+    if (document.getElementById(opt.id).checked) selected.push(opt.lines);
+  });
+  if (selected.length === 0) {
+    document.getElementById('sec-preview').textContent = 'Waehle mindestens eine Ebene aus.';
+    return;
+  }
+  var out = ['WICHTIG FUER DIE QUALITAET:'];
+  var step = 1;
+  selected.forEach(function(lines) {
+    lines.forEach(function(line) {
+      out.push((step++ === 1 || line.endsWith(':')) ? line : '  ' + line);
+    });
+    out.push('');
+    step = 1;
+  });
+  out.push('Bestatige am Ende der Antwort, dass du keine Informationen');
+  out.push('aus deinem allgemeinen Trainingswissen hinzugefuegt hast.');
+  document.getElementById('sec-preview').textContent = out.join('\n').trim();
+}
+
+function copySecPrompt() {
+  navigator.clipboard.writeText(document.getElementById('sec-preview').textContent).then(function() {
+    var btn = document.querySelector('.sec-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// 60-SEKUNDEN-CHECK
+var check60State = [false, false, false, false];
+
+function toggleCheck60(item, idx) {
+  check60State[idx] = !check60State[idx];
+  item.classList.toggle('checked', check60State[idx]);
+  document.getElementById('cb60-' + idx).textContent = check60State[idx] ? '\u2713' : '';
+  updateCheck60Progress();
+}
+
+function updateCheck60Progress() {
+  var done = check60State.filter(Boolean).length;
+  var pct = (done / 4) * 100;
+  document.getElementById('check60-fill').style.width = pct + '%';
+  document.getElementById('check60-score').textContent = done + ' / 4 erledigt';
+}
+
+function resetCheck60() {
+  check60State = [false, false, false, false];
+  [0,1,2,3].forEach(function(i) {
+    var item = document.getElementById('cb60-' + i).parentElement;
+    item.classList.remove('checked');
+    document.getElementById('cb60-' + i).textContent = '';
+  });
+  updateCheck60Progress();
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'Was versteht man unter dem "Pleaser-Effekt" bei KI-Systemen?',
+    options: [
+      'Die KI versucht, den Nutzer mit moeglichst langen Antworten zu beeindrucken.',
+      'Die KI konstruiert eine hilfreiche Antwort, statt eine Datenlücke zuzugeben, weil sie darauf trainiert wurde, nuetzlich zu sein.',
+      'Die KI passt ihren Schreibstil an den bevorzugten Stil des Nutzers an.',
+      'Die KI gibt dem Nutzer immer Recht, um positive Bewertungen zu erhalten.'
+    ],
+    correct: 1,
+    feedback: 'Der Pleaser-Effekt beschreibt den KI-"Zugzwang": Statt "Ich weiss es nicht" zu sagen, konstruiert die KI eine plausibel klingende Antwort. Je spezifischer die Frage, desto groesser die Halluzinationsgefahr.'
+  },
+  {
+    q: 'Wie "rechnet" eine KI im Grunde?',
+    options: [
+      'Sie hat einen eingebauten Taschenrechner-Modus fuer mathematische Operationen.',
+      'Sie berechnet keine Zahlen, sondern sagt das wahrscheinlich korrekte Ergebnis voraus.',
+      'Sie konvertiert alle Zahlen in Binaercode und rechnet damit.',
+      'Sie nutzt eine separate Datenbank fuer Zahlenoperationen.'
+    ],
+    correct: 1,
+    feedback: 'Ein Sprachmodell rechnet nicht. Es sagt das naechste Wort voraus, und bei Zahlen bedeutet das: Es sagt ein plausibles Ergebnis voraus. Deshalb sind KI-berechnete Summen immer manuell zu pruefen.'
+  },
+  {
+    q: 'Was ist das Erkennungsmerkmal einer Phantom-Quelle?',
+    options: [
+      'Die URL ist sehr lang und komplex.',
+      'Der Artikel ist kostenpflichtig und nicht frei abrufbar.',
+      'Der Link fuehrt zu einer 404-Seite oder der allgemeinen Startseite, nicht zum Dokument.',
+      'Die Quelle ist auf Englisch, obwohl du auf Deutsch gefragt hast.'
+    ],
+    correct: 2,
+    feedback: 'Phantom-Quellen sehen strukturell korrekt aus, weil die KI weiss, wie URLs auf grossen Websites aufgebaut sind. Beim Klick landen wir auf einer 404-Seite oder der Homepage, aber nicht beim Dokument.'
+  },
+  {
+    q: 'Was ist "Zahlen-Akrobatik" im Kontext von KI-Halluzinationen?',
+    options: [
+      'Die KI praefindet Zahlen, die zu den allgemeinen Trends passen, und nutzt Nachkommastellen, um Praezision vorzutaeuschen.',
+      'Die KI macht absichtlich Rechenfehler, um den Nutzer zu verwirren.',
+      'Die KI rundet alle Zahlen auf ganze Zahlen auf.',
+      'Die KI gibt Zahlen immer in wissenschaftlicher Notation aus.'
+    ],
+    correct: 0,
+    feedback: '"28,47 % CAGR" klingt praeziser als "ca. 28 %", aber die Nachkommastelle ist erfunden. Praezision ist kein Beweis fuer Korrektheit. Frag immer nach der Quelle fuer exakte Zahlen.'
+  },
+  {
+    q: 'Was bewirkt die Grounding-Regel in einem Analyse-Prompt?',
+    options: [
+      'Sie sorgt dafuer, dass die KI nur auf Webseiten mit ".de"-Domain sucht.',
+      'Sie verbindet die KI mit einem speziellen Faktendatenbank.',
+      'Sie gibt der KI die Erlaubnis, Luecken im Dokument zuzugeben, statt sie mit Trainingswissen zu fuellen.',
+      'Sie begrenzt die Antwortlaenge auf eine festgelegte Zeichenzahl.'
+    ],
+    correct: 2,
+    feedback: 'Ohne Grounding-Regel steht die KI unter dem Druck, hilfreich zu sein und fuellt Luecken mit Standardwissen. Die Grounding-Regel nimmt diesen Druck weg und erlaubt explizit "Information nicht enthalten".'
+  },
+  {
+    q: 'Was ist das Ziel von "Adversarial Prompting"?',
+    options: [
+      'Die KI dazu zu bringen, aggressive oder konfliktreiche Texte zu schreiben.',
+      'Die KI in einem neuen Chat als strengen Faktenpruefer einzusetzen, der das Ergebnis aus dem ersten Chat kritisch prueft.',
+      'Zwei KI-Modelle gleichzeitig dieselbe Frage zu stellen.',
+      'Die KI durch sehr schwierige Fragen in einen Fehler-Modus zu versetzen.'
+    ],
+    correct: 1,
+    feedback: 'Beim Adversarial Prompting wechselt die KI die Rolle: vom kreativen Ersteller zum strengen Pruefer. Dieser Rollenwechsel aktiviert ein anderes Antwortmuster und findet Fehler, die der Ersteller uebersehen hat.'
+  },
+  {
+    q: 'Was bedeutet "Lost in the Middle"?',
+    options: [
+      'Die KI verliert den Faden bei Fragen, die zu viele Themen gleichzeitig behandeln.',
+      'KIs erinnern sich gut an Anfang und Ende von Dokumenten, verlieren aber im Mittelteil oft den Fokus.',
+      'Die KI findet nicht die richtige Antwort, weil die Frage zu allgemein ist.',
+      'Das Kontextfenster der KI ist voll und sie vergisst die ersten Nachrichten.'
+    ],
+    correct: 1,
+    feedback: '"Lost in the Middle" beschreibt ein bekanntes Phaenomen: KIs bearbeiten Anfang und Ende von langen Texten zuverlaessiger als den Mittelteil. Bei sehr langen Dokumenten deshalb gezielt auf Kapitel hinweisen.'
+  },
+  {
+    q: 'Warum ist ein Ghost-Quote besonders gefaehrlich?',
+    options: [
+      'Weil erfundene Zitate meistens beleidigend sind.',
+      'Weil die KI den Sprachstil der Person imitiert, wodurch das Zitat echt wirkt, obwohl es nie gesagt wurde.',
+      'Weil Zitate urheberrechtlich geschuetzt sind.',
+      'Weil die KI keine Anfuehrungszeichen setzen kann.'
+    ],
+    correct: 1,
+    feedback: 'Ein Ghost-Quote klingt authentisch, weil die KI den typischen Sprachstil der Person aus ihren Trainingsdaten kennt. Das macht es schwer zu erkennen, ohne das Zitat manuell zu verifizieren.'
+  },
+  {
+    q: 'Was ist die Kernfunktion der "Chain of Verification" (CoVe)?',
+    options: [
+      'Die Antwort wird durch drei verschiedene KI-Modelle gefiltert.',
+      'Der Nutzer prueft die Antwort in drei manuellen Schritten.',
+      'Die KI muss zuerst Zitate extrahieren, dann analysieren und erst dann antworten, was Halluzinationen durch Evidenzpflicht reduziert.',
+      'Die Antwort wird dreimal generiert und die wahrscheinlichste ausgewaehlt.'
+    ],
+    correct: 2,
+    feedback: 'CoVe zwingt die KI, ihre Arbeit zu zeigen. Wenn Schritt 1 (das Zitat) nicht existiert, kann Schritt 3 (die Antwort) nicht erfunden werden. Evidenzpflicht reduziert Halluzinationen drastisch.'
+  },
+  {
+    q: 'Du fragst: "Beweise mir, dass Social Media effektiver als SEO ist." Was ist das Problem?',
+    options: [
+      'Die KI kann keine Werturteile zwischen zwei Marketingkanaelen treffen.',
+      'Die Frage enthaelt eine These, die die KI durch Bestaetigung-Bias zu bestaetigen versucht, statt neutral zu vergleichen.',
+      'Die Frage ist zu kurz und liefert keine guten Ergebnisse.',
+      'Die KI weiss nicht, was "Social Media" bedeutet.'
+    ],
+    correct: 1,
+    feedback: 'Bestaetigung-Bias: Wenn die Frage bereits eine These enthaelt, sucht die KI nach Belegen fuer genau diese These. Besser: "Vergleiche die Effektivitaet von Social Media und SEO mit Vor- und Nachteilen beider."'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+<script>var MODULE_ID = "recherche-04";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
+</body>
+</html>

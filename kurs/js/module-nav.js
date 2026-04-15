@@ -30,7 +30,7 @@
   var lastNum    = topic.modules[total - 1].num;
   var prevMod    = modIndex > 0 ? topic.modules[modIndex - 1] : null;
   var nextMod    = modIndex < total - 1 ? topic.modules[modIndex + 1] : null;
-  var nextHref   = nextMod ? (nextMod.id + '.html') : topic.overview;
+  var nextHref   = nextMod ? nextMod.file : topic.overview;
   var nextLabel  = nextMod ? 'Weiter →' : 'Modul abschließen →';
   var backHref   = topic.overview;
   var indicator  = mod.num + ' / ' + lastNum;
