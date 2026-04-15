@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Base nutzen: Dein Second Brain in Aktion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* RAG Erklär-Grafik */
+.rag-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 14px 0;
+  overflow-x: auto;
+}
+.rag-box {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  text-align: center;
+  min-width: 110px;
+}
+.rag-box strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.rag-box span { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.rag-box.highlight { background: var(--accent-light); border-color: var(--accent); }
+.rag-box.highlight strong { color: var(--accent); }
+.rag-arrow {
+  flex-shrink: 0; font-size: 18px; color: var(--text-subtle);
+  padding: 0 8px; font-family: 'JetBrains Mono', monospace;
+}
+
+/* Szenarien Tabs */
+.szenario-sim {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.szenario-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.szenario-tab {
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.szenario-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.szenario-run-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.szenario-run-btn:hover { background: var(--accent-2); color: white; }
+.szenario-body { padding: 14px; }
+.szenario-context-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.szenario-context {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 13px; color: var(--text-muted);
+  line-height: 1.6; margin-bottom: 12px;
+}
+.szenario-prompt-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.szenario-prompt {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 12px; color: var(--text-muted);
+  line-height: 1.6; font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 12px; white-space: pre-wrap; font-style: italic;
+}
+.szenario-output {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.75; color: #C9D1D9;
+  min-height: 90px; white-space: pre-wrap; position: relative;
+}
+.szenario-output-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.szenario-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.szenario-copy-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+.szenario-gain {
+  margin-top: 10px; padding: 10px 14px; border-radius: var(--radius);
+  background: var(--accent-2-light); border: 1px solid #ABF5D1;
+  font-size: 12px; color: var(--green); line-height: 1.6;
+  display: none;
+}
+
+/* Vernetzte Denken Prompt-Builder */
+.vernetz-builder {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.vernetz-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.vernetz-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.vernetz-gen-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.vernetz-gen-btn:hover { background: var(--accent-2); color: white; }
+.vernetz-body { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.vernetz-left { display: flex; flex-direction: column; gap: 10px; }
+.vernetz-field label {
+  display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+}
+.vernetz-field input, .vernetz-field select {
+  width: 100%; padding: 7px 10px; font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;
+}
+.vernetz-field input:focus, .vernetz-field select:focus {
+  outline: none; border-color: var(--accent);
+}
+.vernetz-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.vernetz-preview {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px; line-height: 1.75; color: #C9D1D9;
+  min-height: 160px; white-space: pre-wrap; position: relative;
+}
+.vernetz-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.vernetz-copy-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* Wartungs-Zyklus */
+.wartung-cycle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+.wartung-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; background: var(--surface);
+}
+.wartung-freq {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.wartung-card:nth-child(1) .wartung-freq { color: var(--green); }
+.wartung-card:nth-child(2) .wartung-freq { color: var(--accent); }
+.wartung-card:nth-child(3) .wartung-freq { color: #F59E0B; }
+.wartung-card:nth-child(4) .wartung-freq { color: var(--red); }
+.wartung-card strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.wartung-card p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+
+@media (max-width: 600px) {
+  .rag-flow { flex-direction: column; align-items: flex-start; }
+  .rag-arrow { transform: rotate(90deg); padding: 4px 0; }
+  .vernetz-body { grid-template-columns: 1fr; }
+  .wartung-cycle { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-daten.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">7.3 / 7.3</span>
+  <a href="topic-agenten.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 7 · Daten-Management</div>
+    <h1>Knowledge Base nutzen: Dein Second Brain in Aktion</h1>
+    <p>Vom passiven Archiv zum aktiven Sparringspartner: Das RAG-Prinzip, drei Praxis-Szenarien und wie du dein System dauerhaft frisch hältst.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~20 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>2 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir verwandeln dein "Second Brain" von einer passiven Datenbank in einen aktiven Sparringspartner. Du lernst, wie du deine Knowledgebase täglich einsetzt, vernetzt denkst und das System frisch hältst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du nutzt deine Knowledgebase nicht mehr als Archiv, sondern als strategischen Partner: für Onboarding, Content, Support und die Suche nach Mustern, Widersprüchen und Synergien quer durch alle deine Daten.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: RAG-Prinzip -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Das RAG-Prinzip: Die Goldene Regel der Abfrage</h2>
+        <p>Wie du verhindert, dass die KI in ihr Museumswissen verfällt</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die meisten Menschen nutzen eine Knowledgebase wie ein Archiv: Man schaut hinein, wenn man etwas vergessen hat. Das ist 10 % des Potenzials. Der wahre Hebel entsteht, wenn die KI dein Wissen als <strong>Filter für die gesamte Welt</strong> nutzt.</p>
+
+      <p>Profis nennen das
+        <span class="tooltip-word">RAG (Retrieval-Augmented Generation)
+          <span class="tooltip-popup">RAG bedeutet: Die KI schaut erst in deine hinterlegten Dokumente (Retrieval), bevor sie eine Antwort generiert (Generation). Dadurch basiert die Antwort auf deinen Daten, nicht auf dem allgemeinen Training.</span>
+        </span>. Klingt kompliziert, bedeutet aber nur: Die KI schaut erst in deine Unterlagen, bevor sie den Mund aufmacht.</p>
+
+      <div class="rag-flow">
+        <div class="rag-box">
+          <strong>Deine Frage</strong>
+          <span>"Was kostet Produkt X?"</span>
+        </div>
+        <div class="rag-arrow">→</div>
+        <div class="rag-box highlight">
+          <strong>Knowledgebase</strong>
+          <span>KI durchsucht deine Dokumente zuerst</span>
+        </div>
+        <div class="rag-arrow">→</div>
+        <div class="rag-box">
+          <strong>Relevante Stellen</strong>
+          <span>Passende Abschnitte werden gefunden</span>
+        </div>
+        <div class="rag-arrow">→</div>
+        <div class="rag-box">
+          <strong>Antwort + Quelle</strong>
+          <span>Präzise Antwort mit Quellenangabe</span>
+        </div>
+      </div>
+
+      <p>Damit die KI nicht doch in ihr allgemeines Museumswissen verfällt, brauchst du das <strong>Instructional Shielding</strong>: Du sperrst die KI explizit in deine Knowledgebase ein.</p>
+
+      <div class="callout gray">
+        <div class="callout-icon">🔒</div>
+        <div class="callout-text">
+          <strong>Der Sicherheitszaun-Prompt</strong>
+          <p style="font-family:monospace;font-size:12px;line-height:1.7;">"Nutze für die folgende Antwort ausschließlich die Informationen aus meiner Knowledgebase. Wenn die Information dort nicht enthalten ist, antworte zwingend mit: 'Dazu liegen mir keine internen Daten vor'. Fantasiere nicht."</p>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Mut zur Lücke: Das "Ich weiß es nicht" feiern</strong>
+          <p>Wenn die KI zugibt, dass sie etwas in deinen Daten nicht findet, weißt du zwei Dinge: (1) Das System halluziniert nicht. (2) Du hast eine Wissenslücke in deiner Knowledgebase entdeckt, die du schließen solltest. Beide Erkenntnisse sind Gold wert.</p>
+        </div>
+      </div>
+
+      <p>Und immer die Belegpflicht einfordern. Nicht: "Was sagen unsere Guidelines zu Thema X?", sondern: "Fasse unsere Guidelines zu Thema X zusammen und <strong>nenne mir die exakten Dokumentnamen und Seitenzahlen</strong>."</p>
+    </div>
+  </div>
+
+  <!-- Section 2: Drei Szenarien -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Drei Szenarien für den maximalen Hebel im Alltag</h2>
+        <p>Onboarding, Content und Support mit deiner Knowledgebase</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Deine Knowledgebase entfaltet ihren vollen Wert nicht durch seltene große Analysen, sondern durch tägliche kleine Einsätze. Hier sind die drei Szenarien mit dem größten Hebel.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle ein Szenario und sieh den Prompt plus Beispiel-Output.</p>
+
+      <div class="szenario-sim">
+        <div class="szenario-toolbar">
+          <button class="szenario-tab active" onclick="setSzenario(0, this)">🎓 Onboarding</button>
+          <button class="szenario-tab" onclick="setSzenario(1, this)">✍️ Content</button>
+          <button class="szenario-tab" onclick="setSzenario(2, this)">🎧 Support</button>
+          <button class="szenario-run-btn" onclick="runSzenario()">▶ Beispiel zeigen</button>
+        </div>
+        <div class="szenario-body">
+          <div class="szenario-context-label">Kontext</div>
+          <div class="szenario-context" id="sz-context"></div>
+          <div class="szenario-prompt-label">Dein Prompt</div>
+          <div class="szenario-prompt" id="sz-prompt"></div>
+          <div class="szenario-output-label">KI-Output (auf Basis deiner Knowledgebase)</div>
+          <div class="szenario-output" id="sz-output">Klicke auf "Beispiel zeigen"...</div>
+          <button class="szenario-copy-btn" onclick="copySzenario()">Kopieren</button>
+          <div class="szenario-gain" id="sz-gain"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Vernetztes Denken Builder -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Fortgeschritten: Das Vernetzte Denken</h2>
+        <p>Meta-Analyse, Strategie-Wächter und Synergie-Scout</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn deine Knowledgebase erst einmal aufgebaut ist, passiert etwas Magisches: Die KI beginnt, Punkte zu verbinden, die für unser menschliches Gehirn oft zu weit auseinanderliegen. Du fragst nicht mehr nach dem <em>Was</em>, sondern nach dem <em>Wie</em> und dem <em>Warum</em> über alle Dokumente hinweg.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Wähle eine Analyse-Art und dein Thema. Der Builder erstellt dir einen fertigen Vernetzungs-Prompt.</p>
+
+      <div class="vernetz-builder">
+        <div class="vernetz-toolbar">
+          <span>🕸 Vernetzungs-Prompt-Builder</span>
+          <button class="vernetz-gen-btn" onclick="buildVernetzPrompt()">▶ Prompt generieren</button>
+        </div>
+        <div class="vernetz-body">
+          <div class="vernetz-left">
+            <div class="vernetz-field">
+              <label>Analyse-Art</label>
+              <select id="vb-art">
+                <option value="meta">Meta-Analyse: Muster erkennen</option>
+                <option value="strategie">Strategie-Wächter: Konsistenz prüfen</option>
+                <option value="synergie">Synergie-Scout: Lösungen aus Projekten</option>
+                <option value="widerspruch">Widerspruchs-Suche: Inkonsistenzen finden</option>
+              </select>
+            </div>
+            <div class="vernetz-field">
+              <label>Thema / Bereich</label>
+              <input type="text" id="vb-thema" placeholder="z. B. Kundenfeedback, Preisgestaltung ...">
+            </div>
+            <div class="vernetz-field">
+              <label>Zeitraum (optional)</label>
+              <select id="vb-zeitraum">
+                <option value="">Kein Zeitraum</option>
+                <option value="letzten 3 Monate">Letzte 3 Monate</option>
+                <option value="letzten 6 Monate">Letzte 6 Monate</option>
+                <option value="letzten 12 Monate">Letztes Jahr</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="vernetz-preview-label">Dein Vernetzungs-Prompt</div>
+            <div class="vernetz-preview" id="vb-preview">Felder ausfullen und auf "Prompt generieren" klicken...</div>
+            <button class="vernetz-copy-btn" onclick="copyVernetzPrompt()">Kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Brand Drift verhindern</strong>
+          <p>Je größer ein Unternehmen oder Projekt wird, desto eher weicht man unbewusst von seinen eigenen Werten ab. Der Strategie-Wächter-Prompt macht die KI zu deinem unbestechlichen Kompass gegen "Brand Drift".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Wartung -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Wartung und Pflege: Damit dein Brain nicht verrostet</h2>
+        <p>Single Source of Truth, Feedback-Loop und Data-Rot-Check</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ein digitales Gedächtnis ist kein statisches Monument. Es ist wie ein Garten: Ohne Pflege wuchert das Unkraut (veraltete Infos) und die Früchte (deine Antworten) werden ungenießbar. In der KI-Welt nennen wir das
+        <span class="tooltip-word">Data Rot
+          <span class="tooltip-popup">Data Rot beschreibt den schleichenden Verfall einer Knowledgebase: Infos veralten, Widersprüche häufen sich, und die KI beginnt zu raten, welche Version stimmt. Das Resultat sind unzuverlässige Antworten.</span>
+        </span>.</p>
+
+      <div class="wartung-cycle">
+        <div class="wartung-card">
+          <div class="wartung-freq">Täglich (1 Min.)</div>
+          <strong>Die 1-Minuten-Regel</strong>
+          <p>Wenn die KI eine veraltete Info nutzt: sofort korrigieren. 60 Sekunden jetzt sparen dir Stunden später.</p>
+        </div>
+        <div class="wartung-card">
+          <div class="wartung-freq">Nach jeder starken Antwort</div>
+          <strong>Der Feedback-Loop</strong>
+          <p>Wenn die KI drei Dokumente brillant kombiniert, kopiere die Antwort als neue Datei in die Knowledgebase. Das System lernt mit.</p>
+        </div>
+        <div class="wartung-card">
+          <div class="wartung-freq">Monatlich</div>
+          <strong>Der Delta-Check</strong>
+          <p>Was hat sich geändert? Welche Datei ist jetzt eine Lüge? Altes konsequent löschen, bevor das Neue kommt.</p>
+        </div>
+        <div class="wartung-card">
+          <div class="wartung-freq">Quartalsweise</div>
+          <strong>Der Data-Rot-Check</strong>
+          <p>KI analysiert die eigene Knowledgebase: "Welche 5 Dokumente sind am ältesten oder könnten veraltet sein?"</p>
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">🔑</div>
+        <div class="callout-text">
+          <strong>Die Single Source of Truth</strong>
+          <p>Der häufigste Grund für KI-Halluzinationen in Knowledgebases sind widersprüchliche Dokumente. Wenn du die Preisliste von 2023 <em>und</em> die von 2025 im System hast, rät die KI. Regel: Sobald eine neue Version erscheint, wird die alte <strong>unwiderruflich gelöscht</strong>. Nutze ein festes Datumsformat: <span style="font-family:monospace">2025-02-20_Strategie_Marketing.md</span></p>
+        </div>
+      </div>
+
+      <div class="callout gray">
+        <div class="callout-icon">🔄</div>
+        <div class="callout-text">
+          <strong>Der quartalsweise Data-Rot-Prompt</strong>
+          <p style="font-family:monospace;font-size:12px;line-height:1.7;">"Gehe alle Dokumente in meiner Knowledgebase durch. Liste mir die 5 Dokumente auf, die am ältesten sind oder die Informationen enthalten könnten, die sich typischerweise schnell ändern. Soll ich diese aktualisieren oder löschen?"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Der Weg vom Datensammler zum Daten-Strategen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>RAG ist das Fundament</strong>
+          <p>Instructional Shielding + Belegpflicht sperren die KI in deine Knowledgebase ein. Ohne diese Prompts fällt sie in ihr Museumswissen zurück.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Lücken sind Qualitätsmerkmal</strong>
+          <p>"Dazu liegen mir keine internen Daten vor" ist kein Fehler, sondern der Beweis, dass das System ehrlich arbeitet. Feiere diesen Moment und schließe die Lücke.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Vernetztes Denken ist der echte Mehrwert</strong>
+          <p>Meta-Analyse, Strategie-Wächter und Synergie-Scout nutzen dein Wissen nicht punktuell, sondern verbinden es quer durch alle Dokumente. Das findet kein menschliches Gehirn so schnell.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Eine kleine, aktuelle Knowledgebase schlägt eine große veraltete</strong>
+          <p>Die 1-Minuten-Regel, der Feedback-Loop und der quartalsweise Data-Rot-Check halten dein System gesund. Konsequentes Löschen ist genauso wichtig wie Einfügen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Du hast die Suchen-Kultur beendet</strong>
+          <p>Du fragst dich nicht mehr "Wo war das nochmal?" sondern gibst der KI den Befehl. Die kognitive Last des Suchens ist delegiert. Das ist der Kern des Daten-Strategen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// SZENARIEN SIMULATOR
+var szenarios = [
+  {
+    context: 'Ein neuer Freelancer startet und muss in 30 Minuten das erste Kundengespräch führen. Dein Brand-Voice-Guide und dein Internal FAQ sind in der Knowledgebase.',
+    prompt: 'Was sind die drei wichtigsten Do\'s und Don\'ts in unserer Kundenkommunikation laut unseren Guidelines? Gib mir außerdem ein konkretes Beispiel fuer einen gut formulierten Satz und einen, den wir nie schreiben würden. Quelle bitte angeben.',
+    output: 'Basierend auf deinem Brand-Voice-Guide (S. 3-4):\n\nDO\'S\n1. Immer per "du" ansprechen, niemals "Sie"\n2. Loesungen statt Probleme in den Vordergrund\n3. Konkret bleiben: Zahlen und Fakten statt Adjektive\n\nDON\'TS\n1. Keine Fachbegriffe ohne Erklaerung (Glossar, S. 8)\n2. Niemals "leider" am Satzanfang (wirkt defensiv)\n3. Kein Passiv bei Fehler-Kommunikation\n\nGUT: "Dein Dashboard ist ab 14 Uhr wieder aktiv."\nSCHLECHT: "Leider ist es uns momentan nicht moeglich..."\n\nQuelle: GUIDE_Brand-Voice_2025.md, Abschnitt 2',
+    gain: 'Zeitgewinn: Du sparst Stunden Erklaerungen. Der Freelancer arbeitet sofort nach deinen echten Regeln, nicht nach allgemeinen Marketing-Tipps aus dem Internet.'
+  },
+  {
+    context: 'Du musst einen LinkedIn-Post über ein neues Produkt schreiben. Dein Brand-Voice-Guide und ein früherer Post über ein aehnliches Produkt sind in der Knowledgebase.',
+    prompt: 'Schreibe einen LinkedIn-Post über [Produkt X: KI-gestütztes Analytics-Dashboard]. Nutze meinen Brand-Voice-Guide und orientiere dich am Struktur des Posts über [Produkt Y] aus dem letzten Jahr. Behalte den Stil: direkter Hook, Nutzen in Zahlen, CTA.',
+    output: 'Der Markt schwimmt in Daten.\nDie meisten ertrinken darin.\n\nUnser neues Analytics-Dashboard macht Schluss damit:\n\n→ Muster sehen in 3 Sek. statt 3 Stunden\n→ KI-Alerts wenn Anomalien auftreten\n→ Export in Excel, Notion, Slack\n\nWir haben es mit 12 Teams getestet.\nDurchschnittliche Zeitersparnis: 4,2h/Woche.\n\nLink in den Kommentaren.\n\n---\nQuelle: Brand-Voice-Guide (Tonalitaet), Post_ProduktY_2024.md (Struktur)',
+    gain: 'Dieser Post klingt nach dir, nicht nach einer KI. Die Struktur aus deinem frueheren Post wurde uebernommen, die Zahlen aus deinem Produktlexikon, der Tonfall aus deinem Brand-Guide.'
+  },
+  {
+    context: 'Ein Kunde fragt per E-Mail nach einer sehr spezifischen Sonderregelung in den AGB. Deine aktuellen AGB und Preiskonditionen sind in der Knowledgebase.',
+    prompt: 'Finde in unseren aktuellen AGB die Regelung zu Mengenrabatten bei Jahresvertraegen. Formuliere eine hoefliche, praezise Antwort-Mail an den Kunden. Nenne in der Antwort den entsprechenden AGB-Paragraphen als Referenz.',
+    output: 'Betreff: Re: Ihre Anfrage zur Jahresvertrags-Konditionen\n\nLiebe Frau Hoffmann,\n\nvielen Dank fuer Ihre Anfrage.\n\nGerne bestaetigen wir: Ab einem Jahresvertrag mit\nmindestens 10 Lizenzen erhalten Sie 15% Rabatt\nauf den Listenpreis (§ 4.2 unserer AGB).\n\nFuer Teams ab 25 Lizenzen gelten Sonderkonditionen,\nueber die wir gerne persoenlich sprechen.\n\nMit freundlichen Gruessen\n[Ihr Name]\n\nQuelle: AGB_2025-Q1.md, § 4.2',
+    gain: 'Die KI hat weder Rabatte erfunden noch geraten. Sie hat direkt aus deinen AGB geantwortet. Kein manuelles Suchen, kein Risiko falscher Angaben gegenueber dem Kunden.'
+  }
+];
+
+var currentSz = 0;
+
+function setSzenario(idx, btn) {
+  currentSz = idx;
+  document.querySelectorAll('.szenario-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  var s = szenarios[idx];
+  document.getElementById('sz-context').textContent = s.context;
+  document.getElementById('sz-prompt').textContent = s.prompt;
+  document.getElementById('sz-output').textContent = 'Klicke auf "Beispiel zeigen"...';
+  document.getElementById('sz-gain').style.display = 'none';
+}
+
+function runSzenario() {
+  var s = szenarios[currentSz];
+  var out = document.getElementById('sz-output');
+  out.textContent = '';
+  var text = s.output;
+  var i = 0;
+  var interval = setInterval(function() {
+    if (i < text.length) { out.textContent += text[i]; i++; }
+    else {
+      clearInterval(interval);
+      var gain = document.getElementById('sz-gain');
+      gain.textContent = '\u26A1 Dein Hebel: ' + s.gain;
+      gain.style.display = 'block';
+    }
+  }, 11);
+}
+
+function copySzenario() {
+  navigator.clipboard.writeText(document.getElementById('sz-output').textContent);
+}
+
+// Init Szenario 0
+setSzenario(0, document.querySelector('.szenario-tab'));
+
+// VERNETZUNGS-PROMPT-BUILDER
+var vernetzTemplates = {
+  meta: function(thema, zeitraum) {
+    var z = zeitraum ? ' der ' + zeitraum : '';
+    return 'Analysiere alle Dokumente in meiner Knowledgebase zum Thema "' + thema + '"' + z + '.\n\nDeine Aufgabe:\n1. Welches Muster oder Problem taucht am haeufigsten auf?\n2. Wie korreliert dieses Muster mit anderen Bereichen\n   (z.B. Produktbeschreibungen, Prozessdokumenten)?\n3. Liefere eine datenbasierte Schlussfolgerung,\n   keine Bauchgefuehl-Annahme.\n\nQuelle fuer jede Kernaussage angeben.';
+  },
+  strategie: function(thema, zeitraum) {
+    return 'Hier ist mein Entwurf zum Thema "' + thema + '".\n\nVergleiche ihn mit:\n- unserer langfristigen Firmenstrategie\n- unserem Marken-Guide\nin der Knowledgebase.\n\nDeine Aufgabe:\n1. Wo weichen wir von unseren Kernversprechen ab?\n2. Wo sind wir inkonsistent mit frueheren Entscheidungen?\n3. Was muss vor der Umsetzung geklart werden?\n\nJede Abweichung mit Quelldokument belegen.';
+  },
+  synergie: function(thema, zeitraum) {
+    return 'Ich starte ein neues Projekt im Bereich "' + thema + '".\n\nSuche in der Knowledgebase nach:\n1. Aehnlichen Herausforderungen aus vergangenen Projekten.\n2. Strategien, die damals erfolgreich waren.\n3. Fehler oder Sackgassen, die wir vermeiden sollten.\n\nWelche Erkenntnisse koennen wir 1:1 uebernehmen?\nQuelle und Projekt-Name fuer jeden Punkt angeben.';
+  },
+  widerspruch: function(thema, zeitraum) {
+    return 'Durchsuche meine gesamte Knowledgebase zum Thema "' + thema + '".\n\nDeine Aufgabe:\n1. Finde widersprüchliche Aussagen in verschiedenen Dokumenten.\n2. Liste Stellen auf, wo wir "A" sagen, aber nach "B" handeln.\n3. Markiere veraltete Informationen, die mit neueren Dokumenten\n   in Konflikt stehen.\n\nJeden Widerspruch mit beiden Quelldokumenten belegen.';
+  }
+};
+
+function buildVernetzPrompt() {
+  var art = document.getElementById('vb-art').value;
+  var thema = document.getElementById('vb-thema').value.trim() || '[Thema eintragen]';
+  var zeitraum = document.getElementById('vb-zeitraum').value;
+  var prompt = vernetzTemplates[art](thema, zeitraum);
+  document.getElementById('vb-preview').textContent = prompt;
+}
+
+function copyVernetzPrompt() {
+  navigator.clipboard.writeText(document.getElementById('vb-preview').textContent).then(function() {
+    var btn = document.querySelector('.vernetz-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'Was bedeutet RAG (Retrieval-Augmented Generation) in einfachen Worten?',
+    options: [
+      'Die KI generiert kreative Texte auf Basis von zufälligen Quellen aus dem Internet.',
+      'Die KI schaut erst in deine hinterlegten Dokumente, bevor sie eine Antwort generiert.',
+      'Die KI regeneriert alte Antworten, um sie aktueller zu machen.',
+      'Ein Verfahren, bei dem mehrere KI-Modelle gleichzeitig eine Antwort generieren.'
+    ],
+    correct: 1,
+    feedback: 'RAG = Erst die eigenen Daten abrufen (Retrieval), dann auf Basis dieser Daten antworten (Generation). Das verhindert, dass die KI in ihr allgemeines Museumswissen zurueckfaellt.'
+  },
+  {
+    q: 'Was ist "Instructional Shielding"?',
+    options: [
+      'Ein technisches Sicherheitsprotokoll, das Datenlecks verhindert.',
+      'Ein Prompt, der die KI explizit anweist, nur auf Basis der Knowledgebase zu antworten.',
+      'Eine Funktion in NotebookLM, die automatisch Quellen belegt.',
+      'Die Einstellung, die das Training der eigenen Daten deaktiviert.'
+    ],
+    correct: 1,
+    feedback: 'Instructional Shielding sperrt die KI in deine Knowledgebase ein: "Antworte ausschliesslich auf Basis meiner Daten. Wenn nicht enthalten: Sag es mir." Das verhindert Halluzinationen durch Museumswissen.'
+  },
+  {
+    q: 'Warum ist es ein gutes Zeichen, wenn die KI sagt "Dazu liegen mir keine internen Daten vor"?',
+    options: [
+      'Es bedeutet, dass die Knowledgebase zu klein ist und erweitert werden muss.',
+      'Es zeigt, dass das System ehrlich arbeitet und nicht halluziniert, und deckt gleichzeitig eine Wissenslücke auf.',
+      'Es bedeutet, dass das Instructional Shielding deaktiviert ist.',
+      'Es zeigt, dass die KI die Frage nicht verstanden hat.'
+    ],
+    correct: 1,
+    feedback: 'Zwei Erkenntnisse aus einer Aussage: (1) Das System halluziniert nicht, was Vertrauen schafft. (2) Du hast eine Luecke gefunden, die du schliessen kannst. Beides ist wertvoll.'
+  },
+  {
+    q: 'Was ist das Prinzip des "Feedback-Loops" bei der Wartung einer Knowledgebase?',
+    options: [
+      'Die KI gibt dem Nutzer Feedback, wenn ein Dokument veraltet ist.',
+      'Nutzer bewerten KI-Antworten, damit das Modell besser wird.',
+      'Besonders gute KI-Antworten werden als neue Dokumente in die Knowledgebase aufgenommen.',
+      'Die Knowledgebase gibt der KI nach jeder Antwort automatisch Verbesserungsvorschlaege.'
+    ],
+    correct: 2,
+    feedback: 'Wenn die KI drei Dokumente brillant kombiniert und eine neue Einsicht liefert, kopierst du diese Antwort als neues Dokument. Das System wird mit jeder Nutzung klüger.'
+  },
+  {
+    q: 'Was versteht man unter "Data Rot"?',
+    options: [
+      'Datenverlust durch defekte Festplatten oder Serverausfaelle.',
+      'Den schleichenden Verfall einer Knowledgebase durch veraltete, widersprüchliche Daten.',
+      'Die Reduktion der Datenmenge durch Komprimierungsalgorithmen.',
+      'Datenpannen durch unsachgemaessen Einsatz von KI-Tools.'
+    ],
+    correct: 1,
+    feedback: 'Data Rot beschreibt, wie eine Knowledgebase mit der Zeit unzuverlaessig wird: Preise aus 2023 stehen neben denen aus 2025, widersprüchliche Prozessbeschreibungen existieren gleichzeitig. Die KI beginnt zu raten.'
+  },
+  {
+    q: 'Was ist die "Single Source of Truth"-Regel?',
+    options: [
+      'Jede Information darf nur aus einer einzigen Quelle stammen.',
+      'Sobald eine neue Version eines Dokuments erscheint, wird die alte unwiderruflich geloescht.',
+      'Die KI darf nur das am haeufigsten vorkommende Dokument als Referenz nutzen.',
+      'Alle Teamdaten muessen an einem einzigen zentralen Ort gespeichert sein.'
+    ],
+    correct: 1,
+    feedback: 'Single Source of Truth: Nur eine Version existiert gleichzeitig. Alte Preisliste? Geloescht, sobald die neue hochgeladen ist. Zwei widersprüchliche Wahrheiten sind fuer die KI eine Einladung zur Halluzination.'
+  },
+  {
+    q: 'Was macht der "Strategie-Wächter"-Anwendungsfall in der Knowledgebase?',
+    options: [
+      'Er prueft, ob externe Wettbewerber in deinen Bereich vordringen.',
+      'Er ueberwacht die Datensicherheit der Knowledgebase auf Angriffe.',
+      'Er vergleicht neue Entscheidungen oder Dokumente mit der eigenen Firmenstrategie und dem Marken-Guide auf Inkonsistenzen.',
+      'Er archiviert automatisch veraltete Strategiedokumente.'
+    ],
+    correct: 2,
+    feedback: 'Der Strategie-Wächter nutzt die Knowledgebase als Kompass gegen "Brand Drift": Er erkennt, wo ein neuer Entwurf mit den eigenen Kernversprechen oder vergangenen Entscheidungen in Konflikt steht.'
+  },
+  {
+    q: 'Was ist der "Synergie-Scout"?',
+    options: [
+      'Ein Tool, das Synergien zwischen verschiedenen KI-Modellen findet.',
+      'Eine Technik, bei der die KI nach erfolgreich geloesten Problemen aus vergangenen Projekten sucht, die auf neue Herausforderungen übertragen werden koennen.',
+      'Eine KI-Funktion zur Identifizierung von Partnerschaften mit anderen Unternehmen.',
+      'Ein Analyse-Modus, der den ROI der Knowledgebase berechnet.'
+    ],
+    correct: 1,
+    feedback: 'Der Synergie-Scout verhindert, das Rad zweimal zu erfinden: Er durchsucht vergangene Projekte nach Strategien, die damals funktioniert haben, und uebertraegt diese auf neue Herausforderungen.'
+  },
+  {
+    q: 'Was ist der richtige Prompt-Stil, um Belegpflicht einzufordern?',
+    options: [
+      '"Was sagen unsere Guidelines zu Thema X?"',
+      '"Erklaer mir Thema X so einfach wie moeglich."',
+      '"Fasse unsere Guidelines zu Thema X zusammen und nenne mir die exakten Dokumentnamen und Seitenzahlen."',
+      '"Zeige mir alle Dokumente, in denen Thema X vorkommt."'
+    ],
+    correct: 2,
+    feedback: 'Belegpflicht bedeutet: Explizit nach Quellen fragen. "Nenne die exakten Dokumentnamen und Seitenzahlen" zwingt die KI zur Evidenz und schutzt vor unverifizierten Aussagen.'
+  },
+  {
+    q: 'Was beschreibt die "1-Minuten-Regel" bei der Knowledgebase-Wartung?',
+    options: [
+      'Jeden Tag eine Minute Zeit einplanen, um neue Dokumente hinzuzufuegen.',
+      'KI-Antworten duerfen maximal eine Minute generieren, sonst ist die Knowledgebase zu gross.',
+      'Wenn die KI eine veraltete Info nutzt, wird diese sofort (in ca. 60 Sekunden) korrigiert.',
+      'Jeden Monat eine Minute fuer den vollstaendigen Datenschutz-Check einplanen.'
+    ],
+    correct: 2,
+    feedback: 'Die 1-Minuten-Regel ist praeventive Wartung: Kleine Korrekturen sofort erledigen, statt sie aufzuhaeufen. 60 Sekunden jetzt schuetzen vor stundenlangen Aufraeum-Aktionen spaeter.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIPS
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+</body>
+</html>

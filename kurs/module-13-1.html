@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zukunftsausblick: Die Ära der agentischen Intelligenz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Stat-Karten für die großen Zahlen */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.stat-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 16px 14px;
+  background: var(--surface);
+  text-align: center;
+}
+.stat-number {
+  font-size: 32px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.stat-source {
+  font-size: 9px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 6px;
+}
+
+/* Agent-Team Darstellung */
+.agent-team {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0;
+}
+.agent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.agent-icon { font-size: 18px; flex-shrink: 0; }
+.agent-name {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; flex-shrink: 0; min-width: 130px;
+}
+.agent-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+/* Roadmap-Zweispalter */
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 14px 0;
+}
+.roadmap-col {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.roadmap-col-head {
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.roadmap-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted); line-height: 1.6;
+}
+.roadmap-item:last-child { border-bottom: none; }
+.roadmap-item strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+
+/* Abschluss-Hero */
+.closing-box {
+  margin: 28px 0 14px;
+  padding: 28px 28px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-2-light) 100%);
+  border: 1px solid var(--accent);
+  text-align: center;
+}
+.closing-emoji { font-size: 36px; margin-bottom: 14px; }
+.closing-title {
+  font-size: 20px; font-weight: 800; color: var(--text);
+  margin-bottom: 10px; line-height: 1.3;
+}
+.closing-text {
+  font-size: 13px; color: var(--text-muted); line-height: 1.7;
+  max-width: 560px; margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .roadmap-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-zukunft.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">13.1 / 13.2</span>
+  <a href="module-13-2.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 13 · Zukunftsausblick</div>
+    <h1>Die Ära der agentischen Intelligenz</h1>
+    <p>Kein weiteres technologisches Update, sondern ein Epochenwechsel: Was er für deine Kunden und deine Karriere bedeutet.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🔭</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Dieses letzte Modul analysiert die zwei entscheidenden Ebenen der Transformation: wie sich das Verhalten deiner Kunden verändert, und wie du deine Arbeit als Marketer neu organisieren musst, um ökonomisch relevant zu bleiben.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Evolution des Nutzers -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die Evolution des Nutzers: Vom Suchen zum Delegieren</h2>
+        <p>Das Fundament des digitalen Marketings der letzten 25 Jahre erodiert</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Die Suche und der Klick, das Herzstück des digitalen Marketings seit Mitte der Neunziger, verlieren ihre Dominanz. Nutzer verbringen zunehmend weniger Zeit damit, blaue Links zu vergleichen. Stattdessen delegieren sie Kaufentscheidungen an persönliche KI-Assistenten.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number">−25 %</div>
+          <div class="stat-label">Rückgang des traditionellen Suchvolumens bis 2026</div>
+          <div class="stat-source">Gartner, 2024</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">−34,5 %</div>
+          <div class="stat-label">Rückgang der Klickrate (CTR) für Top-Ergebnisse durch KI-Overviews</div>
+          <div class="stat-source">Genesys Growth Analysis</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">$3–5 Bio.</div>
+          <div class="stat-label">Transaktionsvolumen durch autonomen "Agentic Commerce" bis 2030</div>
+          <div class="stat-source">McKinsey</div>
+        </div>
+      </div>
+
+      <p>Die Konsequenz aus diesen Zahlen ist direkt: Die Website verliert ihre Rolle als alleiniger Anker der Customer Journey. Sichtbarkeit bedeutet künftig, als Quelle in der KI-Antwort zitiert zu werden, nicht das erste Suchergebnis zu sein.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Agentic Commerce: Wenn KI-Systeme zu Kunden werden</strong>
+          <p>In diesem neuen Modell kommuniziert der KI-Agent des Kunden direkt mit dem KI-Agenten der Marke, um Produkte zu finden, zu vergleichen und zu kaufen. Marken müssen für Maschinen optimiert werden (<strong>Answer Engine Optimization, AEO</strong>). KI-Agenten bevorzugen strukturierte Daten-Feeds gegenüber emotionalen Werbetexten. Wer keine sauberen Schemata bereitstellt, bleibt für Shopping-Agenten unsichtbar.</p>
+        </div>
+      </div>
+
+      <p>Dazu kommt das <strong>Paradoxon der Authentizität</strong>: In einer Welt unendlicher KI-generierter Inhalte wird Echtheit zum kritischen Wettbewerbsvorteil. 56 % der Menschen misstrauen Werbung bereits heute. 46 % der Konsumenten vertrauen einer Marke weniger, wenn sie erfahren, dass KI hinter einer Leistung steckt, die sie für menschlich hielten. Erfolgreiche Marken nutzen technologische Standards wie
+        <span class="tooltip-word">C2PA
+          <span class="tooltip-popup">C2PA (Coalition for Content Provenance and Authenticity) ist ein offener Standard, der die Herkunft von Medieninhalten verifizierbar macht. Mit C2PA können Nutzer prüfen, ob ein Bild oder Video von einer KI erzeugt oder von einem Menschen bearbeitet wurde.</span>
+        </span>, um die Herkunft ihrer Inhalte verifizierbar zu machen und so Vertrauen zurückzugewinnen.</p>
+    </div>
+  </div>
+
+  <!-- Section 2: Metamorphose der Arbeit -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Die Metamorphose deiner Arbeit: Vom Handwerker zum Architekten</h2>
+        <p>Aus personalintensiven Content-Fabriken werden schlanke Strategie-Zentralen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Marketing-Abteilungen werden sich grundlegend verändern. Wo heute 30 bis 50 Spezialisten Dashboards verwalten und Content produzieren, werden künftig oft nur noch 3 bis 5 Senior-Strategen nötig sein, die autonome Agenten-Systeme überwachen. Unternehmen, die auf autonome Agenten setzen, berichten von einer Senkung der Betriebskosten um 40 bis 70 %. Die Zeit bis zum Start von Kampagnen verkürzt sich um bis zu 90 %.</p>
+
+      <p>Der größte Hebel für Erfolg ist nicht das Tool selbst, sondern das <strong>Redesign der Arbeitsprozesse</strong>. Hochleistungs-Unternehmen sind 3,6-mal häufiger dabei, ihre Workflows komplett neu zu organisieren, statt KI einfach auf bestehende Prozesse aufzupfropfen (McKinsey, State of AI 2025). Du orchestrierst künftig spezialisierte Agenten-Teams:</p>
+
+      <div class="agent-team">
+        <div class="agent-row">
+          <div class="agent-icon">👂</div>
+          <div class="agent-name">Listener Agents</div>
+          <div class="agent-desc">Überwachen Kundenfeedback, Social Media und Markt-Trends rund um die Uhr, ohne Pause und ohne Betriebskosten für Überstunden.</div>
+        </div>
+        <div class="agent-row">
+          <div class="agent-icon">🎯</div>
+          <div class="agent-name">Topic Agents</div>
+          <div class="agent-desc">Identifizieren aus dem gefilterten Signal strategische Themenlücken und Content-Opportunities, bevor die Konkurrenz sie sieht.</div>
+        </div>
+        <div class="agent-row">
+          <div class="agent-icon">✍️</div>
+          <div class="agent-name">Creator Agents</div>
+          <div class="agent-desc">Entwerfen tausende personalisierte Assets, die exakt auf die Micro-Momente der Nutzer abgestimmt sind, in der Zeit, die ein Mensch für einen einzigen Text braucht.</div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Wirtschaftlicher Impact: Die Gehaltsprämie für KI-Skills</strong>
+          <p>Fachkräfte mit KI-Skills erzielen bereits heute einen Gehaltsaufschlag von <strong>56 %</strong> gegenüber Kollegen ohne diese Fähigkeiten (PwC). In konkreten Zahlen: ca. 18.000 USD pro Jahr Unterschied. Das ist kein fernes Zukunftsszenario, das ist der aktuelle Arbeitsmarkt.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Roadmap -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Deine Roadmap für die Ära 2030</h2>
+        <p>Zwei Ebenen, die du aktiv steuern musst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Um in der Ära der agentischen Intelligenz erfolgreich zu bleiben, musst du die Transformation auf zwei Ebenen gleichzeitig angehen: deine Marke für die neue Realität fit machen und deine eigene Karriere zukunftssicher positionieren.</p>
+
+      <div class="roadmap-grid">
+        <div class="roadmap-col">
+          <div class="roadmap-col-head">🏢 Roadmap: Deine Marke</div>
+          <div class="roadmap-item">
+            <strong>AEO & Machine-Readability</strong>
+            Implementiere konsequent strukturierte Daten, damit KI-Agenten deine Produkte identifizieren und kategorisieren können. Wer für Maschinen unsichtbar ist, existiert nicht.
+          </div>
+          <div class="roadmap-item">
+            <strong>Agentic Entry Point</strong>
+            Neben Website und App musst du eine Schnittstelle für Agenten betreiben, die Termine, Käufe und Anfragen direkt ausführen können, ohne visuelles Interface.
+          </div>
+          <div class="roadmap-item">
+            <strong>Ambient Brand Identity</strong>
+            Bereite deine Marke auf eine Welt vor, in der Entdeckung durch Wearables und Sensoren passiv und kontextgesteuert stattfindet, nicht durch aktive Suche.
+          </div>
+          <div class="roadmap-item">
+            <strong>Neue Erfolgsmetriken</strong>
+            Ersetze Klickraten durch AI Citation Rate (wie oft zitiert die KI deine Marke?) und Agent Conversion Quality.
+          </div>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-col-head">🧑‍💼 Roadmap: Deine Karriere</div>
+          <div class="roadmap-item">
+            <strong>Vom Prompter zum Workflow-Architekten</strong>
+            Deine neue Kernkompetenz: Design und Optimierung komplexer Multi-Agenten-Systeme, die autonom Ziele verfolgen und Kampagnen optimieren.
+          </div>
+          <div class="roadmap-item">
+            <strong>Leadership für hybride Teams</strong>
+            Du wirst zum Manager einer hybriden Belegschaft. "Digitale Mitarbeiter" (KI-Agenten) führen, inklusive Onboarding und Leistungsprüfung.
+          </div>
+          <div class="roadmap-item">
+            <strong>Spezialisierung "Upstream"</strong>
+            Konzentriere dich auf Empathie, kulturelle Relevanz und ethische Aufsicht. Diese Fähigkeiten lassen sich nicht durch Algorithmen replizieren und werden zur wertvollsten Währung.
+          </div>
+          <div class="roadmap-item">
+            <strong>Strategisches Urteilsvermögen</strong>
+            Nur Menschen können verlässlich gute von mittelmäßigen Ideen unterscheiden und sicherstellen, dass KI-Entscheidungen mit langfristigen Markenwerten übereinstimmen.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was dieser Kurs dir mitgegeben hat</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Es ist kein Update, sondern ein Epochenwechsel</strong>
+          <p>Von generativer KI (erstellt Inhalte) zu agentischer KI (versteht Ziele, plant, handelt autonom). Diese Verschiebung betrifft nicht nur Tools, sondern ganze Geschäftsmodelle.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Deine Kunden ändern ihr Verhalten gerade</strong>
+          <p>25 % weniger Suchvolumen, dramatisch gesunkene Klickraten, KI-Agenten als neue Einkäufer. Das Marketing muss für Maschinen optimiert werden, nicht nur für Menschen.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Workflow-Design ist die neue Kernkompetenz</strong>
+          <p>3,6x mehr Erfolg für Unternehmen, die Prozesse neu bauen, statt KI auf alte aufzupfropfen. Der Hebel liegt nicht im Tool, sondern in der Architektur des Systems dahinter.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Authentizität wird zum Wettbewerbsvorteil</strong>
+          <p>In einer Welt voller KI-generierter Inhalte ist nachweisbare Echtheit ein messbarer Wachstumshebel. Vertrauen ist keine weiche Größe mehr, sondern eine wirtschaftliche.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>KI ersetzt nicht Marketer, sondern verändert, was Marketer tun</strong>
+          <p>Der Marketer, der intelligente Systeme orchestriert, wird jene ersetzen, die es nicht tun. Das ist keine Bedrohung, sondern eine Einladung, die du bereits angenommen hast.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abschluss -->
+  <div class="closing-box">
+    <div class="closing-emoji">🎓</div>
+    <div class="closing-title">Du stehst nicht am Ende.<br>Du stehst am Anfang.</div>
+    <div class="closing-text">Die gesamte Branche steht noch ganz am Anfang dieser Entwicklung. Manche sind bereits weiter, andere haben noch gar nicht angefangen. Es ist absolut nicht zu spät, Expertenwissen aufzubauen. Du hast nun die Strategie, um diese Transformation nicht nur zu verstehen, sondern aktiv anzuführen. Jetzt bist du gefragt.</div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Abschluss-Check</h2>
+    <p>10 Fragen zum Zukunftsausblick</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// QUIZ
+var questions = [
+  {
+    q: 'Was beschreibt der Begriff "Agentic AI" als Unterschied zur bisherigen "Generativen AI"?',
+    options: [
+      'Agentic AI erstellt qualitativ bessere Inhalte als generative Modelle.',
+      'Agentic AI versteht Ziele, entwirft Plaene und handelt autonom, statt nur auf Anfrage Inhalte zu erzeugen.',
+      'Agentic AI kann keine Texte oder Bilder erzeugen und fokussiert sich auf Daten.',
+      'Agentic AI laeuft ausschliesslich auf lokalen Servern ohne Cloud-Verbindung.'
+    ],
+    correct: 1,
+    feedback: 'Der Epochenwechsel: Generative KI erstellt auf Anfrage. Agentic KI versteht ein Ziel ("Optimiere unsere Kampagne"), plant selbststaendig Schritte und fuehrt sie autonom aus. Das veraendert ganze Geschaeftsmodelle.'
+  },
+  {
+    q: 'Was prognostiziert Gartner fuer das traditionelle Suchvolumen bis 2026?',
+    options: [
+      'Es wird um 25 % sinken, da Nutzer Antworten direkt in KI-Chatbots suchen.',
+      'Es wird um 10 % steigen, da mehr Menschen online aktiv werden.',
+      'Es wird unveraendert bleiben, da KI-Tools Suchmaschinen ergaenzen, nicht ersetzen.',
+      'Es wird um 50 % sinken durch den Rueckgang mobiler Geraetenutzung.'
+    ],
+    correct: 0,
+    feedback: 'Gartner prognostiziert einen Rueckgang von 25 % bis 2026. Dazu kommt der Zero-Click-Effekt durch KI-Overviews: Die Klickrate fuer Top-Suchergebnisse sinkt um ueber 34 %. Sichtbarkeit bedeutet kuenftig etwas anderes als heute.'
+  },
+  {
+    q: 'Was ist "Agentic Commerce"?',
+    options: [
+      'Ein Bezahlsystem, das ausschliesslich Kryptowaehrungen akzeptiert.',
+      'Ein Modell, in dem der KI-Agent des Kunden direkt mit dem KI-Agenten der Marke kommuniziert, um Produkte zu finden und zu kaufen.',
+      'Ein Marktplatz fuer KI-generierte Produkte und Designs.',
+      'Ein neues Social-Commerce-Format auf TikTok und Instagram.'
+    ],
+    correct: 1,
+    feedback: 'Agentic Commerce: Maschine kauft bei Maschine. Der KI-Assistent des Kunden vergleicht, entscheidet und kauft autonom. McKinsey schaetzt das Transaktionsvolumen bis 2030 auf 3 bis 5 Billionen USD.'
+  },
+  {
+    q: 'Was bedeutet "Answer Engine Optimization" (AEO) fuer Marken?',
+    options: [
+      'Websiteinhalte fuer Sprachassistenten wie Alexa optimieren.',
+      'Sicherstellen, dass die eigene Marke in den Antworten von KI-Systemen als Quelle zitiert wird, durch strukturierte Daten und Machine-Readability.',
+      'Produktbeschreibungen in besonders kurzen Saetzen schreiben.',
+      'Werbeausgaben von Google Ads auf Bing Ads umschichten.'
+    ],
+    correct: 1,
+    feedback: 'AEO ist die Weiterentwicklung von SEO fuer die KI-Aera: Nicht das Ranking in einer Liste, sondern die Zitierung als Quelle in einer KI-Antwort. Wer keine sauberen strukturierten Daten bereitstellt, bleibt fuer Shopping-Agenten unsichtbar.'
+  },
+  {
+    q: 'Was beschreibt das "Paradoxon der Authentizitaet" im KI-Zeitalter?',
+    options: [
+      'Je mehr KI eingesetzt wird, desto authentischer wirken die Inhalte.',
+      'In einer Welt voller KI-generierter Inhalte wird menschliche Echtheit zum kritischen Wettbewerbsvorteil, gerade weil sie selten wird.',
+      'Authentische Inhalte sind teurer in der Produktion, haben aber keinen Mehrwert.',
+      'Nutzer bevorzugen KI-generierte Inhalte, weil sie konsistenter sind.'
+    ],
+    correct: 1,
+    feedback: 'Das Paradoxon: Je mehr KI-Content die Welt flutet, desto wertvoller wird das, was nachweislich von Menschen stammt. 56% misstrauen Werbung bereits, 46% vertrauen Marken weniger bei entdecktem KI-Einsatz.'
+  },
+  {
+    q: 'Um wie viel Prozent Gehaltsaufschlag profitieren Fachkraefte mit KI-Skills heute bereits laut PwC?',
+    options: [
+      '20 %',
+      '38 %',
+      '56 %',
+      '72 %'
+    ],
+    correct: 2,
+    feedback: '56 % Gehaltsaufschlag gegenueber Kollegen ohne KI-Skills, laut PwC. In konkreten Zahlen: rund 18.000 USD pro Jahr Unterschied (Kalungi Analysis). Das ist der aktuelle Arbeitsmarkt, kein Zukunftsszenario.'
+  },
+  {
+    q: 'Was ist die neue Kernkompetenz des Marketers in der Agentic-AI-Aera?',
+    options: [
+      'Das Schreiben praeziser Prompts fuer jeden einzelnen Inhalt.',
+      'Das Design und die Optimierung komplexer Multi-Agenten-Systeme, die autonom Ziele verfolgen.',
+      'Das manuelle Ueberwachen aller KI-generierten Inhalte vor Veroeffentlichung.',
+      'Das Erlernen von Programmiersprachen wie Python und JavaScript.'
+    ],
+    correct: 1,
+    feedback: 'Nicht Prompter, sondern Workflow-Architekt. Wer nur Prompts schreiben kann, wird von denen ersetzt, die ganze Systeme bauen, die autonom Kampagnen optimieren, Feedback analysieren und Assets erzeugen.'
+  },
+  {
+    q: 'Was unterscheidet Hochleistungs-Unternehmen im KI-Einsatz von anderen laut McKinsey?',
+    options: [
+      'Sie nutzen mehr verschiedene KI-Tools gleichzeitig.',
+      'Sie haben groessere IT-Budgets als der Marktdurchschnitt.',
+      'Sie reorganisieren ihre Workflows komplett neu, statt KI einfach auf bestehende Prozesse aufzupfropfen.',
+      'Sie setzen ausschliesslich auf selbst entwickelte KI-Modelle.'
+    ],
+    correct: 2,
+    feedback: 'Laut McKinsey State of AI 2025 sind Hochleistungs-Unternehmen 3,6-mal haeufiger dabei, Workflows komplett neu zu bauen. Der Hebel liegt nicht im Tool, sondern in der Architektur des Systems, das damit betrieben wird.'
+  },
+  {
+    q: 'Was bedeutet "Ambient Brand Identity" als Zukunftsstrategie?',
+    options: [
+      'Marken sollten kuenftig auf Werbung verzichten und sich auf Mundpropaganda verlassen.',
+      'Die Marke fuer eine Welt vorbereiten, in der Entdeckung passiv und kontextgesteuert ueber Wearables und Sensoren stattfindet.',
+      'Markenkommunikation sollte subtiler und weniger auffaellig werden.',
+      'Die Markenidentitaet sollte alle zwei Jahre grundlegend ueberarbeitet werden.'
+    ],
+    correct: 1,
+    feedback: 'Ambient Brand Identity bedeutet: Weg vom aktiven Klick, hin zum passiven Kontext. Sensoren und Wearables erkennen den Moment, in dem deine Marke relevant ist, und stellen sie vor, ohne dass der Nutzer suchen muss.'
+  },
+  {
+    q: 'Welche menschlichen Faehigkeiten werden laut dem Modul im KI-Zeitalter am wertvollsten?',
+    options: [
+      'Schnelles Tippen und prazise Datenerfassung.',
+      'Technische Programmier- und Daten-Analyse-Kenntnisse.',
+      'Empathie, kulturelle Relevanz und ethische Aufsicht, die sich nicht durch Algorithmen replizieren lassen.',
+      'Die Faehigkeit, grosse Mengen an Texten in kurzer Zeit zu lesen.'
+    ],
+    correct: 2,
+    feedback: 'KI skaliert Logik und Daten. Was sie nicht kann: verlasslich gute von mittelmassigen Ideen unterscheiden, kulturelle Nuancen lesen und sicherstellen, dass Entscheidungen mit langfristigen Markenwerten uebereinstimmen. Das ist der menschliche Vorteil.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Kurs abgeschlossen. Du bist bereit.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// TOOLTIP
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Die Agenten-Werkstatt: Tools &amp; Anwendung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Tool-Landkarte */
+.tool-landscape {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 14px 0;
+}
+.tool-tier {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.tool-tier-header {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.tool-tier-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace;
+}
+.tool-tier.beginner .tool-tier-label { color: var(--green); }
+.tool-tier.specialist .tool-tier-label { color: var(--accent); }
+.tool-tier.pro .tool-tier-label { color: #D2A8FF; }
+.tool-tier-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.tool-card-item {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.tool-card-item:nth-child(even) { border-right: none; }
+.tool-card-item:last-child, .tool-card-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+.tool-card-item:nth-last-child(2):nth-child(even) { border-bottom: none; }
+.tool-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.tool-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-bottom: 6px; }
+.tool-ideal {
+  font-size: 10px; font-weight: 600; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}
+.tool-tag {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 4px; margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.tag-start { background: var(--accent-2-light); color: var(--green); border: 1px solid #ABF5D1; }
+.tag-visual { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+.tag-openai { background: #1e1e2e; color: #C9D1D9; border: 1px solid #21262D; }
+.tag-claude { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+.tag-code { background: #1e1e2e; color: #D2A8FF; border: 1px solid #30363D; }
+.tag-power { background: var(--red-light); color: var(--red); border: 1px solid #FFBDAD; }
+
+/* Quick Win Builder */
+.qw-builder {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.qw-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.qw-tab {
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.qw-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.qw-run-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.qw-run-btn:hover { background: var(--accent-2); color: white; }
+.qw-body { padding: 14px; }
+.qw-section-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.qw-goal {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 13px; color: var(--text-muted);
+  line-height: 1.6; margin-bottom: 12px;
+}
+.qw-workflow {
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;
+}
+.qw-step {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 9px 12px; border-radius: var(--radius);
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted); line-height: 1.5;
+}
+.qw-step-num {
+  flex-shrink: 0; font-size: 10px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace; color: var(--accent);
+  background: var(--accent-light); border: 1px solid var(--accent);
+  padding: 1px 6px; border-radius: 4px; margin-top: 1px;
+}
+.qw-hitl {
+  padding: 10px 14px; border-radius: var(--radius);
+  background: var(--accent-2-light); border: 1px solid #ABF5D1;
+  font-size: 12px; color: var(--green); line-height: 1.6;
+  display: none;
+}
+
+/* Eigenen Workflow Planer */
+.workflow-planner {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+.wp-toolbar {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.wp-toolbar span { font-size: 12px; font-weight: 600; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+.wp-gen-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.wp-gen-btn:hover { background: var(--accent-2); color: white; }
+.wp-body { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.wp-left { display: flex; flex-direction: column; gap: 10px; }
+.wp-field label {
+  display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+}
+.wp-field input, .wp-field select {
+  width: 100%; padding: 7px 10px; font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;
+}
+.wp-field input:focus, .wp-field select:focus {
+  outline: none; border-color: var(--accent);
+}
+.wp-preview {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px; line-height: 1.75; color: #C9D1D9;
+  min-height: 200px; white-space: pre-wrap; position: relative;
+}
+.wp-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.wp-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.wp-copy-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* Komplexitaets-Spektrum */
+.complexity-bar {
+  margin: 14px 0;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden;
+}
+.complexity-header {
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  padding: 8px 14px; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+}
+.complexity-track {
+  padding: 14px;
+  display: flex;
+  gap: 0;
+}
+.complexity-item {
+  flex: 1;
+  text-align: center;
+  padding: 10px 8px;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.complexity-item:last-child { border-right: none; }
+.complexity-item:hover { background: var(--surface-2); }
+.complexity-item.active { background: var(--accent-light); }
+.complexity-num { font-size: 18px; margin-bottom: 4px; }
+.complexity-name {
+  font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 2px;
+}
+.complexity-sub { font-size: 10px; color: var(--text-muted); }
+.complexity-detail {
+  padding: 12px 14px; background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted); line-height: 1.65;
+  display: none;
+}
+.complexity-detail.active { display: block; }
+
+@media (max-width: 600px) {
+  .tool-tier-cards { grid-template-columns: 1fr; }
+  .tool-card-item { border-right: none; }
+  .wp-body { grid-template-columns: 1fr; }
+  .complexity-track { flex-wrap: wrap; }
+  .complexity-item { flex: 0 0 50%; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-agenten.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">8.2 / 8.3</span>
+  <a href="module-8-3.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 8 · Agenten &amp; Automatisierung</div>
+    <h1>Die Agenten-Werkstatt: Tools &amp; Anwendung</h1>
+    <p>Den Markt sortieren, das richtige Tool finden und drei Quick Wins planen, die dir ab morgen Zeit sparen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Nachdem wir die Logik von Agenten verstanden haben, schauen wir uns nun passende Tools an. Es gibt unzählige Anbieter, aber welcher passt zu dir? Wir sortieren den Markt und schauen uns an, wie du mit minimalem Aufwand erste echte Ergebnisse erzielst.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du kennst die Software-Landschaft für Agenten und kannst entscheiden, welches Tool für welchen Marketing-Zweck das richtige ist. Du kannst erste "Quick Wins" planen und verstehst, wo die Grenze zu komplexen Profi-Systemen verläuft.</p>
+    </div>
+  </div>
+
+  <!-- Section 1: Tool-Landschaft -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Das Agenten-Ökosystem: Welches Werkzeug für wen?</h2>
+        <p>Drei Tiers, sechs Tools, eine Entscheidung</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Du musst das Rad nicht neu erfinden. Es gibt bereits Plattformen, die dir die "Hände" und "Gedächtnisse" für deine Agenten fertig bereitstellen. Die goldene Regel: Wähle das Tool nicht nach Hype, sondern nach deinem aktuellen Problem.</p>
+
+      <div class="tool-landscape">
+        <div class="tool-tier beginner">
+          <div class="tool-tier-header">
+            <span class="tool-tier-label">🛠 Für Einsteiger &amp; Workflow-Fans</span>
+          </div>
+          <div class="tool-tier-cards">
+            <div class="tool-card-item">
+              <div class="tool-name">Zapier</div>
+              <div class="tool-desc">Der absolute Standard. Verbindet tausende Apps (Slack, Google Sheets, Mailchimp) mit KI-Logik. Wenn du bereits Zapier nutzt, startest du hier.</div>
+              <div class="tool-ideal">Ideal für: Erste Agenten, App-Verbindungen</div>
+              <span class="tool-tag tag-start">Empfohlen zum Start</span>
+            </div>
+            <div class="tool-card-item">
+              <div class="tool-name">Gumloop</div>
+              <div class="tool-desc">Geheimtipp für visuelles Arbeiten. Boxen auf eine Leinwand ziehen und verbinden. Ideal für komplexe Datenmengen durch KI-Logik zu schleusen.</div>
+              <div class="tool-ideal">Ideal für: Visuelle Thinker, Daten-Workflows</div>
+              <span class="tool-tag tag-visual">Visuell</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-tier specialist">
+          <div class="tool-tier-header">
+            <span class="tool-tier-label">🧠 Spezialisten der großen Modelle</span>
+          </div>
+          <div class="tool-tier-cards">
+            <div class="tool-card-item">
+              <div class="tool-name">OpenAI Operator</div>
+              <div class="tool-desc">Spezialisiert auf Browser-Aufgaben direkt im Web. "Buche mir diesen Flug" oder "Recherchiere diese Firmen" — er führt es im Browser aus.</div>
+              <div class="tool-ideal">Ideal für: Web-Aufgaben im OpenAI-Universum</div>
+              <span class="tool-tag tag-openai">OpenAI</span>
+            </div>
+            <div class="tool-card-item">
+              <div class="tool-name">Claude Code</div>
+              <div class="tool-desc">Extrem präzise für komplexe Texte, Code oder Strategie-Dokumente über mehrere Schritte hinweg. Technisch angehaucht, aber ungeschlagen in Tiefe.</div>
+              <div class="tool-ideal">Ideal für: Komplexe Texte, Strategie-Docs</div>
+              <span class="tool-tag tag-claude">Claude</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-tier pro">
+          <div class="tool-tier-header">
+            <span class="tool-tier-label">🚀 Für Ambitionierte &amp; Profis</span>
+          </div>
+          <div class="tool-tier-cards">
+            <div class="tool-card-item">
+              <div class="tool-name">Replit</div>
+              <div class="tool-desc">Plattform zum Hosten eigener Agenten-Skripte. Wenn Standard-Tools zu starr werden, baust du hier maßgeschneiderte Lösungen.</div>
+              <div class="tool-ideal">Ideal für: Custom Agents, Hosting</div>
+              <span class="tool-tag tag-code">Code</span>
+            </div>
+            <div class="tool-card-item">
+              <div class="tool-name">n8n</div>
+              <div class="tool-desc">Die Power-User-Alternative zu Zapier. Extrem flexibel und kostengünstig, aber komplexer in der Einrichtung. Profis bauen hier ganze Agenten-Armeen.</div>
+              <div class="tool-ideal">Ideal für: Komplexe Systeme, Kostenkontrolle</div>
+              <span class="tool-tag tag-power">Power-User</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Empfehlung für den Start</strong>
+          <p>Zapier Central für den Einstieg. Es verbindet sich mit tausenden Apps, hat eine visuelle Oberfläche und erlaubt dir, erste Ergebnisse in unter 30 Minuten zu erzielen. Wechsle zu n8n, wenn du mehr Kontrolle und weniger Kosten willst.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Quick Win Simulator -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Quick Wins: Drei Rezepte für sofortige Zeitersparnis</h2>
+        <p>In unter 30 Minuten aufsetzen, sofort nutzen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Agenten müssen nicht kompliziert sein. Hier sind drei Anwendungsfälle, die du mit Tools wie Zapier oder Gumloop heute noch aufsetzen kannst. Wähle deinen Quick Win und sieh den kompletten Workflow.</p>
+
+      <div class="qw-builder">
+        <div class="qw-toolbar">
+          <button class="qw-tab active" onclick="setQW(0, this)">✍️ Personal Brand</button>
+          <button class="qw-tab" onclick="setQW(1, this)">📊 Feedback-Analyst</button>
+          <button class="qw-tab" onclick="setQW(2, this)">🎯 Ad-Copy-Variator</button>
+          <button class="qw-run-btn" onclick="runQW()">▶ Workflow zeigen</button>
+        </div>
+        <div class="qw-body">
+          <div class="qw-section-label">Ziel</div>
+          <div class="qw-goal" id="qw-goal"></div>
+          <div class="qw-section-label">Workflow</div>
+          <div class="qw-workflow" id="qw-workflow">Klicke auf "Workflow zeigen"...</div>
+          <div class="qw-hitl" id="qw-hitl"></div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Kein "So baust du Agenten"-Kurs</strong>
+          <p>Diese Lektion zeigt dir die Möglichkeiten und soll inspirieren. Der konkrete Aufbau einzelner Tools würde den Rahmen sprengen. Starte mit einem Quick Win, lerne wie der Agent reagiert, und skaliere dann schrittweise.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Komplexitätsspektrum -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Der Ausblick: Vom Quick Win zum autonomen System</h2>
+        <p>Das Komplexitätsspektrum kennen und einordnen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Was wir bei den Quick Wins gesehen haben, sind oft lineare Ketten. Aber die Reise geht weiter. Profis bauen heute Systeme, die ganze Prozesse autonom bearbeiten. Je komplexer das System, desto mehr Human-in-the-Loop ist Pflicht.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf eine Stufe, um die Merkmale und den Einstiegspunkt zu sehen.</p>
+
+      <div class="complexity-bar">
+        <div class="complexity-header">Komplexitätsspektrum: Wo stehst du?</div>
+        <div class="complexity-track">
+          <div class="complexity-item" onclick="setComplexity(0, this)">
+            <div class="complexity-num">1️⃣</div>
+            <div class="complexity-name">Trigger</div>
+            <div class="complexity-sub">Wenn A, dann B</div>
+          </div>
+          <div class="complexity-item" onclick="setComplexity(1, this)">
+            <div class="complexity-num">2️⃣</div>
+            <div class="complexity-name">Kette</div>
+            <div class="complexity-sub">3-5 Schritte</div>
+          </div>
+          <div class="complexity-item" onclick="setComplexity(2, this)">
+            <div class="complexity-num">3️⃣</div>
+            <div class="complexity-name">Agent</div>
+            <div class="complexity-sub">Urteil + Tools</div>
+          </div>
+          <div class="complexity-item" onclick="setComplexity(3, this)">
+            <div class="complexity-num">4️⃣</div>
+            <div class="complexity-name">Multi-Agent</div>
+            <div class="complexity-sub">Spezialisten-Team</div>
+          </div>
+        </div>
+        <div class="complexity-detail" id="cd-0">
+          <strong>Stufe 1: Einfacher Trigger (Klassische Automatisierung)</strong><br>
+          Wenn eine neue Google-Rezension eingeht, sende eine E-Mail-Benachrichtigung. Kein Urteilsvermögen, 100 % vorhersehbar. Einstieg: Zapier Free-Tier. HITL: Nicht notwendig, da keine Handlungsentscheidungen getroffen werden.
+        </div>
+        <div class="complexity-detail" id="cd-1">
+          <strong>Stufe 2: Lineare Kette (Quick Win Level)</strong><br>
+          Neue Rezension eingeht → Sentiment-Analyse → Kategorisierung → Entwurf-E-Mail generieren → in Drafts speichern. 3-5 Schritte, linearer Ablauf. Einstieg: Zapier Central oder Gumloop. HITL: Du prüfst den Entwurf, bevor er versendet wird.
+        </div>
+        <div class="complexity-detail" id="cd-2">
+          <strong>Stufe 3: Echter Agent (Urteil + Tools)</strong><br>
+          Agent analysiert wöchentlich Konkurrenten-Preise, entscheidet was relevant ist, und schickt nur echte Änderungen an das Team. Benötigt: Browser-Tool, Diff-Logik, Slack-API. Einstieg: Zapier Premium oder n8n. HITL: Regelmäßige Ausgaben-Kontrolle, Budget-Limits setzen.
+        </div>
+        <div class="complexity-detail" id="cd-3">
+          <strong>Stufe 4: Multi-Agent-System (Profi-Level)</strong><br>
+          Researcher-Agent, Writer-Agent, Editor-Agent arbeiten koordiniert: Ein vollständiger "SEO-Autopilot" von der Keyword-Analyse bis zum WordPress-Upload und der 4-Wochen-Optimierung. Einstieg: n8n + eigene Skripte auf Replit. HITL: Zwingend erforderlich an mehreren Kontrollpunkten. Ohne HITL kein Profi-Betrieb.
+        </div>
+      </div>
+
+      <div class="callout orange">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Je komplexer, desto mehr HITL</strong>
+          <p>Ein SEO-Autopilot klingt verlockend: Keyword-Analyse, Top-10-Analyse, Artikel schreiben, Bilder generieren, WordPress-Upload, Nachoptimierung. Aber je mehr Autonomie du gibst, desto größer die Fehlerwahrscheinlichkeit. Solche Systeme brauchen ein starkes Fundament aus menschlicher Kontrolle.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Eigener Workflow-Planer -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Dein erster Agent: Der Workflow-Planer</h2>
+        <p>Von der nervigen Aufgabe zum strukturierten Blueprint</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wir verlassen die Theorie. Plane deinen ersten Agenten auf dem Papier. Wähle eine Aufgabe, die dich nervt, und baue den Blueprint.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Fülle die Felder aus und generiere deinen persönlichen Agenten-Blueprint.</p>
+
+      <div class="workflow-planner">
+        <div class="wp-toolbar">
+          <span>🗺 Agenten-Blueprint-Planer</span>
+          <button class="wp-gen-btn" onclick="buildWorkflow()">▶ Blueprint generieren</button>
+        </div>
+        <div class="wp-body">
+          <div class="wp-left">
+            <div class="wp-field">
+              <label>Die nervige Aufgabe (Input)</label>
+              <input type="text" id="wp-task" placeholder="z. B. Meeting-Zusammenfassungen erstellen">
+            </div>
+            <div class="wp-field">
+              <label>Input-Format</label>
+              <select id="wp-input">
+                <option value="Zoom/Teams-Aufnahme (Audio/Video)">Zoom/Teams-Aufnahme</option>
+                <option value="E-Mail-Postfach (Neueingänge)">E-Mail-Postfach</option>
+                <option value="Google Sheet (neue Zeilen)">Google Sheet</option>
+                <option value="Website-URL">Website-URL</option>
+                <option value="Slack-Nachricht">Slack-Nachricht</option>
+                <option value="Google Rezensionen (neu)">Google Rezensionen</option>
+              </select>
+            </div>
+            <div class="wp-field">
+              <label>Gewünschter Output</label>
+              <input type="text" id="wp-output" placeholder="z. B. Action-Item-Liste, E-Mail, Slack-Nachricht">
+            </div>
+            <div class="wp-field">
+              <label>Tool-Empfehlung</label>
+              <select id="wp-tool">
+                <option value="Zapier">Zapier (Einsteiger)</option>
+                <option value="Gumloop">Gumloop (Visuell)</option>
+                <option value="n8n">n8n (Power-User)</option>
+                <option value="Claude Code">Claude Code (Text/Strategie)</option>
+              </select>
+            </div>
+            <div class="wp-field">
+              <label>HITL-Punkt</label>
+              <select id="wp-hitl">
+                <option value="vor dem Versenden der finalen Nachricht">Vor dem Versenden</option>
+                <option value="nach der Analyse, vor der Weiterverarbeitung">Nach der Analyse</option>
+                <option value="täglich beim Morgen-Review">Täglich beim Review</option>
+                <option value="nur bei kritischen Fällen (Eskalation)">Nur bei Eskalation</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="wp-preview-label">Dein Agenten-Blueprint</div>
+            <div class="wp-preview" id="wp-preview">Felder ausfullen und auf "Blueprint generieren" klicken...</div>
+            <button class="wp-copy-btn" onclick="copyWP()">Kopieren</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Learnings -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Es gibt nicht das eine perfekte Tool</strong>
+          <p>Zapier für den Start, Gumloop für visuelle Denker, n8n für Power-User, Claude Code für komplexe Texte. Wähle nach deinem Problem, nicht nach dem Hype.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Starte klein mit einem Quick Win</strong>
+          <p>30 Minuten Aufwand, sofort messbarer Zeitgewinn. Lerne, wie der Agent reagiert, bevor du ein komplexes System baust. Iteration schlägt Perfektionismus.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Das Komplexitätsspektrum kennen</strong>
+          <p>Trigger, Kette, Agent, Multi-Agent: Vier Stufen, vier verschiedene Anforderungen an HITL. Profi-Systeme ohne menschliche Kontrolle sind kein professioneller Betrieb.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Die Zukunft gehört den System-Bauern</strong>
+          <p>Nicht wer die meisten KI-Tools nutzt, gewinnt, sondern wer die besten Systeme baut. Ein durchdachter Blueprint mit klarem HITL-Punkt ist mehr wert als zehn halbfertige Automatisierungen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// QUICK WIN SIMULATOR
+var qwData = [
+  {
+    goal: 'Täglich relevante Branchen-News auf LinkedIn teilen, ohne selbst stundenlang zu lesen.',
+    steps: [
+      { num: '1', text: 'Agent scannt morgens 5 von dir definierte News-Seiten (z. B. t3n, Gründerszene, Marketing Insider).' },
+      { num: '2', text: 'Filtert Artikel heraus, die wirklich relevant für deine Zielgruppe sind (Kriterien von dir vorgegeben).' },
+      { num: '3', text: 'Schreibt einen Entwurf für einen LinkedIn-Post inklusive deiner Tonalität und einem Kommentar-Hook.' },
+      { num: '4', text: 'HITL: Du erhältst eine Slack-Nachricht mit dem Entwurf. Klick auf "Senden" oder passe an.' }
+    ],
+    hitl: '⚡ Zeitgewinn: Statt 45 Min. tägliches Lesen → 2 Min. Review. Der Agent filtert, du entscheidest.'
+  },
+  {
+    goal: 'Kundenstimmen aus Umfragen oder Rezensionen sofort und automatisch auswerten.',
+    steps: [
+      { num: '1', text: 'Neue Rezensionen (z. B. Google, Trustpilot) laufen automatisch in ein Google Sheet ein.' },
+      { num: '2', text: 'Agent liest jeden Text, erkennt die Stimmung (Sentiment) und kategorisiert das Problem (z. B. Preis, Lieferzeit, Freundlichkeit).' },
+      { num: '3', text: 'Kritische Fälle (Negativbewertungen) werden markiert und automatisch an den Support eskaliert.' },
+      { num: '4', text: 'HITL: Du überprüfst wöchentlich die kategorisierten Trends. Die Eskalationen prüfst du täglich im Morgen-Check.' }
+    ],
+    hitl: '⚡ Zeitgewinn: Statt stundenlanger manueller Auswertung → strukturierte Übersicht in Sekunden. Kein kritisches Feedback geht mehr unter.'
+  },
+  {
+    goal: 'Aus einer einzigen Landingpage 20 verschiedene Anzeigen-Texte für Meta oder Google erstellen.',
+    steps: [
+      { num: '1', text: 'Du gibst dem Agenten die URL deiner Landingpage.' },
+      { num: '2', text: 'Agent besucht die Seite, extrahiert die Kernvorteile und schreibt Texte für verschiedene Zielgruppen (z. B. "Sicherheitsorientiert" vs. "Preisbewusst").' },
+      { num: '3', text: 'Output: 20 Varianten in einer Tabelle mit Headline, Subheadline und Body-Text je Zielgruppen-Winkel.' },
+      { num: '4', text: 'HITL: Du prüfst die Varianten, wählst die besten 5 aus und schaltest sie. Nach 2 Wochen analysiert der Agent die Ergebnisse.' }
+    ],
+    hitl: '⚡ Zeitgewinn: Statt Stunden für Copy-Variationen → komplette Varianten-Bibliothek in Minuten. Mehr Tests, mehr Lernen.'
+  }
+];
+
+var currentQW = 0;
+
+function setQW(idx, btn) {
+  currentQW = idx;
+  document.querySelectorAll('.qw-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('qw-goal').textContent = qwData[idx].goal;
+  document.getElementById('qw-workflow').innerHTML = 'Klicke auf "Workflow zeigen"...';
+  document.getElementById('qw-hitl').style.display = 'none';
+}
+
+function runQW() {
+  var qw = qwData[currentQW];
+  var html = qw.steps.map(function(s) {
+    return '<div class="qw-step"><span class="qw-step-num">' + s.num + '</span><span>' + s.text + '</span></div>';
+  }).join('');
+  document.getElementById('qw-workflow').innerHTML = html;
+  var hitl = document.getElementById('qw-hitl');
+  hitl.textContent = qw.hitl;
+  hitl.style.display = 'block';
+}
+
+// init
+setQW(0, document.querySelector('.qw-tab'));
+
+// COMPLEXITY
+function setComplexity(idx, item) {
+  document.querySelectorAll('.complexity-item').forEach(function(c) { c.classList.remove('active'); });
+  document.querySelectorAll('.complexity-detail').forEach(function(d) { d.classList.remove('active'); });
+  item.classList.add('active');
+  document.getElementById('cd-' + idx).classList.add('active');
+}
+
+// WORKFLOW PLANNER
+function buildWorkflow() {
+  var task   = document.getElementById('wp-task').value.trim() || '[Aufgabe eintragen]';
+  var input  = document.getElementById('wp-input').value;
+  var output = document.getElementById('wp-output').value.trim() || '[Output definieren]';
+  var tool   = document.getElementById('wp-tool').value;
+  var hitl   = document.getElementById('wp-hitl').value;
+
+  var lines = [
+    '# AGENTEN-BLUEPRINT',
+    '',
+    'AUFGABE: ' + task,
+    '',
+    '# INPUT',
+    '→ ' + input,
+    '',
+    '# WORKFLOW',
+    '1. Empfange den Input automatisch (' + input + ').',
+    '2. Analysiere und verarbeite den Inhalt.',
+    '3. Wende die definierten Regeln und Kategorien an.',
+    '4. Erstelle einen Entwurf: ' + output,
+    '5. Speichere den Entwurf zur Freigabe.',
+    '',
+    '# HUMAN-IN-THE-LOOP',
+    '→ Eingriffspunkt: ' + hitl + '.',
+    '→ Du pruefst und freigibst, bevor es weitergeht.',
+    '',
+    '# TOOL-EMPFEHLUNG',
+    '→ ' + tool,
+    '',
+    '# ERFOLGS-CHECK',
+    'Stelle dem Agenten eine Testfrage, auf die du die',
+    'Antwort kennst. Pruefe ob der Output deinen',
+    'Erwartungen entspricht. Wenn ja: skalieren.',
+    'Wenn nein: System Prompt verfeinern.'
+  ];
+
+  document.getElementById('wp-preview').textContent = lines.join('\n');
+}
+
+function copyWP() {
+  navigator.clipboard.writeText(document.getElementById('wp-preview').textContent).then(function() {
+    var btn = document.querySelector('.wp-copy-btn');
+    btn.textContent = 'Kopiert!';
+    setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+  });
+}
+
+// QUIZ
+var questions = [
+  {
+    q: 'Welches Tool ist die empfohlene Einstiegsoption für Marketer ohne technischen Hintergrund?',
+    options: [
+      'n8n, weil es am flexibelsten ist.',
+      'Replit, weil es die meisten Integrationen hat.',
+      'Zapier, weil es tausende App-Verbindungen bietet und keine technischen Vorkenntnisse erfordert.',
+      'Claude Code, weil es am präzisesten ist.'
+    ],
+    correct: 2,
+    feedback: 'Zapier ist der Standard-Einstiegspunkt: bekannte Oberfläche, tausende App-Verbindungen, und bereits vorhandene Zapier-Kenntnisse können direkt für KI-Agenten genutzt werden.'
+  },
+  {
+    q: 'Was ist der Hauptvorteil von n8n gegenüber Zapier?',
+    options: [
+      'n8n hat mehr App-Verbindungen als Zapier.',
+      'n8n ist extrem flexibel und kostengünstiger, erfordert aber ein tieferes technisches Verständnis.',
+      'n8n funktioniert ohne Internetverbindung.',
+      'n8n ist besonders gut für visuelle Denker geeignet.'
+    ],
+    correct: 1,
+    feedback: 'n8n ist die Power-User-Alternative: günstiger (oft selbstgehostet), flexibler, aber komplexer einzurichten. Profis bauen hier ganze Agenten-Armeen. Der Preis ist höherer Einarbeitungsaufwand.'
+  },
+  {
+    q: 'Der "Personal Brand Kurator" Quick Win hilft dabei, was zu automatisieren?',
+    options: [
+      'Automatisches Veröffentlichen von LinkedIn-Posts ohne menschliche Kontrolle.',
+      'Täglich relevante Branchen-News scannen, filtern und einen Post-Entwurf erstellen, der dann zur Freigabe vorgelegt wird.',
+      'Das komplette Content-Kalender-Management ohne menschlichen Input.',
+      'Die Erstellung von Unternehmensstrategien basierend auf News-Daten.'
+    ],
+    correct: 1,
+    feedback: 'Der Kurator spart Zeit beim Lesen und Selektieren. Aber: Der Agent erstellt nur den Entwurf. Du prüfst und drückst auf Senden. Human-in-the-Loop ist auch beim einfachsten Quick Win Pflicht.'
+  },
+  {
+    q: 'Was macht der "Feedback-Analyst" Agent mit kritischen Rezensionen?',
+    options: [
+      'Er löscht automatisch negative Bewertungen auf Bewertungsplattformen.',
+      'Er antwortet öffentlich auf die Bewertungen im Namen des Unternehmens.',
+      'Er markiert kritische Fälle und eskaliert sie automatisch an den Support.',
+      'Er schreibt eine Gegendarstellung an die Plattform.'
+    ],
+    correct: 2,
+    feedback: 'Der Feedback-Analyst liest, analysiert Sentiment, kategorisiert und eskaliert kritische Fälle. Er handelt nicht öffentlich, er strukturiert intern. Du entscheidest, wie mit dem Feedback umgegangen wird.'
+  },
+  {
+    q: 'Was unterscheidet Stufe 1 (Trigger) von Stufe 3 (Agent) im Komplexitätsspektrum?',
+    options: [
+      'Stufe 1 ist schneller, Stufe 3 ist langsamer.',
+      'Stufe 1 folgt starren Regeln ohne Urteilsvermögen, Stufe 3 urteilt selbst über Relevanz und nächste Schritte.',
+      'Stufe 1 nutzt nur E-Mail, Stufe 3 kann alle Kommunikationskanäle nutzen.',
+      'Stufe 1 braucht keine Programmierung, Stufe 3 erfordert immer Code.'
+    ],
+    correct: 1,
+    feedback: 'Trigger = deterministische Wenn-A-dann-B-Logik, kein Urteilsvermögen. Ein echter Agent (Stufe 3) beurteilt selbst, ob eine Information relevant ist, und entscheidet über den nächsten Schritt.'
+  },
+  {
+    q: 'Warum brauchen Multi-Agent-Systeme (Stufe 4) besonders viel Human-in-the-Loop?',
+    options: [
+      'Weil sie teurer sind und man die Kosten im Blick behalten muss.',
+      'Weil mehrere Agenten sich gegenseitig widersprechen und manuell moderiert werden müssen.',
+      'Je mehr Autonomie ein System hat, desto größer die Fehlerwahrscheinlichkeit und die potenziellen Auswirkungen eines Fehlers.',
+      'Weil Multi-Agent-Systeme noch keine ausgereifte Technologie sind.'
+    ],
+    correct: 2,
+    feedback: 'Mehr Autonomie = mehr Fehlerrisiko, und vor allem: Fehler bei Stufe 4 haben größere Auswirkungen (z. B. falsch veröffentlichte Artikel). Deshalb ist HITL an mehreren Kontrollpunkten bei komplexen Systemen kein Luxus, sondern Pflicht.'
+  },
+  {
+    q: 'Für was ist Claude Code besonders geeignet?',
+    options: [
+      'Für die Verbindung von tausenden verschiedenen Apps über eine visuelle Oberfläche.',
+      'Für einfache Trigger-Automatisierungen ohne Programmierkenntnis.',
+      'Für komplexe, präzise Texte, Code und Strategie-Dokumente über mehrere Schritte hinweg.',
+      'Für das Hosten und Betreiben eigener Agenten-Skripte.'
+    ],
+    correct: 2,
+    feedback: 'Claude Code ist technisch angehaucht, aber ungeschlagen bei Tiefe und Präzision für komplexe Textverarbeitung, mehrstufige Strategie-Dokumente und Code-Aufgaben. Nicht für visuelle Workflow-Verbindungen gedacht.'
+  },
+  {
+    q: 'Was ist der erste Schritt beim "Ad-Copy-Variator" Quick Win?',
+    options: [
+      'Den Agenten direkt mit dem Meta Ads Manager verbinden, damit er Anzeigen schaltet.',
+      '20 Zielgruppen-Personas manuell definieren und dem Agenten übergeben.',
+      'Dem Agenten die URL der Landingpage geben, damit er die Seite besucht und Vorteile extrahiert.',
+      'Die Budgets für jede Anzeigenvariante definieren.'
+    ],
+    correct: 2,
+    feedback: 'Schritt 1 ist der Input: eine URL. Der Agent besucht die Seite selbst, extrahiert die Kern-USPs und leitet daraus verschiedene Texte für verschiedene Zielgruppen-Winkel ab. Du definierst nur das Ausgangsmaterial.'
+  },
+  {
+    q: 'Was ist der entscheidende Unterschied zwischen dem "Starte klein"-Prinzip und dem "Denke groß"-Prinzip?',
+    options: [
+      'Man sollte immer groß denken und direkt ein komplexes System bauen.',
+      'Klein starten bedeutet, nur einfache Tools zu nutzen und nie zu skalieren.',
+      'Erst einen einfachen Quick Win aufsetzen, die Reaktion des Agenten lernen, und dann schrittweise zu komplexeren Systemen skalieren.',
+      'Groß denken bedeutet, sofort Profi-Tools wie n8n zu nutzen, auch ohne Vorkenntnisse.'
+    ],
+    correct: 2,
+    feedback: 'Iteration ist der Weg: Quick Win aufsetzen, Qualität prüfen, System Prompt verbessern, dann skalieren. Wer direkt ein komplexes System baut, ohne den Agenten zu kennen, riskiert viel Aufwand ohne Ergebnis.'
+  },
+  {
+    q: 'Warum sollte man sein Tool nach "aktuellem Problem" statt nach "Hype" wählen?',
+    options: [
+      'Weil neue Tools immer schlechter als bewährte sind.',
+      'Weil das richtige Tool für das aktuelle Problem die schnellste Zeit bis zum ersten Ergebnis liefert. Ein Tool-Wechsel kostet Einarbeitungszeit ohne Mehrwert.',
+      'Weil neue KI-Tools oft unsicher und datenschutzrechtlich problematisch sind.',
+      'Weil man sonst zu viel Geld für Tools ausgibt, die man nicht braucht.'
+    ],
+    correct: 1,
+    feedback: 'Hype-getriebene Tool-Wechsel kosten Einarbeitungszeit und verzögern echte Ergebnisse. Das richtige Tool ist das, das deinen konkreten Quick Win am schnellsten umsetzt, nicht das mit den meisten Features.'
+  }
+];
+
+var currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  var q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  var optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[currentQ];
+  var opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong> ' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  var pct = score / questions.length;
+  var badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
