@@ -12,6 +12,15 @@
 var COURSE = {
   topics: [
     {
+      id:       "einleitung",
+      num:      "00",
+      title:    "Einleitung",
+      overview: "index.html",
+      modules: [
+        { id: "einleitung-01", file: "01.html", num: "1.1", title: "Einleitung", time: 15, tools: 0, quiz: 10 }
+      ]
+    },
+    {
       id:       "prompting",
       num:      "01",
       title:    "Prompting",
