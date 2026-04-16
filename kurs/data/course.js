@@ -25,6 +25,15 @@ var COURSE = {
       ]
     },
     {
+      id:       "bildkreation",
+      num:      "04",
+      title:    "Bildkreation",
+      overview: "index.html",
+      modules: [
+        { id: "bildkreation-01", file: "01.html", num: "4.1", title: "Bild-KIs: Vom Zufallstreffer zur visuellen Strategie", time: 15, tools: 3, quiz: 10 }
+      ]
+    },
+    {
       id:       "content",
       num:      "03",
       title:    "Content-Produktion",
