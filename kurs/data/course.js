@@ -13,7 +13,7 @@ var COURSE = {
   topics: [
     {
       id:       "einleitung",
-      num:      "00",
+      num:      "01",
       title:    "Einleitung",
       overview: "index.html",
       modules: [
@@ -22,7 +22,7 @@ var COURSE = {
     },
     {
       id:       "prompting",
-      num:      "01",
+      num:      "02",
       title:    "Prompting",
       overview: "index.html",
       modules: [
