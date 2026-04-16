@@ -234,6 +234,7 @@
 .inpaint-new-element {
   position: absolute; bottom: 18px; right: 22px;
   font-size: 26px; opacity: 0; transition: all 0.4s;
+  pointer-events: none;
 }
 .inpaint-new-element.visible { opacity: 1; }
 .inpaint-controls { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
@@ -569,8 +570,7 @@
             <input class="pb-input" id="pb-handlung" placeholder="z.B. arbeitet an einem futuristischen Modell in einem Loft-Büro" oninput="pbUpdate()">
           </div>
           <div class="pb-row">
-            <div class="pb-letter" style="background:#6D28D9;"></div>
-            <div class="pb-label-wrap" style="gap:6px;">
+            <div class="pb-label-wrap">
               <div class="pb-letter" style="background:#6D28D9;">ST</div>
               <div class="pb-label">Stil</div>
             </div>
@@ -586,7 +586,6 @@
           <div class="pb-preview-label">GENERIERTER PROMPT</div>
           <div class="pb-output" id="pb-output">
             <span style="color:rgba(255,255,255,0.2);font-size:12px;">Fülle die Felder oben aus, um deinen Prompt zu sehen...</span>
-            <button class="pb-copy" onclick="pbCopy()" id="pb-copy-btn" style="display:none;">Kopieren</button>
           </div>
         </div>
         <div class="pb-footer">
@@ -869,47 +868,47 @@ var pqData = [
   {
     q: 'Welcher Prompt liefert konsistentere Ergebnisse?',
     prompts: [
-      'Erstelle ein Bild von einem Hund, der auf einer Wiese mit einem Ball spielt. Das Wetter ist schoen, Schmetterlinge fliegen herum.',
-      'Golden Retriever, faengt einen roten Ball auf einer gruenen Wiese. Sonnenlicht von rechts, Gegenlicht, scharfe Tiefenschaerfe.'
+      'Erstelle ein Bild von einem Hund, der auf einer Wiese mit einem Ball spielt. Das Wetter ist schön, Schmetterlinge fliegen herum.',
+      'Golden Retriever, fängt einen roten Ball auf einer grünen Wiese. Sonnenlicht von rechts, Gegenlicht, scharfe Tiefenschärfe.'
     ],
     correct: 1,
-    feedback: 'Der zweite Prompt ist deutlich staerker: kein grammatikalischer Ballast, klare Subjektbeschreibung, konkrete Angaben zu Licht und Kamera. Die KI uebersetzt Text direkt in Pixel - jedes ueberflüssige Wort ist Rauschen.'
+    feedback: 'Der zweite Prompt ist deutlich stärker: kein grammatikalischer Ballast, klare Subjektbeschreibung, konkrete Angaben zu Licht und Kamera. Die KI übersetzt Text direkt in Pixel – jedes überflüssige Wort ist Rauschen.'
   },
   {
-    q: 'Welcher Stil-Hinweis im Prompt fuehrt zu einem professionelleren Ergebnis?',
+    q: 'Welcher Stil-Hinweis im Prompt führt zu einem professionelleren Ergebnis?',
     prompts: [
-      'Ein moderner Sneaker. Schoen fotografiert.',
-      'Moderner gruener Sneaker. Stil: High-End Produktfotografie, 8k, extrem detailliert. Beleuchtung: Golden Hour, warme Kontraste.'
+      'Ein moderner Sneaker. Schön fotografiert.',
+      'Moderner grüner Sneaker. Stil: High-End Produktfotografie, 8k, extrem detailliert. Beleuchtung: Golden Hour, warme Kontraste.'
     ],
     correct: 1,
-    feedback: 'Vage Adjektive wie "schoen" helfen der KI kaum. Sie hat keine aesthetische Meinung. Konkrete technische Referenzen wie "8k", "Golden Hour" oder "Produktfotografie" navigieren die KI zu einem exakten Punkt im latenten Raum.'
+    feedback: 'Vage Adjektive wie "schön" helfen der KI kaum. Sie hat keine ästhetische Meinung. Konkrete technische Referenzen wie "8k", "Golden Hour" oder "Produktfotografie" navigieren die KI zu einem exakten Punkt im latenten Raum.'
   },
   {
     q: 'Du willst Brand-Konsistenz bei einem neuen Bild. Was ist der effektivste Weg?',
     prompts: [
-      'Prompt schreiben: "Nutze unsere Markenfarben Blau und Weiss und einen professionellen, modernen Stil."',
-      'Ein vorhandenes Markenbild als Style Reference hochladen und der KI sagen: "Nutze diesen visuellen Stil fuer das neue Motiv."'
+      'Prompt schreiben: "Nutze unsere Markenfarben Blau und Weiß und einen professionellen, modernen Stil."',
+      'Ein vorhandenes Markenbild als Style Reference hochladen und der KI sagen: "Nutze diesen visuellen Stil für das neue Motiv."'
     ],
     correct: 1,
-    feedback: 'Referenzbilder sind maechtiger als Farbbeschreibungen in Text. Die KI kann aus einem Bild Lichtstimmung, Farbpalette und Atmosphaere direkt ablesen - das ist praeziser als jede verbale Beschreibung.'
+    feedback: 'Referenzbilder sind mächtiger als Farbbeschreibungen in Text. Die KI kann aus einem Bild Lichtstimmung, Farbpalette und Atmosphäre direkt ablesen – das ist präziser als jede verbale Beschreibung.'
   },
   {
-    q: 'Fuer welches Szenario ist Adobe Firefly die beste Wahl?',
+    q: 'Für welches Szenario ist Adobe Firefly die beste Wahl?',
     prompts: [
-      'Schnelle Social-Media-Ideen fuer eine interne Brainstorming-Runde generieren.',
-      'Produktbilder fuer eine nationale TV-Werbekampagne erstellen, die rechtssicher sein muessen.'
+      'Schnelle Social-Media-Ideen für eine interne Brainstorming-Runde generieren.',
+      'Produktbilder für eine nationale TV-Werbekampagne erstellen, die rechtssicher sein müssen.'
     ],
     correct: 1,
-    feedback: 'Fuer kommerzielle High-Risk-Kampagnen bietet Adobe Firefly Haftungsfreistellung, weil Trainingsdaten ausschliesslich lizenzierte Bilder aus Adobe Stock sind. Fuer internes Brainstorming reicht ChatGPT oder Gemini voellig aus.'
+    feedback: 'Für kommerzielle High-Risk-Kampagnen bietet Adobe Firefly Haftungsfreistellung, weil Trainingsdaten ausschließlich lizenzierte Bilder aus Adobe Stock sind. Für internes Brainstorming reicht ChatGPT oder Gemini völlig aus.'
   },
   {
     q: 'Was beschreibt den "Latenten Raum" einer Bild-KI am besten?',
     prompts: [
       'Der Speicherplatz der KI, in dem alle generierten Bilder archiviert werden.',
-      'Ein unsichtbarer Konzeptraum, in dem die KI Begriffe nach Aehnlichkeit anordnet und durch den dein Prompt navigiert.'
+      'Ein unsichtbarer Konzeptraum, in dem die KI Begriffe nach Ähnlichkeit anordnet und durch den dein Prompt navigiert.'
     ],
     correct: 1,
-    feedback: 'Der latente Raum ist keine Datenbank. Er ist eine mathematische Repraesentation von Konzeptbeziehungen. "Hund" liegt nah bei "Katze", weit weg von "Toaster". Je praeziser dein Prompt, desto gezielter navigierst du zu einem exakten Punkt in diesem Raum.'
+    feedback: 'Der latente Raum ist keine Datenbank. Er ist eine mathematische Repräsentation von Konzeptbeziehungen. "Hund" liegt nah bei "Katze", weit weg von "Toaster". Je präziser dein Prompt, desto gezielter navigierst du zu einem exakten Punkt in diesem Raum.'
   }
 ];
 
@@ -922,8 +921,8 @@ function pqRender() {
     resultEl.style.display = 'block';
     var pct = pqScore / pqData.length;
     document.getElementById('pq-result-badge').textContent = pct >= 0.8 ? '\uD83C\uDFC6' : pct >= 0.6 ? '\uD83E\uDD47' : '\uD83D\uDCDA';
-    document.getElementById('pq-result-title').textContent = pct >= 0.8 ? 'Starkes Prompt-Gefuehl!' : pct >= 0.6 ? 'Guter Ansatz.' : 'Noch etwas ueben.';
-    document.getElementById('pq-result-sub').textContent = pqScore + ' von ' + pqData.length + ' Prompts richtig eingeschaetzt.';
+    document.getElementById('pq-result-title').textContent = pct >= 0.8 ? 'Starkes Prompt-Gefühl!' : pct >= 0.6 ? 'Guter Ansatz.' : 'Noch etwas üben.';
+    document.getElementById('pq-result-sub').textContent = pqScore + ' von ' + pqData.length + ' Prompts richtig eingeschätzt.';
     return;
   }
   var d = pqData[pqCurrent];
@@ -984,10 +983,10 @@ pqRender();
 
 // PROMPT BUILDER
 var pbExamples = {
-  subjekt: '30-jaehrige Architektin, Brille, fokussierter Blick',
-  handlung: 'arbeitet an einem futuristischen Gebaeudemodell in einem hellen Loft-Buero',
+  subjekt: '30-jährige Architektin, Brille, fokussierter Blick',
+  handlung: 'arbeitet an einem futuristischen Gebäudemodell in einem hellen Loft-Büro',
   stil: 'Fotorealismus, Editorial Style, wie im Magazin Vogue',
-  licht: 'weiches Tageslicht von links (Window Light), geringe Tiefenschaerfe'
+  licht: 'weiches Tageslicht von links (Window Light), geringe Tiefenschärfe'
 };
 
 function pbUpdate() {
@@ -998,10 +997,8 @@ function pbUpdate() {
   var filled = [s,h,st,l].filter(function(x){return x.length > 0;}).length;
   document.getElementById('pb-hint').textContent = filled + ' / 4 Felder ausgefüllt';
   var out = document.getElementById('pb-output');
-  var copyBtn = document.getElementById('pb-copy-btn');
   if (!s && !h && !st && !l) {
     out.innerHTML = '<span style="color:rgba(255,255,255,0.2);font-size:12px;">Fülle die Felder oben aus, um deinen Prompt zu sehen...</span>';
-    copyBtn.style.display = 'none';
     return;
   }
   var parts = [];
@@ -1009,9 +1006,7 @@ function pbUpdate() {
   if (h) parts.push('<span class="kw-green">' + h + '</span>');
   if (st) parts.push('Stil: <span class="kw-purple">' + st + '</span>');
   if (l) parts.push('Licht: <span class="kw-orange">' + l + '</span>');
-  out.innerHTML = parts.join('. ') + '.';
-  out.appendChild(copyBtn);
-  copyBtn.style.display = 'block';
+  out.innerHTML = parts.join('. ') + '.<button class="pb-copy" onclick="pbCopy()" id="pb-copy-btn">Kopieren</button>';
 }
 
 function pbExample() {
@@ -1054,7 +1049,7 @@ function inpaintSelect() {
   document.getElementById('istep-1').querySelector('.inpaint-step-num').textContent = '\u2713';
   document.getElementById('istep-2').className = 'inpaint-step active';
   document.getElementById('inpaint-phase-label').textContent = 'Schritt 2: Anweisung geben';
-  document.getElementById('inpaint-status').textContent = 'Person ausgewaehlt. Gib jetzt eine Anweisung.';
+  document.getElementById('inpaint-status').textContent = 'Person ausgewählt. Gib jetzt eine Anweisung.';
   document.getElementById('inpaint-instruction-input').style.display = 'block';
   document.getElementById('inpaint-instruction-input').focus();
 }
@@ -1088,7 +1083,7 @@ function inpaintRun() {
     document.getElementById('inpaint-new').classList.add('visible');
     document.getElementById('istep-3').className = 'inpaint-step done';
     document.getElementById('istep-3').querySelector('.inpaint-step-num').textContent = '\u2713';
-    document.getElementById('inpaint-status').textContent = 'Fertig. Nur der markierte Bereich wurde veraendert.';
+    document.getElementById('inpaint-status').textContent = 'Fertig. Nur der markierte Bereich wurde verändert.';
     document.getElementById('inpaint-phase-label').textContent = '\u2713 Inpainting abgeschlossen';
     document.getElementById('inpaint-instruction-input').style.display = 'none';
     var resetBtn = document.createElement('button');
@@ -1108,7 +1103,7 @@ function inpaintRun() {
       document.getElementById('inpaint-instruction-input').value = '';
       document.getElementById('inpaint-instruction-input').style.display = 'none';
       document.getElementById('inpaint-status').textContent = 'Wähle zuerst ein Element aus.';
-      document.getElementById('inpaint-phase-label').textContent = 'Schritt 1: Element auswaehlen';
+      document.getElementById('inpaint-phase-label').textContent = 'Schritt 1: Element auswählen';
       document.getElementById('inpaint-run').disabled = true;
       var footer = document.getElementById('inpaint-run').parentNode;
       var oldReset = footer.querySelector('.pb-generate-btn');
@@ -1124,112 +1119,112 @@ const questions = [
   {
     q: 'Wie generieren Diffusions-Modelle Bilder technisch gesehen?',
     options: [
-      'Sie malen Schicht fuer Schicht, aehnlich wie ein Mensch mit Pinsel und Farbe.',
-      'Sie suchen in einer Datenbank nach dem aehnlichsten Bild und passen es an.',
-      'Sie entfernen schrittweise Rauschen aus einem zufaelligen Ausgangsbild, basierend auf gelernten Mustern.',
+      'Sie malen Schicht für Schicht, ähnlich wie ein Mensch mit Pinsel und Farbe.',
+      'Sie suchen in einer Datenbank nach dem ähnlichsten Bild und passen es an.',
+      'Sie entfernen schrittweise Rauschen aus einem zufälligen Ausgangsbild, basierend auf gelernten Mustern.',
       'Sie kombinieren vorhandene Stockbilder nach dem Prompt-Inhalt.'
     ],
     correct: 2,
-    feedback: 'Diffusions-Modelle starten mit reinem Rauschen und "meisseln" das Bild heraus, indem sie Schritt fuer Schritt Pixel entfernen, die nicht zum Prompt passen. Sie erstellen keine Bilder additiv, sondern subtraktiv.'
+    feedback: 'Diffusions-Modelle starten mit reinem Rauschen und "meißeln" das Bild heraus, indem sie Schritt für Schritt Pixel entfernen, die nicht zum Prompt passen. Sie erstellen keine Bilder additiv, sondern subtraktiv.'
   },
   {
-    q: 'Warum generiert eine Bild-KI manchmal Haende mit 6 Fingern?',
+    q: 'Warum generiert eine Bild-KI manchmal Hände mit 6 Fingern?',
     options: [
       'Weil der Prompt nicht klar genug war, was eine Hand ist.',
-      'Weil die KI zufaellige Rausch-Muster, die nach Fingern aussehen, nicht als anatomisch falsch erkennt.',
-      'Weil Haende technisch sehr schwer zu berechnen sind und viel Rechenleistung benoetigen.',
+      'Weil die KI zufällige Rausch-Muster, die nach Fingern aussehen, nicht als anatomisch falsch erkennt.',
+      'Weil Hände technisch sehr schwer zu berechnen sind und viel Rechenleistung benötigen.',
       'Weil die KI absichtlich Fehler einbaut, um Copyright zu vermeiden.'
     ],
     correct: 1,
-    feedback: 'Die KI hat kein biologisches Verstaendnis von Anatomie. Sie erkennt Muster. Wenn im generierten Rauschen zunaechst ein Muster entsteht, das nach Finger aussieht, laesst die KI es stehen, da es statistisch plausibel wirkt.'
+    feedback: 'Die KI hat kein biologisches Verständnis von Anatomie. Sie erkennt Muster. Wenn im generierten Rauschen zunächst ein Muster entsteht, das nach Finger aussieht, lässt die KI es stehen, da es statistisch plausibel wirkt.'
   },
   {
     q: 'Was beschreibt den Begriff "Latenter Raum" in Bild-KIs am treffendsten?',
     options: [
-      'Der Wartebereich waehrend der KI das Bild berechnet.',
-      'Die maximale Bildgroesse, die eine KI generieren kann.',
-      'Ein mathematischer Konzeptraum, in dem Begriffe nach Aehnlichkeit angeordnet sind und durch den der Prompt navigiert.',
+      'Der Wartebereich während die KI das Bild berechnet.',
+      'Die maximale Bildgröße, die eine KI generieren kann.',
+      'Ein mathematischer Konzeptraum, in dem Begriffe nach Ähnlichkeit angeordnet sind und durch den der Prompt navigiert.',
       'Die Zwischenspeicherung aller generierten Bilder in der Cloud.'
     ],
     correct: 2,
-    feedback: 'Der latente Raum ist eine mathematische Repraesentation von Konzeptbeziehungen. Ein starker Prompt mit spezifischen Angaben (z.B. "85mm Objektiv, Golden Hour") fuehrt die KI an einen exakten Punkt in diesem Raum.'
+    feedback: 'Der latente Raum ist eine mathematische Repräsentation von Konzeptbeziehungen. Ein starker Prompt mit spezifischen Angaben (z.B. "85mm Objektiv, Golden Hour") führt die KI an einen exakten Punkt in diesem Raum.'
   },
   {
-    q: 'Fuer welche Aufgabe ist Adobe Firefly Enterprise am besten geeignet?',
+    q: 'Für welche Aufgabe ist Adobe Firefly Enterprise am besten geeignet?',
     options: [
-      'Schnelle Social-Media-Ideen fuer interne Brainstorming-Sessions.',
-      'Kommerzielle Hochrisiko-Kampagnen, bei denen rechtliche Absicherung benoetigt wird.',
+      'Schnelle Social-Media-Ideen für interne Brainstorming-Sessions.',
+      'Kommerzielle Hochrisiko-Kampagnen, bei denen rechtliche Absicherung benötigt wird.',
       'Fotorealistische Bildbearbeitung bestehender Fotos.',
-      'Komplexe Bild-zu-Text-Beschreibungen fuer Barrierefreiheit.'
+      'Komplexe Bild-zu-Text-Beschreibungen für Barrierefreiheit.'
     ],
     correct: 1,
-    feedback: 'Adobe Firefly wurde ausschliesslich auf lizenzierten Adobe-Stock-Bildern trainiert und bietet fuer Enterprise-Kunden eine Haftungsfreistellung. Das macht es zur sichersten Wahl fuer kommerzielle High-Stakes-Kampagnen.'
+    feedback: 'Adobe Firefly wurde ausschließlich auf lizenzierten Adobe-Stock-Bildern trainiert und bietet für Enterprise-Kunden eine Haftungsfreistellung. Das macht es zur sichersten Wahl für kommerzielle High-Stakes-Kampagnen.'
   },
   {
-    q: 'Was ist der Hauptvorteil von ChatGPT (DALL-E) gegenueber anderen Bild-KIs?',
+    q: 'Was ist der Hauptvorteil von ChatGPT (DALL-E) gegenüber anderen Bild-KIs?',
     options: [
       'Die beste Rechtssicherheit aller Tools auf dem Markt.',
       'Unschlagbarer Fotorealismus bei Portraits.',
-      'Hervorragendes Sprachverstaendnis und die Moeglichkeit, im Dialog zu iterieren.',
+      'Hervorragendes Sprachverständnis und die Möglichkeit, im Dialog zu iterieren.',
       'Die einzige KI, die Bilder direkt auf Webseiten exportieren kann.'
     ],
     correct: 2,
-    feedback: 'ChatGPT/DALL-E versteht komplexe Anweisungen und Kontext besonders gut. Das macht es ideal fuer iterative Prozesse, bei denen man im Gespraech das Ergebnis verfeinert. Der "KI-Look" ist dafuer eine bekannte Schwaeche.'
+    feedback: 'ChatGPT/DALL-E versteht komplexe Anweisungen und Kontext besonders gut. Das macht es ideal für iterative Prozesse, bei denen man im Gespräch das Ergebnis verfeinert. Der "KI-Look" ist dafür eine bekannte Schwäche.'
   },
   {
     q: 'Was versteht man unter "Inpainting" (Generative Fill)?',
     options: [
-      'Das nachtraegliche Einfaerben von schwarz-weiss Fotos durch KI.',
-      'Das Hinzufuegen von Text und Logos in generierte Bilder.',
-      'Das gezielte Neuberechnen eines markierten Bildbereichs, waehrend der Rest unveraendert bleibt.',
-      'Die Technik, mehrere generierte Bilder zu einer Collage zusammenzufuegen.'
+      'Das nachträgliche Einfärben von schwarz-weiß Fotos durch KI.',
+      'Das Hinzufügen von Text und Logos in generierte Bilder.',
+      'Das gezielte Neuberechnen eines markierten Bildbereichs, während der Rest unverändert bleibt.',
+      'Die Technik, mehrere generierte Bilder zu einer Collage zusammenzufügen.'
     ],
     correct: 2,
-    feedback: 'Inpainting markiert eine spezifische Stelle im Bild (z.B. eine stoerende Person) und berechnet nur diesen Bereich neu. Licht, Schatten und Kontext werden dabei automatisch angepasst. Der Rest des Bildes bleibt pixelgenau identisch.'
+    feedback: 'Inpainting markiert eine spezifische Stelle im Bild (z.B. eine störende Person) und berechnet nur diesen Bereich neu. Licht, Schatten und Kontext werden dabei automatisch angepasst. Der Rest des Bildes bleibt pixelgenau identisch.'
   },
   {
     q: 'Du willst sicherstellen, dass ein neues KI-Bild farblich zu deiner Marke passt. Was ist der effektivste Weg?',
     options: [
-      'Den Prompt so praezise wie moeglich mit Hex-Farbcodes schreiben.',
+      'Den Prompt so präzise wie möglich mit Hex-Farbcodes schreiben.',
       'Ein bestehendes Markenbild als Style Reference hochladen.',
-      'Die Saettigung und den Farbton nach der Generierung in Photoshop anpassen.',
-      'Mehrere Bilder generieren und das passendste auswaehlen.'
+      'Die Sättigung und den Farbton nach der Generierung in Photoshop anpassen.',
+      'Mehrere Bilder generieren und das passendste auswählen.'
     ],
     correct: 1,
-    feedback: 'Referenzbilder sind maechtiger als verbale Farbangaben. Die KI liest aus einem Style-Reference-Bild direkt Farben, Lichtstimmung und Atmosphaere ab. Das ist praeziser als jede textuelle Beschreibung, auch mit Hex-Codes.'
+    feedback: 'Referenzbilder sind mächtiger als verbale Farbangaben. Die KI liest aus einem Style-Reference-Bild direkt Farben, Lichtstimmung und Atmosphäre ab. Das ist präziser als jede textuelle Beschreibung, auch mit Hex-Codes.'
   },
   {
     q: 'Was fordert der EU AI Act (ab August 2026) bei KI-generierten Bildern?',
     options: [
-      'Alle KI-Bilder muessen in einem speziellen, von der EU zertifizierten Format gespeichert werden.',
-      'KI-Bilder duerfen nicht mehr fuer kommerzielle Zwecke genutzt werden.',
-      'Realistische KI-Bilder (insbesondere Personendarstellungen) muessen als KI-generiert gekennzeichnet werden.',
+      'Alle KI-Bilder müssen in einem speziellen, von der EU zertifizierten Format gespeichert werden.',
+      'KI-Bilder dürfen nicht mehr für kommerzielle Zwecke genutzt werden.',
+      'Realistische KI-Bilder (insbesondere Personendarstellungen) müssen als KI-generiert gekennzeichnet werden.',
       'Jede KI-Bildgenerierung muss beim Datenschutzbeauftragten registriert werden.'
     ],
     correct: 2,
     feedback: 'Der EU AI Act verlangt Transparenz: Wenn ein Bild wie eine echte Person oder ein echtes Foto aussieht, aber KI-generiert ist, muss dies kenntlich gemacht werden. Kennzeichnung schafft Vertrauen und ist gesetzliche Pflicht.'
   },
   {
-    q: 'Warum sind kuerzere, praezisere Prompts bei Bild-KIs oft effektiver als lange, ausfuehrliche?',
+    q: 'Warum sind kürzere, präzisere Prompts bei Bild-KIs oft effektiver als lange, ausführliche?',
     options: [
-      'Weil Bild-KIs technisch nur 50 Woerter verarbeiten koennen.',
-      'Weil die KI keine lange Texte lesen kann und nur das erste Wort beachtet.',
-      'Weil ueberflüssige Woerter und Grammatik der KI nicht signalisieren, was priorisiert werden soll.',
-      'Weil laengere Prompts mehr Rechenzeit benoetigen und daher ungenauer werden.'
+      'Weil Bild-KIs technisch nur 50 Wörter verarbeiten können.',
+      'Weil die KI keine langen Texte lesen kann und nur das erste Wort beachtet.',
+      'Weil überflüssige Wörter und Grammatik der KI nicht signalisieren, was priorisiert werden soll.',
+      'Weil längere Prompts mehr Rechenzeit benötigen und daher ungenauer werden.'
     ],
     correct: 2,
-    feedback: 'Bild-KIs lesen Text nicht wie Menschen. Sie uebersetzen ihn direkt in Pixelwahrscheinlichkeiten. Grammatikalischer "Ballast" (z.B. "Erstelle ein Bild von einem...") und vage Adjektive stören diesen Uebersetzungsprozess ohne Informationsgewinn.'
+    feedback: 'Bild-KIs lesen Text nicht wie Menschen. Sie übersetzen ihn direkt in Pixelwahrscheinlichkeiten. Grammatikalischer "Ballast" (z.B. "Erstelle ein Bild von einem...") und vage Adjektive stören diesen Übersetzungsprozess ohne Informationsgewinn.'
   },
   {
-    q: 'Was ist die empfohlene Prompt-Struktur fuer professionelle Bild-Ergebnisse?',
+    q: 'Was ist die empfohlene Prompt-Struktur für professionelle Bild-Ergebnisse?',
     options: [
-      'Emotion + Farbe + Groesse + Dateiformat',
+      'Emotion + Farbe + Größe + Dateiformat',
       'Subjekt + Handlung/Kontext + Stil + Licht/Kamera',
-      'Tool + Modell + Qualitaet + Zielgruppe',
-      'Aufgabe + Ziel + Ton + Laenge'
+      'Tool + Modell + Qualität + Zielgruppe',
+      'Aufgabe + Ziel + Ton + Länge'
     ],
     correct: 1,
-    feedback: 'Die Vier-Komponenten-Formel gibt der KI alle noetigen Navigationspunkte: Wer oder was (Subjekt), in welcher Situation (Handlung/Kontext), in welchem visuellen Stil (Stil) und unter welchen Lichtbedingungen (Licht/Kamera). Jede Komponente fuehrt die KI praeziser im latenten Raum.'
+    feedback: 'Die Vier-Komponenten-Formel gibt der KI alle nötigen Navigationspunkte: Wer oder was (Subjekt), in welcher Situation (Handlung/Kontext), in welchem visuellen Stil (Stil) und unter welchen Lichtbedingungen (Licht/Kamera). Jede Komponente führt die KI präziser im latenten Raum.'
   }
 ];
 
