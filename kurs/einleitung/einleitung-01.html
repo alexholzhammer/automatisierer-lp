@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einleitung: KI-Einsatz im Marketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ═══════════════════════════════════
+   INTERACTIVE 1: TOKEN SIMULATOR
+═══════════════════════════════════ */
+.token-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+}
+.token-input:focus { border-color: var(--accent); }
+.token-display {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  min-height: 48px;
+  padding: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+.token-chip {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 500;
+  border: 1px solid transparent;
+  animation: tokenPop 0.15s ease;
+}
+@keyframes tokenPop {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.token-colors {
+  --t0: #EBF2FF; --t0b: #B8D1FF; --t0c: #1A6FFF;
+  --t1: #E0FDF9; --t1b: #99E9DC; --t1c: #00897B;
+  --t2: #EDE9FE; --t2b: #C4B5FD; --t2c: #6D28D9;
+  --t3: #FFF7ED; --t3b: #FED7AA; --t3c: #C2410C;
+  --t4: #ECFDF5; --t4b: #6EE7B7; --t4c: #059669;
+}
+.token-stats {
+  display: flex; gap: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-subtle);
+}
+.token-stat span { color: var(--text); font-weight: 500; }
+
+/* ═══════════════════════════════════
+   INTERACTIVE 2: WAHRSCHEINLICHKEITS-DEMO
+═══════════════════════════════════ */
+.prob-demo {
+  background: #0E0D0C;
+  border: 1px solid #2A2520;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin: 14px 0;
+}
+.prob-prompt-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.prob-prompt-display .highlight { color: #80AAFF; font-weight: 500; }
+.prob-scenarios {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.prob-scenario-btn {
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.prob-scenario-btn:hover { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.9); }
+.prob-scenario-btn.active { background: rgba(26,111,255,0.2); border-color: rgba(26,111,255,0.5); color: #80AAFF; }
+.prob-bars { display: grid; gap: 8px; }
+.prob-bar-row {
+  display: grid; grid-template-columns: 110px 1fr 50px;
+  align-items: center; gap: 10px;
+}
+.prob-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.prob-track {
+  height: 8px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.prob-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+.prob-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; text-align: right;
+  color: rgba(255,255,255,0.45);
+}
+.prob-explanation {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.6;
+  transition: all 0.3s;
+}
+
+/* ═══════════════════════════════════
+   INTERACTIVE 3: VEKTORRAUM NAVIGATOR
+═══════════════════════════════════ */
+.vector-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin: 14px 0;
+}
+@media(max-width: 600px) { .vector-grid { grid-template-columns: 1fr; } }
+.vector-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.vector-card:hover { border-color: var(--accent); box-shadow: var(--shadow-colored); }
+.vector-card.selected { border-color: var(--accent); background: var(--accent-light); }
+.vector-card-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.vector-card.selected .vector-card-header { border-bottom-color: rgba(26,111,255,0.2); }
+.vector-quality {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  font-family: 'JetBrains Mono', monospace;
+}
+.quality-low { background: var(--red-light); color: var(--red); }
+.quality-high { background: var(--green-light); color: var(--green); }
+.vector-prompt {
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text-muted);
+  line-height: 1.6;
+}
+.vector-result-area {
+  margin: 14px 0;
+  min-height: 100px;
+  background: #0E0D0C;
+  border: 1px solid #2A2520;
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: all 0.3s;
+  display: none;
+}
+.vector-result-area.visible { display: block; }
+.vector-result-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 10px;
+}
+.vector-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.vector-tag {
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  animation: tagFade 0.3s ease forwards;
+  opacity: 0;
+}
+@keyframes tagFade {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.tag-generic { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+.tag-specific { background: rgba(26,111,255,0.2); color: #80AAFF; border: 1px solid rgba(26,111,255,0.3); }
+.vector-output {
+  font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7;
+  font-style: italic;
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ═══════════════════════════════════
+   INTERACTIVE 4: C-A-R-E CHECKLISTE
+═══════════════════════════════════ */
+.care-grid { display: grid; gap: 10px; margin: 14px 0; }
+.care-item {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.care-item.checked { border-color: var(--green); }
+.care-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.care-letter {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.care-item:not(.checked) .care-letter {
+  background: var(--surface-2); color: var(--text-muted);
+  border: 2px solid var(--border);
+}
+.care-item.checked .care-letter {
+  background: var(--green-light); color: var(--green);
+  border: 2px solid var(--green);
+}
+.care-title-wrap { flex: 1; }
+.care-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.care-subtitle { font-size: 12px; color: var(--text-muted); }
+.care-check-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+  transition: all 0.2s;
+}
+.care-item.checked .care-check-icon {
+  background: var(--green); border-color: var(--green); color: white;
+}
+.care-detail {
+  padding: 0 16px;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.care-item.open .care-detail {
+  max-height: 120px;
+  padding-bottom: 14px;
+}
+.care-detail p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.6; }
+.care-progress-bar {
+  height: 4px; background: var(--surface-2); border-radius: 999px;
+  overflow: hidden; margin: 14px 0 0;
+}
+.care-progress-fill {
+  height: 100%; background: var(--green);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.care-status {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px;
+  font-size: 12px; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}
+.care-status-badge {
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  transition: all 0.3s;
+}
+.care-status-badge.incomplete { background: var(--surface-2); color: var(--text-subtle); }
+.care-status-badge.complete { background: var(--green-light); color: var(--green); }
+
+/* ═══════════════════════════════════
+   INTERACTIVE 5: EVOLUTION STUFEN
+═══════════════════════════════════ */
+.evo-stages { display: grid; gap: 0; margin: 14px 0; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.evo-stage {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 14px;
+}
+.evo-stage:last-child { border-bottom: none; }
+.evo-stage:hover { background: var(--surface-2); }
+.evo-stage.active { background: var(--accent-light); }
+.evo-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.evo-stage:not(.active) .evo-num { background: var(--surface-2); color: var(--text-muted); border: 1.5px solid var(--border); }
+.evo-stage.active .evo-num { background: var(--accent); color: white; border: 1.5px solid var(--accent); }
+.evo-stage-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.evo-stage-desc { font-size: 12px; color: var(--text-muted); }
+.evo-arrow { color: var(--text-subtle); transition: all 0.2s; font-size: 14px; }
+.evo-stage.active .evo-arrow { color: var(--accent); transform: rotate(90deg); }
+.evo-detail-panel {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 12px 0;
+  display: none;
+}
+.evo-detail-panel.visible { display: block; }
+.evo-example-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;
+}
+.evo-example-text {
+  font-size: 13px; color: var(--text); line-height: 1.65;
+}
+.evo-example-text strong { color: var(--accent); }
+.evo-tools {
+  margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;
+}
+.evo-tool-tag {
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 500;
+  background: var(--accent-light); color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* KEY LEARNINGS */
+.kl-grid { display: grid; gap: 8px; }
+.kl-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.kl-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.kl-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+.kl-text strong { display: block; font-weight: 600; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">&#9679; Einleitung &middot; Modul 01</div>
+    <h1>Wie KI "denkt" und warum Systeme Tools schlagen</h1>
+    <p>Von statistischen Mustern zum kognitiven Mitarbeiter: Die Grundlagen, die dich als Marketer dauerhaft relevant machen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">&#9201; Lesezeit <span>~12 Min.</span></div>
+      <div class="hero-meta-item">&#9881; Interaktive Tools <span>5</span></div>
+      <div class="hero-meta-item">&#10003; Quiz <span>10 Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1: EINLEITUNG -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Dein neuer kognitiver Mitarbeiter</h2>
+        <p>KI ist kein Kanal. KI ist eine neue Ressource.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>KI ist kein neuer Kanal und auch kein fancy Extra. Sie ist dein neuer kognitiver Mitarbeiter, der niemals schlaeft.</p>
+      <p><strong>Aber:</strong> Viele bedienen diesen Supercomputer aktuell noch komplett falsch und geben der KI die Schuld, dass die Ergebnisse nichts taugen.</p>
+      <p>Der Trend ist klar: 54% der Marketer nutzen im Jahr 2025 bereits kuenstliche Intelligenz, aber die meisten kratzen nur an der Oberfläche. Wer nur "mal eben einen Text schreibt", verschenkt das eigentliche Potenzial.</p>
+
+      <div class="callout blue">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-text">
+          <strong>Der Kern unserer Philosophie</strong>
+          <p>Tools aendern sich staendig. Wenn du aber verstehst, wie das <strong>System</strong> dahinter funktioniert, bleibst du als Marketer relevant, egal ob das Tool morgen ChatGPT, Claude oder KI3000 heisst.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2: WIE FUNKTIONIERT KI -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Wie funktioniert KI?</h2>
+        <p>Statistik statt Wissen: Was wirklich hinter der KI steckt.</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <h3>2.1 Warum die KI "wuerfelt"</h3>
+      <p>Viele denken, die KI "denkt" oder "weiss" Dinge. Fakt ist: <span class="tooltip-word">LLMs<div class="tooltip-popup">Large Language Models: Grosse Sprachmodelle wie GPT-4 oder Claude, die auf riesigen Textmengen trainiert wurden, um den naechsten Token vorherzusagen.</div></span> sind <strong>statistische Vorhersagemaschinen</strong>. Wenn du eine Frage stellst, berechnet die KI mathematisch das wahrscheinlichste naechste Wort (Token) basierend auf deinem Input.</p>
+
+      <!-- INTERACTIVE 1: WAHRSCHEINLICHKEITS-DEMO -->
+      <div class="callout yellow">
+        <div class="callout-icon">&#127922;</div>
+        <div class="callout-text">
+          <strong>Interaktiv: Satzergaenzung wie ein LLM</strong>
+          <p>Waehle ein Szenario und sieh, welche Wörter die KI statistisch priorisiert.</p>
+        </div>
+      </div>
+
+      <div class="prob-demo token-colors">
+        <div class="prob-prompt-display" id="prob-prompt-display">
+          Waehle unten ein Szenario aus...
+        </div>
+        <div class="prob-scenarios">
+          <button class="prob-scenario-btn active" onclick="setScenario(0)">Hauptstadt</button>
+          <button class="prob-scenario-btn" onclick="setScenario(1)">Hotel-Slogan</button>
+          <button class="prob-scenario-btn" onclick="setScenario(2)">Boutique-Alpen</button>
+        </div>
+        <div class="prob-bars" id="prob-bars"></div>
+        <div class="prob-explanation" id="prob-explanation"></div>
+      </div>
+
+      <h3>2.2 Tokens: Die Waehrung der KI</h3>
+      <p>Computer verstehen keine Buchstaben, sondern nur Zahlen. Deshalb wird dein Text in "Tokens" zerhackt. Ein Token ist im Schnitt 0,75 Woerter. Jedes Token bekommt eine Zahl, mit der das Modell rechnet.</p>
+
+      <!-- INTERACTIVE 2: TOKEN SIMULATOR -->
+      <div class="callout blue">
+        <div class="callout-icon">&#9881;</div>
+        <div class="callout-text">
+          <strong>Interaktiv: Token-Simulator</strong>
+          <p>Gib beliebigen Text ein und sieh, wie er in Tokens zerlegt wird.</p>
+        </div>
+      </div>
+      <input type="text" class="token-input" id="token-input" placeholder="Schreibe hier deinen Prompt..." oninput="tokenize(this.value)" value="KI-Marketing ist meine Superwaffe.">
+      <div class="token-display token-colors" id="token-display"></div>
+      <div class="token-stats">
+        <div>Tokens: <span id="token-count">0</span></div>
+        <div>Woerter: <span id="word-count">0</span></div>
+        <div>Kosten-Indikator: <span id="cost-est">~0.001 ct</span></div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>2.3 Vektorraum: Kontext navigiert die KI</h3>
+      <p>Jedes Token hat einen Platz in einem riesigen, mehrdimensionalen Zahlenraum. Dein Prompt ist das Navigationssystem. Fragst du nach einem "Slogan fuer ein Hotel", wuerfelst du im Durchschnitt aller Slogans. Gibst du Kontext, navigierst du die KI in den richtigen Ergebnis-Raum.</p>
+
+      <!-- INTERACTIVE 3: VEKTORRAUM NAVIGATOR -->
+      <div class="callout green">
+        <div class="callout-icon">&#127919;</div>
+        <div class="callout-text">
+          <strong>Interaktiv: Kontext-Kompass</strong>
+          <p>Klicke auf einen Prompt und sieh, wie Kontext die Qualitaet des Ergebnisses veraendert.</p>
+        </div>
+      </div>
+      <div class="vector-grid" id="vector-grid">
+        <div class="vector-card" onclick="selectVector(0)">
+          <div class="vector-card-header">
+            <span class="vector-quality quality-low">Schwach</span> Ohne Kontext
+          </div>
+          <div class="vector-prompt">"Schreibe einen Slogan fuer ein Hotel."</div>
+        </div>
+        <div class="vector-card" onclick="selectVector(1)">
+          <div class="vector-card-header">
+            <span class="vector-quality quality-high">Stark</span> Mit Kontext
+          </div>
+          <div class="vector-prompt">"Boutique-Hotel in den Alpen fuer Remote Worker. Schreibe einen Slogan."</div>
+        </div>
+        <div class="vector-card" onclick="selectVector(2)">
+          <div class="vector-card-header">
+            <span class="vector-quality quality-low">Schwach</span> Ohne Kontext
+          </div>
+          <div class="vector-prompt">"Schreibe eine Produktbeschreibung."</div>
+        </div>
+        <div class="vector-card" onclick="selectVector(3)">
+          <div class="vector-card-header">
+            <span class="vector-quality quality-high">Stark</span> Mit Kontext
+          </div>
+          <div class="vector-prompt">"Bio-Kaffee fuer Nachhaltigkeits-Bewusste, 35+, urban, Abo-Modell. Beschreibe das Produkt."</div>
+        </div>
+      </div>
+      <div class="vector-result-area" id="vector-result">
+        <div class="vector-result-label">KI-Vektorraum: Aktivierte Konzepte</div>
+        <div class="vector-tags" id="vector-tags"></div>
+        <div class="vector-output" id="vector-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3: SUPERKRAEFTE VS GRENZEN -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Superkraefte vs. Grenzen</h2>
+        <p>Was KI kann, was nicht, und warum du immer dabei bleiben musst.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <h3>3.1 Die Superkraefte</h3>
+      <ul>
+        <li><strong>Mustererkennung:</strong> Findet Trends in Millionen Datenpunkten in Sekunden.</li>
+        <li><strong>Multimodalitaet:</strong> Jongliert gleichzeitig mit Text, Bild und Video.</li>
+        <li><strong>Skalierung:</strong> 500 Produktbeschreibungen? Erledigt, bevor du deinen Kaffee getrunken hast.</li>
+      </ul>
+
+      <h3>3.2 Die Grenzen</h3>
+      <ul>
+        <li><strong>Korrelation statt Kausalitaet:</strong> Die KI weiss, dass Dinge zusammen auftreten, aber nicht warum.</li>
+        <li><strong>Kein gesunder Menschenverstand:</strong> Texte koennen gut klingen, aber inhaltlich keinen Sinn ergeben. Das erkennt die KI nicht selbst.</li>
+      </ul>
+
+      <div class="callout orange">
+        <div class="callout-icon">&#9888;</div>
+        <div class="callout-text">
+          <strong>Die goldene Regel</strong>
+          <p>Nutze KI fuer das "Schwere" (Muster, Masse, Logik) und bleib selbst der Experte fuer Empathie, Kausalitaet und Kontext.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4: FALLSTRICKE & C-A-R-E -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Fallstricke und der C-A-R-E Check</h2>
+        <p>Halluzinationen, Bias und wie du dich schuetzt.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <h3>Halluzinationen: Wenn die KI flunkert</h3>
+      <p>KI ist darauf trainiert, plausibel zu klingen, nicht unbedingt wahrheitsgemass. Wenn sie keine Antwort weiss, gibt sie das selten zu. Sie fuellt die statistische Luecke einfach mit etwas, das gut klingt.</p>
+      <p><strong>Bekanntes Beispiel:</strong> Google schlug vor, Kleber auf die Pizza zu geben, damit der Kaese besser haelt, weil eine satirische Quelle falsch interpretiert wurde.</p>
+
+      <h3>Bias: Der Spiegel unserer Vorurteile</h3>
+      <p>KI lernt aus dem Internet, und das Internet ist voller Vorurteile. Bildgeneratoren zeigen bei "Vorstand" oft nur weisse Maenner, weil das in den Trainingsdaten das wahrscheinlichste Ergebnis ist.</p>
+
+      <div class="callout gray">
+        <div class="callout-icon">&#128274;</div>
+        <div class="callout-text">
+          <strong>Datenschutz-Warnung</strong>
+          <p>Fuettere die KI niemals mit geheimen CRM-Daten oder Firmengeheimnissen, ausser du nutzt eine abgesicherte Enterprise-Loesung.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>4.4 Der C-A-R-E Check</h3>
+      <p>Bevor du KI-generierte Inhalte veroeffentlichst, prüfe mit diesem interaktiven Checklist jeden Punkt ab.</p>
+
+      <!-- INTERACTIVE 4: C-A-R-E CHECKLISTE -->
+      <div class="care-grid" id="care-grid"></div>
+      <div class="care-progress-bar">
+        <div class="care-progress-fill" id="care-fill" style="width:0%"></div>
+      </div>
+      <div class="care-status">
+        <span id="care-count">0 / 4 abgehakt</span>
+        <span class="care-status-badge incomplete" id="care-badge">Noch nicht bereit</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SEKTION 5: SYSTEME STATT TOOLS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Denken in Systemen statt in Tools</h2>
+        <p>Vom Tool-Zoo zum integrierten Workflow.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wer nur Tools sammelt, baut einen "Tool-Zoo". Das ist ineffizient und teuer. Ein <strong>Tool</strong> loest eine Aufgabe. Ein <strong>System</strong> loest einen ganzen Prozess.</p>
+
+      <div class="callout blue">
+        <div class="callout-icon">&#128301;</div>
+        <div class="callout-text">
+          <strong>Klicke auf eine Evolutionsstufe</strong>
+          <p>Sieh, was sich konkret aendert, wenn du von punktuellem Einsatz zu agentischen Systemen wechselst.</p>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE 5: EVOLUTION STAGES -->
+      <div class="evo-stages" id="evo-stages"></div>
+      <div class="evo-detail-panel" id="evo-panel">
+        <div class="evo-example-label" id="evo-label">Beispiel</div>
+        <div class="evo-example-text" id="evo-text"></div>
+        <div class="evo-tools" id="evo-tools"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SEKTION 6: ORIGINAERE DATEN -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <h2>Warum originaere Daten dein Turbo sind</h2>
+        <p>Wenn alle KI nutzen, gewinnt der mit den besseren Daten.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Wenn jeder Marketer 100.000 Woerter am Tag automatisch veroeffentlicht, sticht nur einer heraus: <strong>derjenige mit den besseren Daten.</strong></p>
+
+      <h3>First-Party-Data: Deine Geheimwaffe</h3>
+      <p>Deine eigenen Kundendaten (Kaufhistorie, Support-Tickets, Interviews) sind exklusiv. Die KI kann daraus Dinge lernen, die kein Konkurrent weiss.</p>
+
+      <h3>Dokumentiertes Expertenwissen</h3>
+      <p>Wenn du einer KI Zugang zu deinem Firmenwissen gibst, antwortet sie nicht mehr aus dem "Vakuum", sondern basierend auf <em>deinen</em> Dokumenten. Das reduziert Halluzinationen und generiert Content, den so schnell keiner kopieren kann.</p>
+
+      <div class="callout green">
+        <div class="callout-icon">&#9889;</div>
+        <div class="callout-text">
+          <strong>"Garbage in, Garbage out"</strong>
+          <p>Gilt heute mehr denn je. Saubere, originaere Daten sind der einzige Weg zu Ergebnissen, die deine Konkurrenz nicht einfach kopieren kann.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" style="background: var(--accent-2);">&#10003;</div>
+      <div>
+        <h2>Key Learnings</h2>
+        <p>Das nimmst du aus diesem Modul mit.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="kl-grid">
+        <div class="kl-item">
+          <div class="kl-icon">&#127922;</div>
+          <div class="kl-text"><strong>KI ist Statistik, kein Wissen</strong>LLMs berechnen die Wahrscheinlichkeit des naechsten Wortes. Sie "denken" nicht, sie vervollstaendigen Muster.</div>
+        </div>
+        <div class="kl-item">
+          <div class="kl-icon">&#9881;</div>
+          <div class="kl-text"><strong>Systeme schlagen Tools</strong>Ein Wettbewerbsvorteil entsteht nicht durch die Anzahl deiner Apps, sondern durch deren nahtlose Integration in intelligente Workflows.</div>
+        </div>
+        <div class="kl-item">
+          <div class="kl-icon">&#129303;</div>
+          <div class="kl-text"><strong>Keine Empathie</strong>KI glaenzt bei Logik und Datenmassen, scheitert aber oft an einfachem menschlichem Gespuer. Nutze KI fuer das "Schwere".</div>
+        </div>
+        <div class="kl-item">
+          <div class="kl-icon">&#128202;</div>
+          <div class="kl-text"><strong>Datenqualitaet ist alles</strong>Saubere, originaere Daten sind der einzige Weg zu Ergebnissen, die deine Konkurrenz nicht einfach kopieren kann.</div>
+        </div>
+        <div class="kl-item">
+          <div class="kl-icon">&#128373;</div>
+          <div class="kl-text"><strong>Kontrolle ist Pflicht</strong>Nutze den C-A-R-E Check, um Halluzinationen und Bias abzufangen. Die KI liefert den Rohentwurf, du gibst ihm die Seele.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu den Grundlagen. Wie gut hast du das Modul verinnerlicht?</p>
+
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <div class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</div>
+        <div class="quiz-streak">&#128293; <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Naechste Frage &#8594;</button>
+      </div>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">Punkte</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Quiz wiederholen</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════
+// 1. WAHRSCHEINLICHKEITS-DEMO
+// ═══════════════════════════════════
+const scenarios = [
+  {
+    prompt: 'Die Hauptstadt von Frankreich ist <span class="highlight">___</span>',
+    bars: [
+      { label: 'Paris', pct: 99.9, color: '#1A6FFF' },
+      { label: 'Lyon', pct: 0.05, color: '#6D28D9' },
+      { label: 'Baguette', pct: 0.01, color: '#C2410C' },
+      { label: 'Frankreich', pct: 0.04, color: '#059669' },
+    ],
+    explanation: 'Eindeutige Faktenfrage: Die KI hat in den Trainingsdaten gelernt, dass auf diese Wortfolge fast immer "Paris" folgt. Hohe Konfidenz, wenig Spielraum.'
+  },
+  {
+    prompt: 'Schreibe einen Slogan fuer ein <span class="highlight">Hotel</span>.',
+    bars: [
+      { label: '"Willkommen"', pct: 22, color: '#1A6FFF' },
+      { label: '"Zuhause fern..."', pct: 19, color: '#6D28D9' },
+      { label: '"Komfort pur"', pct: 18, color: '#C2410C' },
+      { label: '"Ihr perfekter..."', pct: 17, color: '#059669' },
+    ],
+    explanation: 'Zu wenig Kontext: Die KI wuerfelt im Durchschnitt aller Hotel-Slogans. Das Ergebnis ist generisch, weil die Wahrscheinlichkeiten sich aufteilen.'
+  },
+  {
+    prompt: '<span class="highlight">Boutique-Hotel, Alpen, Remote Worker.</span> Slogan:',
+    bars: [
+      { label: '"Gipfelgluck..."', pct: 68, color: '#1A6FFF' },
+      { label: '"Highspeed am..."', pct: 15, color: '#059669' },
+      { label: '"Freiheit auf..."', pct: 12, color: '#6D28D9' },
+      { label: '"Willkommen"', pct: 5, color: '#C2410C' },
+    ],
+    explanation: 'Mit Kontext navigiert der Prompt die KI in einen spezifischen Vektorraum. Die Wahrscheinlichkeit konzentriert sich auf relevante, einzigartige Konzepte.'
+  }
+];
+
+function setScenario(idx) {
+  document.querySelectorAll('.prob-scenario-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  const s = scenarios[idx];
+  document.getElementById('prob-prompt-display').innerHTML = s.prompt;
+  const barsEl = document.getElementById('prob-bars');
+  barsEl.innerHTML = '';
+  s.bars.forEach((b, i) => {
+    const row = document.createElement('div');
+    row.className = 'prob-bar-row';
+    row.innerHTML = `<div class="prob-label">${b.label}</div>
+      <div class="prob-track"><div class="prob-fill" id="pf-${idx}-${i}" style="width:0%;background:${b.color}"></div></div>
+      <div class="prob-pct">${b.pct}%</div>`;
+    barsEl.appendChild(row);
+    setTimeout(() => { document.getElementById(`pf-${idx}-${i}`).style.width = b.pct + '%'; }, 50 + i * 80);
+  });
+  document.getElementById('prob-explanation').textContent = s.explanation;
+}
+setScenario(0);
+
+// ═══════════════════════════════════
+// 2. TOKEN SIMULATOR
+// ═══════════════════════════════════
+function tokenize(text) {
+  const colors = [
+    { bg: '#EBF2FF', border: '#B8D1FF', color: '#1A6FFF' },
+    { bg: '#E0FDF9', border: '#99E9DC', color: '#00897B' },
+    { bg: '#EDE9FE', border: '#C4B5FD', color: '#6D28D9' },
+    { bg: '#FFF7ED', border: '#FED7AA', color: '#C2410C' },
+    { bg: '#ECFDF5', border: '#6EE7B7', color: '#059669' },
+  ];
+  const display = document.getElementById('token-display');
+  if (!text.trim()) {
+    display.innerHTML = '';
+    document.getElementById('token-count').textContent = '0';
+    document.getElementById('word-count').textContent = '0';
+    document.getElementById('cost-est').textContent = '~0.000 ct';
+    return;
+  }
+  // Simple tokenizer: split on spaces/punctuation
+  const rawTokens = text.match(/[a-zA-Z0-9\u00C0-\u024F]+|[^\s\w]/g) || [];
+  // Sub-word: split long words
+  const tokens = [];
+  rawTokens.forEach(t => {
+    if (t.length > 6) {
+      // Split approx every 4-5 chars
+      let i = 0;
+      while (i < t.length) {
+        const len = i === 0 ? Math.ceil(t.length / 2) : t.length;
+        tokens.push(t.slice(i, i + len));
+        i += len;
+      }
+    } else {
+      tokens.push(t);
+    }
+  });
+  display.innerHTML = '';
+  tokens.forEach((tok, i) => {
+    const c = colors[i % colors.length];
+    const chip = document.createElement('span');
+    chip.className = 'token-chip';
+    chip.style.cssText = `background:${c.bg};border-color:${c.border};color:${c.color}`;
+    chip.textContent = tok;
+    display.appendChild(chip);
+  });
+  const words = text.trim().split(/\s+/).length;
+  document.getElementById('token-count').textContent = tokens.length;
+  document.getElementById('word-count').textContent = words;
+  const cost = (tokens.length * 0.000003).toFixed(5);
+  document.getElementById('cost-est').textContent = '~' + cost + ' ct';
+}
+tokenize(document.getElementById('token-input').value);
+
+// ═══════════════════════════════════
+// 3. VEKTORRAUM NAVIGATOR
+// ═══════════════════════════════════
+const vectorData = [
+  {
+    tags: ['Hotel', 'Unterkunft', 'Buchen', 'Reise', 'Komfort'],
+    tagType: 'generic',
+    output: '"Willkommen in unserem Hotel. Ihr Zuhause fern von Zuhause." Das klingt wie jedes andere Hotel der Welt.'
+  },
+  {
+    tags: ['Alpen', 'Remote Work', 'Highspeed-WLAN', 'Gipfelgluck', 'Freiheit', 'Natur', 'Fokus'],
+    tagType: 'specific',
+    output: '"Grosse Ideen brauchen grosse Aussichten." Einzigartig, zielgruppenspezifisch, unvergesslich.'
+  },
+  {
+    tags: ['Produkt', 'Kaufen', 'Qualitaet', 'Preis', 'Beschreibung'],
+    tagType: 'generic',
+    output: '"Dieses hochwertige Produkt ueberzeugt durch seine ausgezeichnete Qualitaet." Generisch, austauschbar, wertlos.'
+  },
+  {
+    tags: ['Bio-Kaffee', 'Nachhaltigkeit', 'Urban', '35+', 'Abo-Modell', 'Bewusstsein', 'Ritual'],
+    tagType: 'specific',
+    output: '"Jeden Morgen. Bewusst. Direkt vom Ursprung in deine Tasse." Zielgruppenspezifisch und konversionsstark.'
+  }
+];
+
+let selectedVector = null;
+function selectVector(idx) {
+  selectedVector = idx;
+  document.querySelectorAll('.vector-card').forEach((c, i) => c.classList.toggle('selected', i === idx));
+  const d = vectorData[idx];
+  const tagsEl = document.getElementById('vector-tags');
+  tagsEl.innerHTML = '';
+  d.tags.forEach((tag, i) => {
+    const t = document.createElement('span');
+    t.className = 'vector-tag ' + (d.tagType === 'specific' ? 'tag-specific' : 'tag-generic');
+    t.textContent = tag;
+    t.style.animationDelay = (i * 60) + 'ms';
+    tagsEl.appendChild(t);
+  });
+  document.getElementById('vector-output').textContent = d.output;
+  const area = document.getElementById('vector-result');
+  area.classList.add('visible');
+}
+
+// ═══════════════════════════════════
+// 4. C-A-R-E CHECKLISTE
+// ═══════════════════════════════════
+const careItems = [
+  {
+    letter: 'C',
+    title: 'Consistency',
+    subtitle: 'Passt der Ton zum Rest?',
+    detail: 'Pruefe: Stimmt die Sprache mit eurem Markenstil ueberein? Macht der Inhalt im Gesamtkontext Sinn? Wirkt er wie ein echter Mensch aus eurem Team?'
+  },
+  {
+    letter: 'A',
+    title: 'Accuracy',
+    subtitle: 'Stimmen alle Fakten?',
+    detail: 'Faktencheck-Pflicht: Zahlen, Studien, Zitate und spezifische Behauptungen muessen verifiziert werden. Die KI kann halluzinieren.'
+  },
+  {
+    letter: 'R',
+    title: 'Risk',
+    subtitle: 'Urheberrecht oder Bias-Gefahr?',
+    detail: 'Pruefe auf moegliche rechtliche Risiken, Vorurteile (z.B. einseitige Darstellungen), und ob Inhalte unbeabsichtigt diskriminierend wirken koennten.'
+  },
+  {
+    letter: 'E',
+    title: 'Engagement',
+    subtitle: 'Hat der Text eine Seele?',
+    detail: 'Die entscheidende Frage: Klingt es wie KI oder wie ein Mensch? Gibt es echte Emotionen, ueberraschende Formulierungen, etwas Bleibendes?'
+  }
+];
+
+const careChecked = new Set();
+const careOpen = new Set();
+
+function buildCare() {
+  const grid = document.getElementById('care-grid');
+  grid.innerHTML = '';
+  careItems.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'care-item' + (careChecked.has(i) ? ' checked' : '') + (careOpen.has(i) ? ' open' : '');
+    el.id = 'care-' + i;
+    el.innerHTML = `
+      <div class="care-header" onclick="toggleCare(${i})">
+        <div class="care-letter">${item.letter}</div>
+        <div class="care-title-wrap">
+          <div class="care-title">${item.title}</div>
+          <div class="care-subtitle">${item.subtitle}</div>
+        </div>
+        <div class="care-check-icon" onclick="checkCare(event, ${i})">${careChecked.has(i) ? '&#10003;' : ''}</div>
+      </div>
+      <div class="care-detail"><p>${item.detail}</p></div>`;
+    grid.appendChild(el);
+  });
+  updateCareProgress();
+}
+
+function toggleCare(i) {
+  if (careOpen.has(i)) careOpen.delete(i); else careOpen.add(i);
+  buildCare();
+}
+
+function checkCare(e, i) {
+  e.stopPropagation();
+  if (careChecked.has(i)) careChecked.delete(i); else careChecked.add(i);
+  buildCare();
+}
+
+function updateCareProgress() {
+  const n = careChecked.size;
+  document.getElementById('care-fill').style.width = (n / 4 * 100) + '%';
+  document.getElementById('care-count').textContent = n + ' / 4 abgehakt';
+  const badge = document.getElementById('care-badge');
+  if (n === 4) {
+    badge.textContent = 'Bereit zum Veroeffentlichen!';
+    badge.className = 'care-status-badge complete';
+  } else {
+    badge.textContent = n === 0 ? 'Noch nicht geprueft' : (n < 3 ? 'In Bearbeitung...' : 'Fast fertig');
+    badge.className = 'care-status-badge incomplete';
+  }
+}
+buildCare();
+
+// ═══════════════════════════════════
+// 5. EVOLUTIONSSTUFEN
+// ═══════════════════════════════════
+const evoData = [
+  {
+    num: '1',
+    title: 'Punktuell',
+    desc: 'ChatGPT ab und zu fuer E-Mails oder schnelle Texte.',
+    label: 'Typisches Beispiel auf Stufe 1',
+    text: 'Du oeffnest ChatGPT, tippst: "Schreib mir eine E-Mail an einen Kunden wegen der verspaeteten Lieferung", kopierst das Ergebnis und passt es manuell an. Danach schliesst du den Tab.',
+    tools: ['ChatGPT', 'Claude', 'Gemini']
+  },
+  {
+    num: '2',
+    title: 'Workflow',
+    desc: 'Tools verbinden, Prozesse automatisch ausfuehren.',
+    label: 'Typisches Beispiel auf Stufe 2',
+    text: 'Ein neuer Blog-Post erscheint auf deiner Website. Zapier erkennt das automatisch, schickt den Inhalt an die KI, die daraus <strong>5 Social-Media-Varianten</strong> erstellt, und postet sie direkt in deinen Buffer-Kalender.',
+    tools: ['Zapier', 'Make', 'n8n', 'Buffer', 'GPT API']
+  },
+  {
+    num: '3',
+    title: 'Agentisch',
+    desc: 'KI-Agenten verfolgen eigenstaendig Ziele und orchestrieren ganze Workflows.',
+    label: 'Typisches Beispiel auf Stufe 3',
+    text: 'Ein Agent analysiert automatisch neue Kundeninterviews, zieht die <strong>10 brennendsten Fragen</strong> heraus, erstellt daraus Blog-Entwuerfe, bewertet sie nach SEO-Potenzial und bereitet direkt die LinkedIn-Posts fuer das Sales-Team vor. Alles aus einem Guss, ohne dein Zutun.',
+    tools: ['Claude', 'Cursor', 'n8n', 'Notion API', 'Agentic Frameworks']
+  }
+];
+
+let activeEvo = null;
+
+function buildEvo() {
+  const stagesEl = document.getElementById('evo-stages');
+  stagesEl.innerHTML = '';
+  evoData.forEach((stage, i) => {
+    const el = document.createElement('div');
+    el.className = 'evo-stage' + (activeEvo === i ? ' active' : '');
+    el.onclick = () => selectEvo(i);
+    el.innerHTML = `
+      <div class="evo-num">${stage.num}</div>
+      <div>
+        <div class="evo-stage-title">${stage.title}</div>
+        <div class="evo-stage-desc">${stage.desc}</div>
+      </div>
+      <div class="evo-arrow">&#9654;</div>`;
+    stagesEl.appendChild(el);
+  });
+}
+
+function selectEvo(i) {
+  if (activeEvo === i) { activeEvo = null; buildEvo(); document.getElementById('evo-panel').classList.remove('visible'); return; }
+  activeEvo = i;
+  buildEvo();
+  const d = evoData[i];
+  document.getElementById('evo-label').textContent = d.label;
+  document.getElementById('evo-text').innerHTML = d.text;
+  const toolsEl = document.getElementById('evo-tools');
+  toolsEl.innerHTML = d.tools.map(t => `<span class="evo-tool-tag">${t}</span>`).join('');
+  document.getElementById('evo-panel').classList.add('visible');
+}
+buildEvo();
+
+// ═══════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════
+const questions = [
+  {
+    q: 'Was sind LLMs (Large Language Models) im Kern?',
+    options: ['Wissensdatenbanken mit gespeicherten Fakten', 'Statistische Vorhersagemaschinen, die den naechsten Token berechnen', 'Programme, die das Internet in Echtzeit durchsuchen', 'Digitale Kopien des menschlichen Gehirns'],
+    correct: 1,
+    feedback: 'LLMs berechnen basierend auf dem Input das wahrscheinlichste naechste Wort (Token). Sie "wissen" nichts im menschlichen Sinne, sie vervollstaendigen Muster.'
+  },
+  {
+    q: 'Was ist ein "Token" im Kontext von KI-Sprachmodellen?',
+    options: ['Ein Passwort fuer KI-APIs', 'Die kleinste Einheit, in die Text fuer das Modell zerlegt wird', 'Eine Messung der Qualitaet eines Prompts', 'Ein Synonym fuer einen ganzen Satz'],
+    correct: 1,
+    feedback: 'Tokens sind die Bausteine, in die Text vor der Verarbeitung zerhackt wird. Rund 0,75 Woerter pro Token im Durchschnitt. Mehr Tokens bedeuten hoehere Kosten und mehr Rechenaufwand.'
+  },
+  {
+    q: 'Was passiert laut dem Vektorraum-Konzept, wenn du einen vagen Prompt ohne Kontext gibst?',
+    options: ['Die KI weigert sich zu antworten', 'Die KI navigiert in den Durchschnitt aller Ergebnisse und liefert generische Outputs', 'Die KI fragt automatisch nach mehr Details', 'Die KI liefert zuverlaessig bessere Ergebnisse'],
+    correct: 1,
+    feedback: 'Ohne Kontext landet der Prompt im statistischen Durchschnitt aller aehnlichen Anfragen. Das Ergebnis ist langweilig und austauschbar, weil sich die Wahrscheinlichkeiten auf viele aehnlich wahrscheinliche Woerter aufteilen.'
+  },
+  {
+    q: 'Was ist eine "Halluzination" bei KI-Modellen?',
+    options: ['Ein Fehler im Programmcode des Modells', 'Eine Situation, in der die KI plausibel klingende, aber falsche Informationen erfindet', 'Wenn die KI eine Anfrage ablehnt', 'Eine besonders kreative Antwort der KI'],
+    correct: 1,
+    feedback: 'KI-Modelle sind darauf optimiert, plausibel zu klingen, nicht auf Wahrhaftigkeit. Wenn sie keine sichere Antwort haben, fuellen sie die statistische Luecke mit etwas, das statistisch gut passt, aber faktisch falsch sein kann.'
+  },
+  {
+    q: 'Fuer welche Aufgaben ist KI strukturell am wenigsten geeignet?',
+    options: ['Grosse Mengen von Texten in Sekunden generieren', 'Muster in Millionen von Datenpunkten erkennen', 'Echte Empathie und tiefes kausales Verstaendnis zeigen', 'Bilder und Text gleichzeitig verarbeiten'],
+    correct: 2,
+    feedback: 'KI erkennt Korrelationen, aber versteht keine Kausalitaeten. Sie hat keinen gesunden Menschenverstand und simuliert Empathie nur sprachlich, ohne sie zu "fuehlen". Das ist deine Aufgabe als Mensch.'
+  },
+  {
+    q: 'Was beschreibt der "Bias" in KI-Modellen?',
+    options: ['Absichtliche Fehler, die Entwickler einprogrammieren', 'Vorurteile und Unausgewogenheiten, die die KI aus ihren Trainingsdaten lernt', 'Eine Eigenschaft, die die KI schneller macht', 'Technische Fehler in der Berechnung'],
+    correct: 1,
+    feedback: 'KI lernt aus dem Internet und menschlichen Texten, die voller Vorurteile und historischer Ungleichgewichte sind. Das Ergebnis: Bildgeneratoren zeigen bei "CEO" haeufiger weisse Maenner, weil das in den Trainingsdaten das wahrscheinlichste Bild war.'
+  },
+  {
+    q: 'Was steht beim C-A-R-E Check fuer das "A"?',
+    options: ['Automation: Wurde der Prozess automatisiert?', 'Accuracy: Stimmen die Fakten?', 'Audience: Passt es zur Zielgruppe?', 'Aesthetics: Sieht es gut aus?'],
+    correct: 1,
+    feedback: 'Accuracy steht fuer Genauigkeit. Wegen der Halluzinations-Tendenz von KI ist ein Faktencheck Pflicht vor jeder Veroeffentlichung. Zahlen, Studien und Behauptungen muessen verifiziert werden.'
+  },
+  {
+    q: 'Was unterscheidet ein "System" von einem einzelnen "Tool" im KI-Einsatz?',
+    options: ['Systeme kosten mehr Geld', 'Ein System loest einen ganzen Prozess, ein Tool loest nur eine einzelne Aufgabe', 'Tools sind immer besser als Systeme', 'Systeme brauchen mehr menschliche Kontrolle'],
+    correct: 1,
+    feedback: 'Ein Tool schreibt dir einen Text. Ein System erkennt einen neuen Blog-Post, erstellt 5 Social-Media-Varianten, sucht passende Bilder und plant alles ein. Wettbewerbsvorteile entstehen durch Systeme, nicht durch einzelne Tools.'
+  },
+  {
+    q: 'Warum sind "First-Party-Data" (eigene Kundendaten) im KI-Zeitalter besonders wertvoll?',
+    options: ['Weil sie kostenlos sind', 'Weil sie exklusiv sind und Konkurrenten sie nicht haben', 'Weil KI nur mit eigenen Daten funktioniert', 'Weil sie immer korrekt sind'],
+    correct: 1,
+    feedback: 'Wenn alle KI nutzen und generische Prompts verwenden, koennen alle dasselbe produzieren. Exklusive Kundendaten, Interviews und Firmenwissen sind nicht kopierbar und geben KI-Ergebnissen einen einzigartigen Vorteil.'
+  },
+  {
+    q: 'Was ist die Kernaussage der Kurs-Philosophie "Systeme schlagen Tools"?',
+    options: ['Man sollte moeglichst viele verschiedene Tools nutzen', 'Ein tiefer Systemverstaendnis macht dich unabhaengig von spezifischen Tools und langfristig relevant', 'Alte Tools sind besser als neue', 'Nur teure Tools bringen gute Ergebnisse'],
+    correct: 1,
+    feedback: 'Tools aendern sich staendig. Wer nur Tools sammelt, baut einen Tool-Zoo. Wer das System versteht, bleibt relevant, egal ob das naechste grosse Tool ChatGPT, Claude oder KI3000 heisst.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<div class="opt-indicator">${labels[i]}</div><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const labels = ['A', 'B', 'C', 'D'];
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '&#10003;';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = `<strong>&#10003; Richtig!${streak >= 3 ? ' &#128293; ' + streak + 'er-Streak!' : ''}</strong>${q.feedback}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '&#10007;';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '&#10003;';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = `<strong>&#10007; Leider falsch.</strong>${q.feedback}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  const rc = document.getElementById('result-card');
+  rc.style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1) { badge = '&#127942;'; title = 'KI-Strategin!'; sub = 'Perfekte Punktzahl. Du hast die Grundlagen vollstaendig verinnerlicht.'; }
+  else if (pct >= 0.8) { badge = '&#129351;'; title = 'Sehr solide!'; sub = 'Fast perfekt. Die Kernkonzepte sitzen gut.'; }
+  else if (pct >= 0.6) { badge = '&#129352;'; title = 'Guter Ansatz.'; sub = 'Nochmal durchlesen und du bist oben.'; }
+  else { badge = '&#128218;'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich wirklich.'; }
+  document.getElementById('result-badge').innerHTML = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+
+// ─── TOOLTIP POSITIONING ─────────────────────
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var triggerRect = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var popupW = popup.offsetWidth;
+    var popupH = popup.offsetHeight;
+    var triggerCenterX = triggerRect.left + triggerRect.width / 2;
+    var rawLeft = triggerCenterX - popupW / 2;
+    var clampedLeft = Math.max(8, Math.min(rawLeft, vw - popupW - 8));
+    popup.style.left = clampedLeft + 'px';
+    popup.style.top = (triggerRect.top - popupH - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (triggerCenterX - clampedLeft) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+</script>
+</body>
+</html>
