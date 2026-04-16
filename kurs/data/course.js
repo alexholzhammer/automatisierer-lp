@@ -25,6 +25,15 @@ var COURSE = {
       ]
     },
     {
+      id:       "videokreation",
+      num:      "05",
+      title:    "Videokreation",
+      overview: "index.html",
+      modules: [
+        { id: "videokreation-01", file: "01.html", num: "5.1", title: "Videokreation mit KI im Marketing", time: 15, tools: 4, quiz: 10 }
+      ]
+    },
+    {
       id:       "bildkreation",
       num:      "04",
       title:    "Bildkreation",
