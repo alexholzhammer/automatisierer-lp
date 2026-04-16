@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recherche & Analyse · KI Marketing Bootcamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--text-subtle); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb-sep { color: var(--border-strong); }
+
+.intro-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.intro-section-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex; align-items: center; gap: 10px;
+}
+.intro-section-header h2 { font-size: 15px; font-weight: 600; }
+.intro-section-body { padding: 24px; }
+.intro-section-body p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+.intro-section-body p:last-child { margin-bottom: 0; }
+
+.goals-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 4px;
+}
+.goal-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.goal-check {
+  width: 20px; height: 20px; border-radius: var(--radius);
+  background: var(--accent-2-light); border: 1px solid #ABF5D1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; margin-top: 1px;
+  color: var(--accent-2);
+}
+.goal-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+.modules-list { display: flex; flex-direction: column; gap: 10px; }
+
+.module-card-status {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent-2); font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 2px;
+}
+
+@media(max-width: 580px) {
+  .goals-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <a href="../" class="topnav-logo">
+    <div class="topnav-logo-dot"></div>
+    <span>KI Marketing Bootcamp</span>
+  </a>
+  <div class="topnav-spacer"></div>
+  <a href="../" class="topnav-link">← Alle Themen</a>
+</nav>
+
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="../">KI Marketing Bootcamp</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>Recherche &amp; Analyse</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Thema 06 · Recherche &amp; Analyse</div>
+    <h1>Recherche &amp; Analyse</h1>
+    <p>Lerne, KI als echten Analyse-Partner einzusetzen — von der richtigen Fragestellung bis hin zu Live-Daten, Dokumentenanalyse und dem Erkennen von Halluzinationen.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📚 <span>4 Module</span></div>
+      <div class="hero-meta-item">⏱ <span>~65 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🎯 <span>11+ interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>40 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>📖</span>
+      <h2>Über dieses Thema</h2>
+    </div>
+    <div class="intro-section-body">
+      <p>KI ist kein besseres Google — sie ist ein völlig anderes Werkzeug zum Verarbeiten von Wissen. Dieses Thema zeigt dir, wie du KI als deinen persönlichen 24/7-Analysten einsetzt, der nicht nur sucht, sondern versteht.</p>
+      <p>Du lernst, wie du auf aktuelle Live-Daten zugreifst, Dokumente interaktiv analysierst statt sie zusammenfassen zu lassen, und wie du Halluzinationen systematisch erkennst — bevor sie dich erwischen.</p>
+    </div>
+  </div>
+
+  <!-- LEARNING GOALS -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>🎯</span>
+      <h2>Lernziele</h2>
+    </div>
+    <div class="intro-section-body">
+      <div class="goals-grid">
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">KI als Analyse-Werkzeug statt Suchmaschine einsetzen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Den Unterschied zwischen Trainingswissen und Live-Daten verstehen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Aktuelle Informationen aus dem Internet in KI-Antworten erzwingen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Dokumente interaktiv verhören statt nur zusammenfassen lassen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Halluzinationen erkennen, bevor sie Schaden anrichten</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Ein persönliches KI-Immunsystem gegen Fehlinformationen aufbauen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="section-label">Module</div>
+
+  <div class="modules-list">
+
+    <a href="01.html" class="module-card">
+      <div class="module-card-num">6.1</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Dein neuer 24/7-Analyst: Vom Suchen zum Verstehen</div>
+        <div class="module-card-desc">Warum KI kein besseres Google ist, sondern ein völlig anderes Werkzeug zum Verarbeiten von Wissen.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~10 Min</div>
+          <div class="module-card-meta-item">🎯 2 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="02.html" class="module-card">
+      <div class="module-card-num">6.2</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Live-Daten: KI als Echtzeit-Sonde</div>
+        <div class="module-card-desc">Wann du der KI vertrauen kannst und wann du sie zwingen musst, das Fenster zum aktuellen Internet zu öffnen.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~15 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="03.html" class="module-card">
+      <div class="module-card-num">6.3</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Dein KI-Analyse-System: Dokumente verhören statt lesen</div>
+        <div class="module-card-desc">Warum "Fasse mir das zusammen" der schlechteste Prompt ist und wie du Dokumente als interaktive Datenbanken nutzt.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~20 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="04.html" class="module-card">
+      <div class="module-card-num">6.4</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Typische Fehler &amp; Halluzinationen: Dein KI-Immunsystem</div>
+        <div class="module-card-desc">Warum die KI gerade dann am überzeugendsten klingt, wenn sie komplett falsch liegt — und wie du das systematisch entlarvst.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~20 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+  </div>
+
+</div>
+
+</body>
+</html>

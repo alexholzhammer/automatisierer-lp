@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenten & Automatisierung · KI Marketing Bootcamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--text-subtle); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb-sep { color: var(--border-strong); }
+
+.intro-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.intro-section-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex; align-items: center; gap: 10px;
+}
+.intro-section-header h2 { font-size: 15px; font-weight: 600; }
+.intro-section-body { padding: 24px; }
+.intro-section-body p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+.intro-section-body p:last-child { margin-bottom: 0; }
+
+.goals-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 4px;
+}
+.goal-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.goal-check {
+  width: 20px; height: 20px; border-radius: var(--radius);
+  background: var(--accent-2-light); border: 1px solid #ABF5D1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; margin-top: 1px;
+  color: var(--accent-2);
+}
+.goal-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+.modules-list { display: flex; flex-direction: column; gap: 10px; }
+
+.module-card-status {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent-2); font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 2px;
+}
+
+@media(max-width: 580px) {
+  .goals-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <a href="../" class="topnav-logo">
+    <div class="topnav-logo-dot"></div>
+    <span>KI Marketing Bootcamp</span>
+  </a>
+  <div class="topnav-spacer"></div>
+  <a href="../" class="topnav-link">← Alle Themen</a>
+</nav>
+
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="../">KI Marketing Bootcamp</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>Agenten &amp; Automatisierung</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Thema 08 · Agenten &amp; Automatisierung</div>
+    <h1>Agenten &amp; Automatisierung</h1>
+    <p>Lerne, wie du KI-Agenten und Workflows aufbaust, die echte Arbeit erledigen — von der Theorie bis zur praktischen Werkstatt mit den richtigen Tools.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📚 <span>2 Module</span></div>
+      <div class="hero-meta-item">⏱ <span>~35 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🎯 <span>6+ interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>20 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>📖</span>
+      <h2>Über dieses Thema</h2>
+    </div>
+    <div class="intro-section-body">
+      <p>Ein einfacher Chatbot beantwortet Fragen. Ein KI-Agent erledigt Aufgaben. Dieses Thema zeigt dir den Sprung von der reaktiven KI-Nutzung zur proaktiven Automatisierung — digitale Mitarbeiter, die wirklich liefern.</p>
+      <p>Du lernst, wie Agenten und Workflows funktionieren, welche Tools du wirklich brauchst und wie du in drei konkreten Quick Wins morgen anfängst, Zeit zu sparen.</p>
+    </div>
+  </div>
+
+  <!-- LEARNING GOALS -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>🎯</span>
+      <h2>Lernziele</h2>
+    </div>
+    <div class="intro-section-body">
+      <div class="goals-grid">
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Den Unterschied zwischen Chatbot und KI-Agent verstehen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Agentic AI und Multi-Step-Workflows konzipieren</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Den Agenten-Markt sortieren und das richtige Tool wählen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Einen ersten funktionierenden Workflow selbst bauen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Marketing-Prozesse auf Autopilot stellen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Drei konkrete Quick Wins sofort umsetzen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="section-label">Module</div>
+
+  <div class="modules-list">
+
+    <a href="01.html" class="module-card">
+      <div class="module-card-num">8.1</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Agenten &amp; Workflows: KI auf Steroiden</div>
+        <div class="module-card-desc">Vom einfachen Chatbot zur agentic AI: Wie du digitale Mitarbeiter baust, die wirklich Arbeit erledigen.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~20 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="02.html" class="module-card">
+      <div class="module-card-num">8.2</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Die Agenten-Werkstatt: Tools &amp; Anwendung</div>
+        <div class="module-card-desc">Den Markt sortieren, das richtige Tool finden und drei Quick Wins planen, die dir ab morgen Zeit sparen.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~15 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+  </div>
+
+</div>
+
+</body>
+</html>
