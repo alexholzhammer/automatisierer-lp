@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bild-KIs: Vom Zufallstreffer zur visuellen Strategie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Tool comparison cards */
+.tool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.tool-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.tool-card-header {
+  padding: 12px 14px 10px;
+  display: flex; align-items: center; gap: 9px;
+}
+.tool-card-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.tool-card-name { font-size: 13px; font-weight: 600; }
+.tool-card-tagline { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.tool-card-body { padding: 12px 14px; border-top: 1px solid var(--border); background: var(--bg); }
+.tool-row {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12px; color: var(--text-muted); margin-bottom: 7px; line-height: 1.45;
+}
+.tool-row:last-child { margin-bottom: 0; }
+.tool-row-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap; margin-top: 1px;
+  min-width: 52px;
+}
+.tool-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;
+}
+.badge-safe { background: var(--green-light); color: var(--green); border: 1px solid #6EE7B7; }
+.badge-creative { background: var(--accent-light); color: var(--accent); border: 1px solid #B8D1FF; }
+.badge-real { background: var(--purple-light); color: var(--purple); border: 1px solid #C4B5FD; }
+
+/* Prompt builder */
+.prompt-builder {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.prompt-builder-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.prompt-builder-toolbar-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+}
+.prompt-builder-body { padding: 16px; }
+.pb-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 8px; align-items: center; margin-bottom: 10px;
+}
+.pb-row:last-of-type { margin-bottom: 14px; }
+.pb-letter {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  color: white; flex-shrink: 0;
+}
+.pb-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+}
+.pb-label-wrap { display: flex; align-items: center; gap: 6px; }
+.pb-input {
+  width: 100%; border: 1px solid var(--border); border-radius: 7px;
+  padding: 8px 12px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface); color: var(--text); outline: none;
+  transition: border-color 0.15s;
+}
+.pb-input:focus { border-color: var(--accent); }
+.pb-input::placeholder { color: var(--text-subtle); }
+.pb-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;
+}
+.pb-output {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 12px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.75; color: #C9D1D9; min-height: 80px;
+  position: relative;
+}
+.pb-output .kw-blue { color: #58A6FF; }
+.pb-output .kw-green { color: #3FB950; }
+.pb-output .kw-orange { color: #FFA657; }
+.pb-output .kw-purple { color: #D2A8FF; }
+.pb-copy {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.pb-copy:hover { background: rgba(255,255,255,0.13); color: white; }
+.pb-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.pb-generate-btn {
+  padding: 6px 16px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  background: var(--accent-light); color: var(--accent); cursor: pointer;
+  transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.pb-generate-btn:hover { background: var(--accent); color: white; }
+.pb-hint { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+
+/* Prompt quality game */
+.pq-game {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.pq-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.pq-body { padding: 16px; }
+.pq-prompt-card {
+  border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 10px;
+  background: var(--surface); font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.65; cursor: pointer;
+  transition: all 0.18s; user-select: none;
+  color: var(--text);
+}
+.pq-prompt-card:last-child { margin-bottom: 0; }
+.pq-prompt-card:hover:not(.answered) { border-color: var(--accent); background: var(--accent-light); }
+.pq-prompt-card.correct-pick { background: var(--accent-2-light); border-color: #00C2A8; }
+.pq-prompt-card.wrong-pick { background: var(--red-light); border-color: #FCA5A5; }
+.pq-prompt-card.reveal-good { background: var(--accent-2-light); border-color: #00C2A8; }
+.pq-cards-wrap { margin-bottom: 14px; }
+.pq-question { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+.pq-feedback {
+  padding: 10px 14px; border-radius: var(--radius); font-size: 13px;
+  line-height: 1.5; margin-top: 12px; display: none;
+}
+.pq-feedback.correct { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.pq-feedback.wrong { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.pq-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.pq-next-btn {
+  padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green); cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s; display: none;
+}
+.pq-next-btn:hover { background: var(--accent-2); color: white; }
+.pq-score-display { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.pq-result {
+  text-align: center; padding: 20px 0; display: none;
+}
+.pq-result-badge { font-size: 40px; margin-bottom: 8px; }
+.pq-result-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.pq-result-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+.pq-restart-btn {
+  padding: 7px 18px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted); cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s;
+}
+.pq-restart-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Inpainting simulator */
+.inpaint-sim {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.inpaint-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.inpaint-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.inpaint-panel-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;
+}
+.inpaint-canvas {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-2); aspect-ratio: 4/3;
+  position: relative; overflow: hidden; cursor: crosshair;
+}
+.inpaint-scene {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 40px; user-select: none; position: relative;
+}
+.inpaint-person {
+  position: absolute; bottom: 18px; right: 22px;
+  font-size: 26px; cursor: pointer; transition: all 0.2s;
+  user-select: none;
+}
+.inpaint-person.selected {
+  outline: 3px dashed var(--accent); outline-offset: 4px; border-radius: 4px;
+  background: rgba(26,111,255,0.15);
+}
+.inpaint-person.masked {
+  opacity: 0.25; outline: 3px dashed var(--red); outline-offset: 4px;
+}
+.inpaint-person.replaced { opacity: 0; }
+.inpaint-new-element {
+  position: absolute; bottom: 18px; right: 22px;
+  font-size: 26px; opacity: 0; transition: all 0.4s;
+}
+.inpaint-new-element.visible { opacity: 1; }
+.inpaint-controls { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+.inpaint-step {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface); transition: all 0.2s;
+}
+.inpaint-step.active { border-color: var(--accent); background: var(--accent-light); }
+.inpaint-step.done { border-color: #6EE7B7; background: var(--green-light); }
+.inpaint-step-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surface-2); color: var(--text-subtle);
+  font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.inpaint-step.active .inpaint-step-num { background: var(--accent); color: white; }
+.inpaint-step.done .inpaint-step-num { background: var(--green); color: white; }
+.inpaint-step-text { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+.inpaint-step-text strong { display: block; font-size: 12px; color: var(--text); margin-bottom: 2px; }
+.inpaint-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.inpaint-run-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.inpaint-run-btn:hover { background: var(--accent-2); color: white; }
+.inpaint-run-btn:disabled { opacity: 0.45; cursor: default; }
+.inpaint-status { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.inpaint-instruction {
+  position: absolute; top: 8px; left: 8px; right: 8px;
+  background: rgba(26,111,255,0.9); color: white;
+  border-radius: 6px; padding: 5px 8px; font-size: 11px; text-align: center;
+  font-family: 'Plus Jakarta Sans', sans-serif; display: none;
+}
+
+/* Phase cards */
+.phase-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+
+/* Legal checklist */
+.legal-list { list-style: none; padding: 0; margin: 0; }
+.legal-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.legal-item:last-child { border-bottom: none; }
+.legal-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.legal-text strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.legal-text p { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+/* Transfer task */
+.transfer-steps {
+  counter-reset: transfer-step;
+  list-style: none; padding: 0; margin: 0;
+}
+.transfer-step-item {
+  counter-increment: transfer-step;
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.transfer-step-item:last-child { border-bottom: none; }
+.transfer-step-item::before {
+  content: counter(transfer-step);
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: white;
+  font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.transfer-step-text strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.transfer-step-text p { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+@media(max-width: 600px) {
+  .tool-grid { grid-template-columns: 1fr; }
+  .phase-grid { grid-template-columns: 1fr; }
+  .inpaint-body { grid-template-columns: 1fr; }
+  .pb-row { grid-template-columns: 75px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-bilder.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">4.1 / 4.3</span>
+  <a href="module-4-2.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 4 · Bildkreation</div>
+    <h1>Bild-KIs: Vom Zufallstreffer zur visuellen Strategie</h1>
+    <p>Wie Bild-KIs technisch funktionieren, welches Tool wann passt und wie du konsistent professionelle Ergebnisse erzielst.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>3 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir beenden das "Slot-Machine-Marketing": Hebel ziehen und hoffen. Du lernst, wie Bild-KIs technisch funktionieren und wie du sie gezielt steuerst, um konsistent gute Ergebnisse zu erzielen.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du verstehst den Unterschied zwischen den großen Tools (Adobe Firefly, ChatGPT, Gemini), kannst einen professionellen Bild-Prompt aufbauen und weißt, wie du rechtlich sicher bleibst.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Wie die KI "sieht" -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Wie die KI "sieht": Technik verstehen</h2>
+        <p>Was wirklich passiert, wenn du auf "Generieren" klickst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Du bist nicht der Designer, du bist der <strong>Creative Director</strong>. Eine KI malt Bilder nicht wie ein Mensch: Sie "träumt" basierend auf Wahrscheinlichkeiten. Deine Aufgabe ist es, diesen Traum so präzise zu lenken, dass er deiner Vorstellung entspricht.</p>
+
+      <h3>Das Diffusions-Prinzip</h3>
+      <p>Stell dir einen Block aus weißem Rauschen vor, wie das Schneegestöber im Fernseher ohne Empfang. Das ist der Startpunkt für jedes neue Bild. Wenn du sagst "Ein roter Apfel", beginnt die KI, Pixel für Pixel das Rauschen zu entfernen, das <em>nicht</em> nach Apfel aussieht. Sie addiert nichts. Sie meißelt das Bild aus dem Chaos heraus, basierend auf Mustern, die sie aus Millionen von Trainingsbildern gelernt hat.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">🤔</div>
+        <div class="callout-text">
+          <strong>Warum hat die KI manchmal 6 Finger?</strong>
+          <p>Im "Rauschen" an der Hand war zufällig noch ein Muster, das wie ein Finger aussah, und die KI hat es stehen lassen. Sie hat kein biologisches Verständnis von Anatomie. Sie erkennt Muster, kein Konzept von "Hand".</p>
+        </div>
+      </div>
+
+      <h3>Der Latente Raum: Die Bibliothek der Konzepte</h3>
+      <p>Die KI ordnet Begriffe in einem riesigen, unsichtbaren Raum an. "Hund" liegt nah bei "Katze" (beides Haustiere), aber weit weg von "Toaster". Dein Prompt ist das Navigationssystem in diesem Raum. Ein schwacher Prompt landet irgendwo in der groben Ecke des Konzepts. Ein starker Prompt führt die KI an einen exakten Punkt.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Erkennst du den Unterschied? Wähle den Prompt aus, der zu einem konsistenteren, professionellen Ergebnis führt:</p>
+
+      <div class="pq-game" id="pq-game">
+        <div class="pq-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">PROMPT-CHECK</span>
+          <span class="pq-score-display" id="pq-score">0 / 5 richtig</span>
+        </div>
+        <div class="pq-body">
+          <div id="pq-main">
+            <div class="pq-question" id="pq-question"></div>
+            <div class="pq-cards-wrap" id="pq-cards"></div>
+            <div class="pq-feedback" id="pq-feedback"></div>
+          </div>
+          <div class="pq-result" id="pq-result">
+            <div class="pq-result-badge" id="pq-result-badge"></div>
+            <div class="pq-result-title" id="pq-result-title"></div>
+            <div class="pq-result-sub" id="pq-result-sub"></div>
+            <button class="pq-restart-btn" onclick="pqRestart()">Nochmal spielen</button>
+          </div>
+        </div>
+        <div class="pq-footer">
+          <span class="pq-score-display" id="pq-round">Runde 1 von 5</span>
+          <button class="pq-next-btn" id="pq-next" onclick="pqNext()">Weiter →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Tool-Vergleich -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Die "Großen Drei": Welches Tool für was?</h2>
+        <p>Dein Entscheidungskompass für 2026</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Es gibt nicht "die eine" beste Bild-KI. Profis wählen je nach Aufgabe das passende Werkzeug. Hier ist der Überblick über die drei wichtigsten Plattformen und wann du welche einsetzt.</p>
+
+      <div class="tool-grid">
+        <!-- Adobe Firefly -->
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon" style="background:#FF0000;color:white;">🔥</div>
+            <div>
+              <div class="tool-card-name">Adobe Firefly</div>
+              <div class="tool-card-tagline">Der Profi</div>
+            </div>
+          </div>
+          <div class="tool-card-body">
+            <span class="tool-badge badge-safe">✓ Rechtssicher</span>
+            <div class="tool-row">
+              <span class="tool-row-label">Stärke</span>
+              <span>Nur auf lizenzierten Adobe-Stock-Bildern trainiert. Keine Copyright-Risiken.</span>
+            </div>
+            <div class="tool-row">
+              <span class="tool-row-label">Killer-Feature</span>
+              <span>Struktur-Referenz: Skizze hochladen und die KI baut das Bild exakt nach diesem Layout.</span>
+            </div>
+            <div class="tool-row">
+              <span class="tool-row-label">Einsatz</span>
+              <span>Kommerzielle Kampagnen, Produktbilder mit Haftungsfreistellung.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ChatGPT -->
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon" style="background:#10A37F;color:white;">💬</div>
+            <div>
+              <div class="tool-card-name">ChatGPT</div>
+              <div class="tool-card-tagline">Der Kreative</div>
+            </div>
+          </div>
+          <div class="tool-card-body">
+            <span class="tool-badge badge-creative">✦ Kreativ</span>
+            <div class="tool-row">
+              <span class="tool-row-label">Stärke</span>
+              <span>Versteht komplexe Anweisungen und Kontext extrem gut. Iteratives Verfeinern im Dialog.</span>
+            </div>
+            <div class="tool-row">
+              <span class="tool-row-label">Schwäche</span>
+              <span>Oft erkennbarer "KI-Look". Bilder wirken glatt und poliert.</span>
+            </div>
+            <div class="tool-row">
+              <span class="tool-row-label">Einsatz</span>
+              <span>Social Media Posts, Blog-Header, schnelle Ideenfindung, Storyboards.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gemini -->
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon" style="background:#4285F4;color:white;">✦</div>
+            <div>
+              <div class="tool-card-name">Gemini / Imagen 3</div>
+              <div class="tool-card-tagline">Der Realist</div>
+            </div>
+          </div>
+          <div class="tool-card-body">
+            <span class="tool-badge badge-real">📷 Fotorealistisch</span>
+            <div class="tool-row">
+              <span class="tool-row-label">Stärke</span>
+              <span>Führend bei Fotorealismus. Kann Text auf Schildern oft besser lesbar darstellen.</span>
+            </div>
+            <div class="tool-row">
+              <span class="tool-row-label">Killer-Feature</span>
+              <span>"Nano Banana": Bestehende Fotos bearbeiten. Aktuell unschlagbar bei Bildbearbeitung.</span>
+            </div>
+            <div class="tool-row">
+              <span class="tool-row-label">Einsatz</span>
+              <span>Realistische Produktbilder, Texteinsatz, Bearbeitung bestehender Fotos.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Profi-Tipp: Tools kombinieren</strong>
+          <p>Nutze Gemini für die initiale realistische Grundlage, und Adobe Firefly für die rechtssichere finale Kampagnen-Version. Verschiedene Tools für verschiedene Phasen ist kein Widerspruch, es ist Strategie.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Workflow -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Unser Workflow: In 3 Phasen zum perfekten Bild</h2>
+        <p>Vom ersten Prompt bis zur fertigen Produktion</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Vergiss das "One-Click-Wunder". Professionelle KI-Bilder entstehen in einem strukturierten Prozess. Wer das versteht, hört auf zu hoffen und fängt an, zu steuern.</p>
+
+      <div class="phase-grid">
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:22px;">✏️</div>
+          <div>
+            <strong style="font-size:13px;">Phase 1</strong>
+            <p style="font-size:12px;margin-top:3px;">Der initiale Prompt nach der Subjekt-Formel</p>
+          </div>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:22px;">🖼️</div>
+          <div>
+            <strong style="font-size:13px;">Phase 2</strong>
+            <p style="font-size:12px;margin-top:3px;">Referenzbilder für Brand-Konsistenz nutzen</p>
+          </div>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:22px;">🔧</div>
+          <div>
+            <strong style="font-size:13px;">Phase 3</strong>
+            <p style="font-size:12px;margin-top:3px;">Inpainting für das finale 10% Finish</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Phase 1: Der initiale Prompt</h3>
+      <p>Ein guter Prompt hat eine feste Struktur. Die Formel: <strong>Subjekt + Handlung/Kontext + Stil + Licht/Kamera.</strong> Nicht "Frau", sondern "30-jährige Architektin, Brille, fokussierter Blick". Nicht "Büro", sondern "in einem hellen Loft-Büro, weiches Tageslicht von links".</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Baue deinen eigenen Bild-Prompt nach der Vier-Komponenten-Formel:</p>
+
+      <div class="prompt-builder" id="prompt-builder">
+        <div class="prompt-builder-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">PROMPT-BUILDER</span>
+          <span style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;">Subjekt + Handlung + Stil + Licht</span>
+        </div>
+        <div class="prompt-builder-body">
+          <div class="pb-row">
+            <div class="pb-label-wrap">
+              <div class="pb-letter" style="background:#1A6FFF;">S</div>
+              <div class="pb-label">Subjekt</div>
+            </div>
+            <input class="pb-input" id="pb-subjekt" placeholder="z.B. 30-jährige Architektin, Brille, fokussierter Blick" oninput="pbUpdate()">
+          </div>
+          <div class="pb-row">
+            <div class="pb-label-wrap">
+              <div class="pb-letter" style="background:#00C2A8;">H</div>
+              <div class="pb-label">Handlung</div>
+            </div>
+            <input class="pb-input" id="pb-handlung" placeholder="z.B. arbeitet an einem futuristischen Modell in einem Loft-Büro" oninput="pbUpdate()">
+          </div>
+          <div class="pb-row">
+            <div class="pb-letter" style="background:#6D28D9;"></div>
+            <div class="pb-label-wrap" style="gap:6px;">
+              <div class="pb-letter" style="background:#6D28D9;">ST</div>
+              <div class="pb-label">Stil</div>
+            </div>
+            <input class="pb-input" id="pb-stil" placeholder="z.B. Editorial Fotorealismus, wie im Magazin 'Vogue'" oninput="pbUpdate()">
+          </div>
+          <div class="pb-row">
+            <div class="pb-label-wrap">
+              <div class="pb-letter" style="background:#C2410C;">L</div>
+              <div class="pb-label">Licht</div>
+            </div>
+            <input class="pb-input" id="pb-licht" placeholder="z.B. weiches Tageslicht von links, geringe Tiefenschärfe" oninput="pbUpdate()">
+          </div>
+          <div class="pb-preview-label">GENERIERTER PROMPT</div>
+          <div class="pb-output" id="pb-output">
+            <span style="color:rgba(255,255,255,0.2);font-size:12px;">Fülle die Felder oben aus, um deinen Prompt zu sehen...</span>
+            <button class="pb-copy" onclick="pbCopy()" id="pb-copy-btn" style="display:none;">Kopieren</button>
+          </div>
+        </div>
+        <div class="pb-footer">
+          <button class="pb-generate-btn" onclick="pbExample()">✦ Beispiel laden</button>
+          <span class="pb-hint" id="pb-hint">0 / 4 Felder ausgefüllt</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Phase 2: Referenzen statt Worte</h3>
+      <p>Das größte Problem im Marketing: "Das Bild ist toll, aber es passt nicht zu unserer Brand-Farbe." Hier kommen Referenzbilder ins Spiel. Nutze <strong>Style Reference</strong> (lade ein Bild deiner letzten Kampagne hoch und die KI übernimmt Farben und Lichtstimmung) und <strong>Structure Reference</strong> (lade eine Skizze deines Website-Headers hoch, und die KI platziert Elemente genau dort, wo du sie brauchst).</p>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Merke: Bilder sind die besten Prompts</strong>
+          <p>Wie auch bei Texte-LLMs sind Beispiele und Referenzen immens wertvoll. Wenn du bereits Brand-Beispiele oder ein Foto hast, das gut zu deiner Idee passt, nutze das. Jede gute Bild-KI erlaubt das Hochladen von Referenzbildern. Sag der KI dabei genau, was sie mit dem Bild anfangen soll.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Phase 3: Inpainting für das finale Finish</h3>
+      <p>Das Bild ist zu 90% perfekt, aber im Hintergrund steht eine fremde Person? Hier geben viele KI-Nutzer auf. Das ist ein Fehler. Mit <strong>Inpainting</strong> (auch "Generative Fill" genannt) markierst du die störende Stelle, beschreibst der KI was stattdessen dort sein soll, und sie berechnet nur diesen kleinen Teil neu. Licht und Schatten werden automatisch angepasst. Der Rest des Bildes bleibt exakt gleich.</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Klicke auf die fremde Person im Bild, um den Inpainting-Prozess zu simulieren:</p>
+
+      <div class="inpaint-sim">
+        <div class="inpaint-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">INPAINTING SIMULATOR</span>
+          <span style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;margin-left:auto;" id="inpaint-phase-label">Schritt 1: Element auswählen</span>
+        </div>
+        <div class="inpaint-body">
+          <div>
+            <div class="inpaint-panel-label">VORSCHAU</div>
+            <div class="inpaint-canvas">
+              <div class="inpaint-scene">
+                🌳
+                <div class="inpaint-person" id="inpaint-person" onclick="inpaintSelect()">👤</div>
+                <div class="inpaint-new-element" id="inpaint-new">🌿</div>
+              </div>
+              <div class="inpaint-instruction" id="inpaint-instruction">Klicke auf 👤 um die Person zu markieren</div>
+            </div>
+          </div>
+          <div class="inpaint-controls">
+            <div class="inpaint-step" id="istep-1">
+              <div class="inpaint-step-num">1</div>
+              <div class="inpaint-step-text">
+                <strong>Bereich markieren</strong>
+                Klicke auf das störende Element im Bild.
+              </div>
+            </div>
+            <div class="inpaint-step" id="istep-2">
+              <div class="inpaint-step-num">2</div>
+              <div class="inpaint-step-text">
+                <strong>Anweisung geben</strong>
+                Beschreibe, was stattdessen erscheinen soll.
+              </div>
+            </div>
+            <div class="inpaint-step" id="istep-3">
+              <div class="inpaint-step-num">3</div>
+              <div class="inpaint-step-text">
+                <strong>KI berechnet nur diesen Teil neu</strong>
+                Rest des Bildes bleibt unverändert.
+              </div>
+            </div>
+            <input class="pb-input" id="inpaint-instruction-input" placeholder='z.B. "Ein Busch mit Blättern"' style="display:none;margin-top:4px;" oninput="inpaintInputChange()">
+          </div>
+        </div>
+        <div class="inpaint-footer">
+          <span class="inpaint-status" id="inpaint-status">Wähle zuerst ein Element aus.</span>
+          <button class="inpaint-run-btn" id="inpaint-run" onclick="inpaintRun()" disabled>▶ Inpainting starten</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Recht & Ethik -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Recht und Ethik: Deine Absicherung</h2>
+        <p>Was du vor dem EU AI Act (August 2026) wissen musst</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Ab August 2026 greift der EU AI Act voll. Drei Punkte, die du jetzt verstehen musst, um dich und dein Unternehmen zu schützen:</p>
+
+      <ul class="legal-list">
+        <li class="legal-item">
+          <span class="legal-icon">🏷️</span>
+          <div class="legal-text">
+            <strong>Kennzeichnungspflicht</strong>
+            <p>Wenn ein Bild wie ein echtes Foto oder eine echte Person aussieht, aber künstlich generiert ist, muss es als KI-Inhalt gekennzeichnet werden. Das gilt insbesondere für realistische Personendarstellungen. Transparenz schafft langfristig Vertrauen.</p>
+          </div>
+        </li>
+        <li class="legal-item">
+          <span class="legal-icon">©️</span>
+          <div class="legal-text">
+            <strong>Urheberrecht: Kein automatisches Copyright</strong>
+            <p>In den meisten Fällen hast du kein Copyright auf reine KI-Bilder. Wenn du ein Bild mit Midjourney erstellst, kann ein Konkurrent es theoretisch nutzen. Schutz entsteht erst durch "menschliche Schöpfungshöhe": Wenn du das KI-Bild massiv bearbeitest, Texte einfügst und es in eine Collage einbaust, gehört das Endprodukt dir.</p>
+          </div>
+        </li>
+        <li class="legal-item">
+          <span class="legal-icon">🛡️</span>
+          <div class="legal-text">
+            <strong>Haftung: Für kommerzielle Kampagnen Adobe Firefly Enterprise nutzen</strong>
+            <p>Adobe bietet für Enterprise-Kunden eine Haftungsfreistellung an, weil sie garantieren, dass ihre Trainingsdaten sauber und lizenziert sind. Bei High-Risk-Kampagnen ist das der sichere Weg.</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="callout orange">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Prompte niemals echte Personen oder Markenlogos</strong>
+          <p>Bilder von erkennbaren Personen ohne Zustimmung oder Bilder mit fremden Markenzeichen können zu echten Rechtsproblemen führen, unabhängig vom KI-Tool, das du nutzt.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Transfer-Aufgabe -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Deine Transfer-Aufgabe: Stil-Übertragung</h2>
+        <p>Das erste Hands-on mit Adobe Firefly</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Theorie ist gut. Praxis ist besser. Diese Aufgabe bringt alles zusammen: Prompt-Formel, Tool-Auswahl und Referenz-Nutzung.</p>
+
+      <ol class="transfer-steps">
+        <li class="transfer-step-item">
+          <div class="transfer-step-text">
+            <strong>Referenzbild suchen</strong>
+            <p>Finde ein Bild, das den visuellen Stil deiner Marke perfekt repräsentiert (Farben, Stimmung, Lichtverhältnisse).</p>
+          </div>
+        </li>
+        <li class="transfer-step-item">
+          <div class="transfer-step-text">
+            <strong>Adobe Firefly öffnen</strong>
+            <p>Öffne Adobe Firefly (kostenlos nutzbar unter firefly.adobe.com). Kein Abo nötig für den Start.</p>
+          </div>
+        </li>
+        <li class="transfer-step-item">
+          <div class="transfer-step-text">
+            <strong>Fremdes Motiv schreiben</strong>
+            <p>Schreibe einen Prompt für ein komplett anderes Motiv, z.B. "Ein Astronaut sitzt auf einer Parkbank". Das Motiv hat nichts mit deiner Marke zu tun.</p>
+          </div>
+        </li>
+        <li class="transfer-step-item">
+          <div class="transfer-step-text">
+            <strong>Style Reference aktivieren</strong>
+            <p>Lade dein Marken-Bild als Style Reference hoch (Option im linken Menü in Firefly). Beobachte, wie die KI das fremde Motiv mit den Farben und dem Vibe deiner Marke verschmilzt.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout green">
+        <div class="callout-icon">🏁</div>
+        <div class="callout-text">
+          <strong>Das Ziel dieser Aufgabe</strong>
+          <p>Du sollst direkt erfahren, wie eine Style Reference funktioniert. Das ist die schnellste Methode zur Brand-Konsistenz bei Bild-KIs, und der entscheidende Unterschied zwischen Hobby-Nutzung und professionellem Einsatz.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Du bist der Creative Director, nicht der Designer.</strong>
+          <p>KI-Bilder entstehen durch präzise Navigation, nicht durch Glück. Wer diesen Mindset-Wechsel macht, hört auf mit Slot-Machine-Marketing.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Diffusions-Modelle "meißeln" Bilder aus Rauschen.</strong>
+          <p>Sie addieren keine Elemente, sie entfernen Rauschen basierend auf Mustern. Das erklärt Halluzinationen wie 6 Finger und warum präzise Prompts entscheidend sind.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Jedes Tool hat eine klare Stärke.</strong>
+          <p>Adobe Firefly für rechtssichere Kommerzprojekte. ChatGPT für kreatives Iterieren. Gemini/Imagen für Fotorealismus und Bildbearbeitung.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Prompts brauchen Struktur: Subjekt + Handlung + Stil + Licht.</strong>
+          <p>Grammatikalischer "Müll" und vage Wörter stören die KI bei der Übersetzung von Text zu Pixeln. Präzision schlägt Länge.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>90% perfekt ist nicht das Ende, es ist die Mitte.</strong>
+          <p>Inpainting löst die letzten Probleme, ohne das gesamte Bild neu zu generieren. Gute KI-Nutzer geben nicht bei 90% auf.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">6</div>
+        <div class="chain-content">
+          <strong>Der EU AI Act gilt ab August 2026.</strong>
+          <p>Realistische KI-Bilder müssen gekennzeichnet werden. Für kommerzielle Kampagnen Adobe Firefly Enterprise für die Haftungsfreistellung nutzen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// TOOLTIP POSITIONING
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+
+// PROMPT QUALITY GAME
+var pqData = [
+  {
+    q: 'Welcher Prompt liefert konsistentere Ergebnisse?',
+    prompts: [
+      'Erstelle ein Bild von einem Hund, der auf einer Wiese mit einem Ball spielt. Das Wetter ist schoen, Schmetterlinge fliegen herum.',
+      'Golden Retriever, faengt einen roten Ball auf einer gruenen Wiese. Sonnenlicht von rechts, Gegenlicht, scharfe Tiefenschaerfe.'
+    ],
+    correct: 1,
+    feedback: 'Der zweite Prompt ist deutlich staerker: kein grammatikalischer Ballast, klare Subjektbeschreibung, konkrete Angaben zu Licht und Kamera. Die KI uebersetzt Text direkt in Pixel - jedes ueberflüssige Wort ist Rauschen.'
+  },
+  {
+    q: 'Welcher Stil-Hinweis im Prompt fuehrt zu einem professionelleren Ergebnis?',
+    prompts: [
+      'Ein moderner Sneaker. Schoen fotografiert.',
+      'Moderner gruener Sneaker. Stil: High-End Produktfotografie, 8k, extrem detailliert. Beleuchtung: Golden Hour, warme Kontraste.'
+    ],
+    correct: 1,
+    feedback: 'Vage Adjektive wie "schoen" helfen der KI kaum. Sie hat keine aesthetische Meinung. Konkrete technische Referenzen wie "8k", "Golden Hour" oder "Produktfotografie" navigieren die KI zu einem exakten Punkt im latenten Raum.'
+  },
+  {
+    q: 'Du willst Brand-Konsistenz bei einem neuen Bild. Was ist der effektivste Weg?',
+    prompts: [
+      'Prompt schreiben: "Nutze unsere Markenfarben Blau und Weiss und einen professionellen, modernen Stil."',
+      'Ein vorhandenes Markenbild als Style Reference hochladen und der KI sagen: "Nutze diesen visuellen Stil fuer das neue Motiv."'
+    ],
+    correct: 1,
+    feedback: 'Referenzbilder sind maechtiger als Farbbeschreibungen in Text. Die KI kann aus einem Bild Lichtstimmung, Farbpalette und Atmosphaere direkt ablesen - das ist praeziser als jede verbale Beschreibung.'
+  },
+  {
+    q: 'Fuer welches Szenario ist Adobe Firefly die beste Wahl?',
+    prompts: [
+      'Schnelle Social-Media-Ideen fuer eine interne Brainstorming-Runde generieren.',
+      'Produktbilder fuer eine nationale TV-Werbekampagne erstellen, die rechtssicher sein muessen.'
+    ],
+    correct: 1,
+    feedback: 'Fuer kommerzielle High-Risk-Kampagnen bietet Adobe Firefly Haftungsfreistellung, weil Trainingsdaten ausschliesslich lizenzierte Bilder aus Adobe Stock sind. Fuer internes Brainstorming reicht ChatGPT oder Gemini voellig aus.'
+  },
+  {
+    q: 'Was beschreibt den "Latenten Raum" einer Bild-KI am besten?',
+    prompts: [
+      'Der Speicherplatz der KI, in dem alle generierten Bilder archiviert werden.',
+      'Ein unsichtbarer Konzeptraum, in dem die KI Begriffe nach Aehnlichkeit anordnet und durch den dein Prompt navigiert.'
+    ],
+    correct: 1,
+    feedback: 'Der latente Raum ist keine Datenbank. Er ist eine mathematische Repraesentation von Konzeptbeziehungen. "Hund" liegt nah bei "Katze", weit weg von "Toaster". Je praeziser dein Prompt, desto gezielter navigierst du zu einem exakten Punkt in diesem Raum.'
+  }
+];
+
+var pqCurrent = 0, pqScore = 0, pqAnswered = false;
+
+function pqRender() {
+  if (pqCurrent >= pqData.length) {
+    document.getElementById('pq-main').style.display = 'none';
+    var resultEl = document.getElementById('pq-result');
+    resultEl.style.display = 'block';
+    var pct = pqScore / pqData.length;
+    document.getElementById('pq-result-badge').textContent = pct >= 0.8 ? '\uD83C\uDFC6' : pct >= 0.6 ? '\uD83E\uDD47' : '\uD83D\uDCDA';
+    document.getElementById('pq-result-title').textContent = pct >= 0.8 ? 'Starkes Prompt-Gefuehl!' : pct >= 0.6 ? 'Guter Ansatz.' : 'Noch etwas ueben.';
+    document.getElementById('pq-result-sub').textContent = pqScore + ' von ' + pqData.length + ' Prompts richtig eingeschaetzt.';
+    return;
+  }
+  var d = pqData[pqCurrent];
+  document.getElementById('pq-question').textContent = d.q;
+  document.getElementById('pq-round').textContent = 'Runde ' + (pqCurrent + 1) + ' von ' + pqData.length;
+  document.getElementById('pq-score').textContent = pqScore + ' / ' + pqData.length + ' richtig';
+  var cardsWrap = document.getElementById('pq-cards');
+  cardsWrap.innerHTML = '';
+  d.prompts.forEach(function(prompt, i) {
+    var card = document.createElement('div');
+    card.className = 'pq-prompt-card';
+    card.textContent = prompt;
+    card.onclick = function() { pqSelect(i); };
+    cardsWrap.appendChild(card);
+  });
+  document.getElementById('pq-feedback').style.display = 'none';
+  document.getElementById('pq-feedback').className = 'pq-feedback';
+  document.getElementById('pq-next').style.display = 'none';
+  pqAnswered = false;
+}
+
+function pqSelect(idx) {
+  if (pqAnswered) return;
+  pqAnswered = true;
+  var d = pqData[pqCurrent];
+  var cards = document.querySelectorAll('.pq-prompt-card');
+  cards.forEach(function(c) { c.classList.add('answered'); });
+  var fb = document.getElementById('pq-feedback');
+  if (idx === d.correct) {
+    cards[idx].classList.add('correct-pick');
+    pqScore++;
+    fb.className = 'pq-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!</strong> ' + d.feedback;
+  } else {
+    cards[idx].classList.add('wrong-pick');
+    cards[d.correct].classList.add('reveal-good');
+    fb.className = 'pq-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Nicht ganz.</strong> ' + d.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('pq-score').textContent = pqScore + ' / ' + pqData.length + ' richtig';
+  document.getElementById('pq-next').style.display = 'block';
+}
+
+function pqNext() {
+  pqCurrent++;
+  pqRender();
+}
+
+function pqRestart() {
+  pqCurrent = 0; pqScore = 0; pqAnswered = false;
+  document.getElementById('pq-main').style.display = 'block';
+  document.getElementById('pq-result').style.display = 'none';
+  pqRender();
+}
+
+pqRender();
+
+// PROMPT BUILDER
+var pbExamples = {
+  subjekt: '30-jaehrige Architektin, Brille, fokussierter Blick',
+  handlung: 'arbeitet an einem futuristischen Gebaeudemodell in einem hellen Loft-Buero',
+  stil: 'Fotorealismus, Editorial Style, wie im Magazin Vogue',
+  licht: 'weiches Tageslicht von links (Window Light), geringe Tiefenschaerfe'
+};
+
+function pbUpdate() {
+  var s = document.getElementById('pb-subjekt').value.trim();
+  var h = document.getElementById('pb-handlung').value.trim();
+  var st = document.getElementById('pb-stil').value.trim();
+  var l = document.getElementById('pb-licht').value.trim();
+  var filled = [s,h,st,l].filter(function(x){return x.length > 0;}).length;
+  document.getElementById('pb-hint').textContent = filled + ' / 4 Felder ausgefüllt';
+  var out = document.getElementById('pb-output');
+  var copyBtn = document.getElementById('pb-copy-btn');
+  if (!s && !h && !st && !l) {
+    out.innerHTML = '<span style="color:rgba(255,255,255,0.2);font-size:12px;">Fülle die Felder oben aus, um deinen Prompt zu sehen...</span>';
+    copyBtn.style.display = 'none';
+    return;
+  }
+  var parts = [];
+  if (s) parts.push('<span class="kw-blue">' + s + '</span>');
+  if (h) parts.push('<span class="kw-green">' + h + '</span>');
+  if (st) parts.push('Stil: <span class="kw-purple">' + st + '</span>');
+  if (l) parts.push('Licht: <span class="kw-orange">' + l + '</span>');
+  out.innerHTML = parts.join('. ') + '.';
+  out.appendChild(copyBtn);
+  copyBtn.style.display = 'block';
+}
+
+function pbExample() {
+  document.getElementById('pb-subjekt').value = pbExamples.subjekt;
+  document.getElementById('pb-handlung').value = pbExamples.handlung;
+  document.getElementById('pb-stil').value = pbExamples.stil;
+  document.getElementById('pb-licht').value = pbExamples.licht;
+  pbUpdate();
+}
+
+function pbCopy() {
+  var s = document.getElementById('pb-subjekt').value.trim();
+  var h = document.getElementById('pb-handlung').value.trim();
+  var st = document.getElementById('pb-stil').value.trim();
+  var l = document.getElementById('pb-licht').value.trim();
+  var parts = [];
+  if (s) parts.push(s);
+  if (h) parts.push(h);
+  if (st) parts.push('Stil: ' + st);
+  if (l) parts.push('Licht: ' + l);
+  var text = parts.join('. ') + '.';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = document.getElementById('pb-copy-btn');
+      btn.textContent = 'Kopiert!';
+      setTimeout(function() { btn.textContent = 'Kopieren'; }, 1500);
+    });
+  }
+}
+
+// INPAINTING SIMULATOR
+var inpaintPhase = 0;
+
+function inpaintSelect() {
+  if (inpaintPhase > 0) return;
+  inpaintPhase = 1;
+  var person = document.getElementById('inpaint-person');
+  person.classList.add('selected');
+  document.getElementById('istep-1').className = 'inpaint-step done';
+  document.getElementById('istep-1').querySelector('.inpaint-step-num').textContent = '\u2713';
+  document.getElementById('istep-2').className = 'inpaint-step active';
+  document.getElementById('inpaint-phase-label').textContent = 'Schritt 2: Anweisung geben';
+  document.getElementById('inpaint-status').textContent = 'Person ausgewaehlt. Gib jetzt eine Anweisung.';
+  document.getElementById('inpaint-instruction-input').style.display = 'block';
+  document.getElementById('inpaint-instruction-input').focus();
+}
+
+function inpaintInputChange() {
+  var val = document.getElementById('inpaint-instruction-input').value.trim();
+  var runBtn = document.getElementById('inpaint-run');
+  if (val.length > 3) {
+    runBtn.disabled = false;
+    document.getElementById('inpaint-status').textContent = 'Bereit. Klicke "Inpainting starten".';
+  } else {
+    runBtn.disabled = true;
+    document.getElementById('inpaint-status').textContent = 'Beschreibe, was ersetzt werden soll.';
+  }
+}
+
+function inpaintRun() {
+  if (inpaintPhase !== 1) return;
+  inpaintPhase = 2;
+  document.getElementById('inpaint-run').disabled = true;
+  document.getElementById('inpaint-status').textContent = 'KI berechnet den markierten Bereich neu...';
+  document.getElementById('inpaint-phase-label').textContent = 'Schritt 3: Verarbeitung...';
+  document.getElementById('istep-2').className = 'inpaint-step done';
+  document.getElementById('istep-2').querySelector('.inpaint-step-num').textContent = '\u2713';
+  document.getElementById('istep-3').className = 'inpaint-step active';
+  var person = document.getElementById('inpaint-person');
+  person.classList.remove('selected');
+  person.classList.add('masked');
+  setTimeout(function() {
+    person.classList.add('replaced');
+    document.getElementById('inpaint-new').classList.add('visible');
+    document.getElementById('istep-3').className = 'inpaint-step done';
+    document.getElementById('istep-3').querySelector('.inpaint-step-num').textContent = '\u2713';
+    document.getElementById('inpaint-status').textContent = 'Fertig. Nur der markierte Bereich wurde veraendert.';
+    document.getElementById('inpaint-phase-label').textContent = '\u2713 Inpainting abgeschlossen';
+    document.getElementById('inpaint-instruction-input').style.display = 'none';
+    var resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Neu starten';
+    resetBtn.className = 'pb-generate-btn';
+    resetBtn.style.marginLeft = 'auto';
+    resetBtn.onclick = function() {
+      inpaintPhase = 0;
+      person.className = 'inpaint-person';
+      document.getElementById('inpaint-new').className = 'inpaint-new-element';
+      document.getElementById('istep-1').className = 'inpaint-step';
+      document.getElementById('istep-1').querySelector('.inpaint-step-num').textContent = '1';
+      document.getElementById('istep-2').className = 'inpaint-step';
+      document.getElementById('istep-2').querySelector('.inpaint-step-num').textContent = '2';
+      document.getElementById('istep-3').className = 'inpaint-step';
+      document.getElementById('istep-3').querySelector('.inpaint-step-num').textContent = '3';
+      document.getElementById('inpaint-instruction-input').value = '';
+      document.getElementById('inpaint-instruction-input').style.display = 'none';
+      document.getElementById('inpaint-status').textContent = 'Wähle zuerst ein Element aus.';
+      document.getElementById('inpaint-phase-label').textContent = 'Schritt 1: Element auswaehlen';
+      document.getElementById('inpaint-run').disabled = true;
+      var footer = document.getElementById('inpaint-run').parentNode;
+      var oldReset = footer.querySelector('.pb-generate-btn');
+      if (oldReset) footer.removeChild(oldReset);
+    };
+    var footer = document.getElementById('inpaint-run').parentNode;
+    footer.appendChild(resetBtn);
+  }, 1800);
+}
+
+// QUIZ
+const questions = [
+  {
+    q: 'Wie generieren Diffusions-Modelle Bilder technisch gesehen?',
+    options: [
+      'Sie malen Schicht fuer Schicht, aehnlich wie ein Mensch mit Pinsel und Farbe.',
+      'Sie suchen in einer Datenbank nach dem aehnlichsten Bild und passen es an.',
+      'Sie entfernen schrittweise Rauschen aus einem zufaelligen Ausgangsbild, basierend auf gelernten Mustern.',
+      'Sie kombinieren vorhandene Stockbilder nach dem Prompt-Inhalt.'
+    ],
+    correct: 2,
+    feedback: 'Diffusions-Modelle starten mit reinem Rauschen und "meisseln" das Bild heraus, indem sie Schritt fuer Schritt Pixel entfernen, die nicht zum Prompt passen. Sie erstellen keine Bilder additiv, sondern subtraktiv.'
+  },
+  {
+    q: 'Warum generiert eine Bild-KI manchmal Haende mit 6 Fingern?',
+    options: [
+      'Weil der Prompt nicht klar genug war, was eine Hand ist.',
+      'Weil die KI zufaellige Rausch-Muster, die nach Fingern aussehen, nicht als anatomisch falsch erkennt.',
+      'Weil Haende technisch sehr schwer zu berechnen sind und viel Rechenleistung benoetigen.',
+      'Weil die KI absichtlich Fehler einbaut, um Copyright zu vermeiden.'
+    ],
+    correct: 1,
+    feedback: 'Die KI hat kein biologisches Verstaendnis von Anatomie. Sie erkennt Muster. Wenn im generierten Rauschen zunaechst ein Muster entsteht, das nach Finger aussieht, laesst die KI es stehen, da es statistisch plausibel wirkt.'
+  },
+  {
+    q: 'Was beschreibt den Begriff "Latenter Raum" in Bild-KIs am treffendsten?',
+    options: [
+      'Der Wartebereich waehrend der KI das Bild berechnet.',
+      'Die maximale Bildgroesse, die eine KI generieren kann.',
+      'Ein mathematischer Konzeptraum, in dem Begriffe nach Aehnlichkeit angeordnet sind und durch den der Prompt navigiert.',
+      'Die Zwischenspeicherung aller generierten Bilder in der Cloud.'
+    ],
+    correct: 2,
+    feedback: 'Der latente Raum ist eine mathematische Repraesentation von Konzeptbeziehungen. Ein starker Prompt mit spezifischen Angaben (z.B. "85mm Objektiv, Golden Hour") fuehrt die KI an einen exakten Punkt in diesem Raum.'
+  },
+  {
+    q: 'Fuer welche Aufgabe ist Adobe Firefly Enterprise am besten geeignet?',
+    options: [
+      'Schnelle Social-Media-Ideen fuer interne Brainstorming-Sessions.',
+      'Kommerzielle Hochrisiko-Kampagnen, bei denen rechtliche Absicherung benoetigt wird.',
+      'Fotorealistische Bildbearbeitung bestehender Fotos.',
+      'Komplexe Bild-zu-Text-Beschreibungen fuer Barrierefreiheit.'
+    ],
+    correct: 1,
+    feedback: 'Adobe Firefly wurde ausschliesslich auf lizenzierten Adobe-Stock-Bildern trainiert und bietet fuer Enterprise-Kunden eine Haftungsfreistellung. Das macht es zur sichersten Wahl fuer kommerzielle High-Stakes-Kampagnen.'
+  },
+  {
+    q: 'Was ist der Hauptvorteil von ChatGPT (DALL-E) gegenueber anderen Bild-KIs?',
+    options: [
+      'Die beste Rechtssicherheit aller Tools auf dem Markt.',
+      'Unschlagbarer Fotorealismus bei Portraits.',
+      'Hervorragendes Sprachverstaendnis und die Moeglichkeit, im Dialog zu iterieren.',
+      'Die einzige KI, die Bilder direkt auf Webseiten exportieren kann.'
+    ],
+    correct: 2,
+    feedback: 'ChatGPT/DALL-E versteht komplexe Anweisungen und Kontext besonders gut. Das macht es ideal fuer iterative Prozesse, bei denen man im Gespraech das Ergebnis verfeinert. Der "KI-Look" ist dafuer eine bekannte Schwaeche.'
+  },
+  {
+    q: 'Was versteht man unter "Inpainting" (Generative Fill)?',
+    options: [
+      'Das nachtraegliche Einfaerben von schwarz-weiss Fotos durch KI.',
+      'Das Hinzufuegen von Text und Logos in generierte Bilder.',
+      'Das gezielte Neuberechnen eines markierten Bildbereichs, waehrend der Rest unveraendert bleibt.',
+      'Die Technik, mehrere generierte Bilder zu einer Collage zusammenzufuegen.'
+    ],
+    correct: 2,
+    feedback: 'Inpainting markiert eine spezifische Stelle im Bild (z.B. eine stoerende Person) und berechnet nur diesen Bereich neu. Licht, Schatten und Kontext werden dabei automatisch angepasst. Der Rest des Bildes bleibt pixelgenau identisch.'
+  },
+  {
+    q: 'Du willst sicherstellen, dass ein neues KI-Bild farblich zu deiner Marke passt. Was ist der effektivste Weg?',
+    options: [
+      'Den Prompt so praezise wie moeglich mit Hex-Farbcodes schreiben.',
+      'Ein bestehendes Markenbild als Style Reference hochladen.',
+      'Die Saettigung und den Farbton nach der Generierung in Photoshop anpassen.',
+      'Mehrere Bilder generieren und das passendste auswaehlen.'
+    ],
+    correct: 1,
+    feedback: 'Referenzbilder sind maechtiger als verbale Farbangaben. Die KI liest aus einem Style-Reference-Bild direkt Farben, Lichtstimmung und Atmosphaere ab. Das ist praeziser als jede textuelle Beschreibung, auch mit Hex-Codes.'
+  },
+  {
+    q: 'Was fordert der EU AI Act (ab August 2026) bei KI-generierten Bildern?',
+    options: [
+      'Alle KI-Bilder muessen in einem speziellen, von der EU zertifizierten Format gespeichert werden.',
+      'KI-Bilder duerfen nicht mehr fuer kommerzielle Zwecke genutzt werden.',
+      'Realistische KI-Bilder (insbesondere Personendarstellungen) muessen als KI-generiert gekennzeichnet werden.',
+      'Jede KI-Bildgenerierung muss beim Datenschutzbeauftragten registriert werden.'
+    ],
+    correct: 2,
+    feedback: 'Der EU AI Act verlangt Transparenz: Wenn ein Bild wie eine echte Person oder ein echtes Foto aussieht, aber KI-generiert ist, muss dies kenntlich gemacht werden. Kennzeichnung schafft Vertrauen und ist gesetzliche Pflicht.'
+  },
+  {
+    q: 'Warum sind kuerzere, praezisere Prompts bei Bild-KIs oft effektiver als lange, ausfuehrliche?',
+    options: [
+      'Weil Bild-KIs technisch nur 50 Woerter verarbeiten koennen.',
+      'Weil die KI keine lange Texte lesen kann und nur das erste Wort beachtet.',
+      'Weil ueberflüssige Woerter und Grammatik der KI nicht signalisieren, was priorisiert werden soll.',
+      'Weil laengere Prompts mehr Rechenzeit benoetigen und daher ungenauer werden.'
+    ],
+    correct: 2,
+    feedback: 'Bild-KIs lesen Text nicht wie Menschen. Sie uebersetzen ihn direkt in Pixelwahrscheinlichkeiten. Grammatikalischer "Ballast" (z.B. "Erstelle ein Bild von einem...") und vage Adjektive stören diesen Uebersetzungsprozess ohne Informationsgewinn.'
+  },
+  {
+    q: 'Was ist die empfohlene Prompt-Struktur fuer professionelle Bild-Ergebnisse?',
+    options: [
+      'Emotion + Farbe + Groesse + Dateiformat',
+      'Subjekt + Handlung/Kontext + Stil + Licht/Kamera',
+      'Tool + Modell + Qualitaet + Zielgruppe',
+      'Aufgabe + Ziel + Ton + Laenge'
+    ],
+    correct: 1,
+    feedback: 'Die Vier-Komponenten-Formel gibt der KI alle noetigen Navigationspunkte: Wer oder was (Subjekt), in welcher Situation (Handlung/Kontext), in welchem visuellen Stil (Stil) und unter welchen Lichtbedingungen (Licht/Kamera). Jede Komponente fuehrt die KI praeziser im latenten Raum.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong>' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong>' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
