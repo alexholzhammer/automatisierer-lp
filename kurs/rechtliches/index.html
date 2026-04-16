@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rechtliches · KI Marketing Bootcamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--text-subtle); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb-sep { color: var(--border-strong); }
+
+.intro-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.intro-section-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex; align-items: center; gap: 10px;
+}
+.intro-section-header h2 { font-size: 15px; font-weight: 600; }
+.intro-section-body { padding: 24px; }
+.intro-section-body p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+.intro-section-body p:last-child { margin-bottom: 0; }
+
+.goals-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 4px;
+}
+.goal-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.goal-check {
+  width: 20px; height: 20px; border-radius: var(--radius);
+  background: var(--accent-2-light); border: 1px solid #ABF5D1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; margin-top: 1px;
+  color: var(--accent-2);
+}
+.goal-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+.modules-list { display: flex; flex-direction: column; gap: 10px; }
+
+.module-card-status {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent-2); font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 2px;
+}
+
+@media(max-width: 580px) {
+  .goals-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <a href="../" class="topnav-logo">
+    <div class="topnav-logo-dot"></div>
+    <span>KI Marketing Bootcamp</span>
+  </a>
+  <div class="topnav-spacer"></div>
+  <a href="../" class="topnav-link">← Alle Themen</a>
+</nav>
+
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="../">KI Marketing Bootcamp</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>Rechtliches</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">Thema 11 · Rechtliches</div>
+    <h1>Rechtliches</h1>
+    <p>Lerne, KI rechtssicher einzusetzen — von DSGVO und Datenschutz über Urheberrecht bis zum EU AI Act. Praxisnah, ohne Juristendeutsch.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📚 <span>3 Module</span></div>
+      <div class="hero-meta-item">⏱ <span>~60 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🎯 <span>9+ interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>30 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>📖</span>
+      <h2>Über dieses Thema</h2>
+    </div>
+    <div class="intro-section-body">
+      <p>KI rechtssicher einzusetzen ist keine Option, sondern Pflicht — besonders in Deutschland. Dieses Thema gibt dir das Wissen, das du brauchst, ohne dich in Juristendeutsch zu ertränken.</p>
+      <p>Du lernst, welche Daten in die KI dürfen, was der EU AI Act für dich bedeutet, wie Urheberrecht bei KI-Output funktioniert und wie du dich mit minimalem Aufwand rechtssicher aufstellst.</p>
+    </div>
+  </div>
+
+  <!-- LEARNING GOALS -->
+  <div class="intro-section">
+    <div class="intro-section-header">
+      <span>🎯</span>
+      <h2>Lernziele</h2>
+    </div>
+    <div class="intro-section-body">
+      <div class="goals-grid">
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">DSGVO-konforme KI-Nutzung im Unternehmensalltag sicherstellen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Den AVV verstehen und richtig abschließen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Urheberrechtliche Risiken bei KI-Output einschätzen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Eigene Assets trotz fehlender KI-Urheberrechte schützen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Den EU AI Act und seine Konsequenzen für Marketer verstehen</div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-check">✓</div>
+          <div class="goal-text">Kennzeichnungspflichten für KI-Inhalte korrekt umsetzen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="section-label">Module</div>
+
+  <div class="modules-list">
+
+    <a href="01.html" class="module-card">
+      <div class="module-card-num">11.1</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">DSGVO &amp; Datenschutz: Die rote Linie für KI-Nutzer</div>
+        <div class="module-card-desc">Welche Daten dürfen in die KI, was ist der AVV, und wie stellst du dich rechtssicher auf, ohne zum Anwalt zu werden.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~20 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="02.html" class="module-card">
+      <div class="module-card-num">11.2</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">Urheberrecht &amp; Geistiges Eigentum: Was dir wirklich gehört</div>
+        <div class="module-card-desc">Warum KI-Output in Deutschland oft kein Urheberrecht genießt, was Nutzungsrechte bedeuten und wie du deine Assets trotzdem schützt.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~20 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+    <a href="03.html" class="module-card">
+      <div class="module-card-num">11.3</div>
+      <div class="module-card-body">
+        <div class="module-card-status">Verfügbar</div>
+        <div class="module-card-title">EU AI Act &amp; Kennzeichnungspflichten: Dein Compliance-Guide</div>
+        <div class="module-card-desc">Das erste verbindliche KI-Regelwerk Europas: was es für dich bedeutet, wann du kennzeichnen musst und welche Sanktionen drohen.</div>
+        <div class="module-card-meta">
+          <div class="module-card-meta-item">📖 ~20 Min</div>
+          <div class="module-card-meta-item">🎯 3 Tools</div>
+          <div class="module-card-meta-item">🧠 10 Fragen</div>
+        </div>
+      </div>
+      <div class="module-card-arrow">→</div>
+    </a>
+
+  </div>
+
+</div>
+
+</body>
+</html>
