@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Videokreation mit KI im Marketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Shot Planner */
+.shot-planner {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.shot-planner-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.shot-planner-body { padding: 16px; }
+.sp-input-row {
+  display: flex; gap: 8px; align-items: flex-start; margin-bottom: 14px;
+}
+.sp-textarea {
+  flex: 1; border: 1px solid var(--border); border-radius: 7px;
+  padding: 10px 12px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--surface); color: var(--text); outline: none;
+  resize: none; height: 64px; line-height: 1.5;
+  transition: border-color 0.15s;
+}
+.sp-textarea:focus { border-color: var(--accent); }
+.sp-textarea::placeholder { color: var(--text-subtle); }
+.sp-run-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+  white-space: nowrap; flex-shrink: 0; align-self: flex-end;
+}
+.sp-run-btn:hover { background: var(--accent-2); color: white; }
+.sp-bad-example {
+  background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius);
+  padding: 10px 14px; margin-bottom: 12px; font-size: 12px;
+  font-family: 'JetBrains Mono', monospace; line-height: 1.65;
+  color: #991B1B; display: none;
+}
+.sp-bad-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #DC2626; font-family: 'JetBrains Mono', monospace; margin-bottom: 5px;
+  display: flex; align-items: center; gap: 5px;
+}
+.sp-shots-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+  display: none;
+}
+.sp-shot-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; background: var(--surface);
+}
+.sp-shot-header {
+  background: var(--accent); color: white;
+  padding: 7px 12px; font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px;
+}
+.sp-shot-type {
+  background: rgba(255,255,255,0.2); border-radius: 4px;
+  padding: 1px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.sp-shot-body { padding: 10px 12px; }
+.sp-shot-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; }
+.sp-shot-prompt {
+  background: #0D1117; border: 1px solid #21262D; border-radius: 6px;
+  padding: 8px 10px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.65; color: #C9D1D9;
+}
+.sp-shot-prompt .kw-green { color: #3FB950; }
+.sp-shot-prompt .kw-blue { color: #58A6FF; }
+.sp-shot-prompt .kw-orange { color: #FFA657; }
+.sp-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.sp-hint { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+
+/* Camera movement matching game */
+.cam-game {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.cam-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.cam-body { padding: 16px; }
+.cam-scenario {
+  background: var(--accent-light); border: 1px solid #B8D1FF;
+  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px;
+}
+.cam-scenario-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px;
+}
+.cam-scenario-text { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.45; }
+.cam-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.cam-option {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 14px; cursor: pointer; transition: all 0.15s;
+  background: var(--surface); font-size: 12px; line-height: 1.45;
+  user-select: none;
+}
+.cam-option:hover:not(.disabled) { border-color: var(--accent); background: var(--accent-light); }
+.cam-option strong { display: block; font-size: 13px; margin-bottom: 2px; color: var(--text); }
+.cam-option span { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.cam-option.correct { background: var(--accent-2-light); border-color: #00C2A8; }
+.cam-option.wrong { background: var(--red-light); border-color: #FCA5A5; }
+.cam-option.reveal { background: var(--accent-2-light); border-color: #00C2A8; }
+.cam-option.disabled { cursor: default; }
+.cam-feedback {
+  padding: 10px 14px; border-radius: var(--radius); font-size: 13px;
+  line-height: 1.5; display: none;
+}
+.cam-feedback.correct { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.cam-feedback.wrong { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.cam-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.cam-next-btn {
+  padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green); cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s; display: none;
+}
+.cam-next-btn:hover { background: var(--accent-2); color: white; }
+.cam-score { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.cam-result { text-align: center; padding: 20px 0; display: none; }
+.cam-result-badge { font-size: 40px; margin-bottom: 8px; }
+.cam-result-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.cam-result-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+.cam-restart-btn {
+  padding: 7px 18px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-muted); cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s;
+}
+.cam-restart-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Anchor Frame workflow */
+.anchor-workflow {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.anchor-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.anchor-body { padding: 16px; display: grid; grid-template-columns: 1fr 200px; gap: 16px; }
+.anchor-steps { display: flex; flex-direction: column; gap: 8px; }
+.anchor-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); cursor: pointer; transition: all 0.2s; user-select: none;
+}
+.anchor-step.active { border-color: var(--accent); background: var(--accent-light); }
+.anchor-step.done { border-color: #6EE7B7; background: var(--green-light); cursor: default; }
+.anchor-step-num {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: var(--surface-2); color: var(--text-subtle);
+  font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.anchor-step.active .anchor-step-num { background: var(--accent); color: white; }
+.anchor-step.done .anchor-step-num { background: var(--green); color: white; }
+.anchor-step-text strong { font-size: 13px; font-weight: 600; display: block; margin-bottom: 2px; }
+.anchor-step-text p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.45; }
+.anchor-preview {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.anchor-preview-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+}
+.anchor-canvas {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-2); aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; overflow: hidden; position: relative;
+  transition: all 0.4s;
+}
+.anchor-canvas-overlay {
+  position: absolute; inset: 0; background: rgba(26,111,255,0.08);
+  border-radius: var(--radius); opacity: 0; transition: opacity 0.4s;
+  display: flex; align-items: center; justify-content: center;
+}
+.anchor-canvas.playing .anchor-canvas-overlay { opacity: 1; }
+.anchor-motion-indicator {
+  font-size: 20px; animation: floatUp 1.2s infinite; opacity: 0;
+  transition: opacity 0.3s;
+}
+.anchor-canvas.playing .anchor-motion-indicator { opacity: 1; }
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  100% { transform: translateY(-12px) scale(0.8); opacity: 0; }
+}
+.anchor-prompt-display {
+  background: #0D1117; border: 1px solid #21262D; border-radius: var(--radius);
+  padding: 10px 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.65; color: #C9D1D9; min-height: 52px;
+  transition: all 0.3s;
+}
+.anchor-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.anchor-next-btn {
+  margin-left: auto; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green);
+  cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.anchor-next-btn:hover { background: var(--accent-2); color: white; }
+.anchor-status { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+
+/* Implied Action game */
+.ia-game {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 14px 0;
+}
+.ia-toolbar {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.ia-body { padding: 16px; }
+.ia-scenario-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+}
+.ia-problem { font-size: 13px; font-weight: 500; margin-bottom: 14px; line-height: 1.45; }
+.ia-clips { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.ia-clip {
+  border: 2px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; cursor: pointer; transition: all 0.18s; user-select: none;
+}
+.ia-clip:hover:not(.answered) { border-color: var(--accent); }
+.ia-clip.correct { border-color: #00C2A8; }
+.ia-clip.wrong { border-color: #FCA5A5; }
+.ia-clip-visual {
+  background: var(--surface-2); padding: 18px 0; text-align: center; font-size: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.ia-clip.correct .ia-clip-visual { background: var(--accent-2-light); }
+.ia-clip.wrong .ia-clip-visual { background: var(--red-light); }
+.ia-clip-label { padding: 8px 10px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); line-height: 1.45; }
+.ia-feedback {
+  padding: 10px 14px; border-radius: var(--radius); font-size: 13px;
+  line-height: 1.5; display: none;
+}
+.ia-feedback.correct { background: var(--accent-2-light); border: 1px solid #ABF5D1; color: var(--green); }
+.ia-feedback.wrong { background: var(--red-light); border: 1px solid #FFBDAD; color: var(--red); }
+.ia-footer {
+  background: var(--surface-2); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.ia-next-btn {
+  padding: 6px 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--accent-2); border-radius: var(--radius);
+  background: var(--accent-2-light); color: var(--green); cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s; display: none;
+}
+.ia-next-btn:hover { background: var(--accent-2); color: white; }
+.ia-score { font-size: 11px; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace; }
+.ia-result { text-align: center; padding: 20px 0; display: none; }
+
+/* Kamera table override: ensure table looks good */
+.cam-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+.cam-table th {
+  background: var(--surface-2); padding: 9px 12px; text-align: left;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;
+  border-bottom: 1px solid var(--border);
+}
+.cam-table td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  vertical-align: top; color: var(--text); line-height: 1.5;
+}
+.cam-table tr:last-child td { border-bottom: none; }
+.cam-table td:first-child { font-weight: 600; white-space: nowrap; }
+.cam-table td:nth-child(2) { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+.cam-table tr:hover td { background: var(--surface-2); }
+
+/* Legal grid */
+.legal-ok-no {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+
+@media(max-width: 600px) {
+  .sp-shots-grid { grid-template-columns: 1fr; }
+  .cam-options { grid-template-columns: 1fr; }
+  .ia-clips { grid-template-columns: 1fr; }
+  .anchor-body { grid-template-columns: 1fr; }
+  .legal-ok-no { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <a href="topic-video.html" class="mod-nav-back">← Übersicht</a>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <div id="progress-label">0% gelesen</div>
+  <span class="mod-nav-indicator">5.1 / 5.3</span>
+  <a href="module-5-2.html" class="mod-nav-next">Weiter →</a>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="module-tag">Modul 5 · Videokreation</div>
+    <h1>Videokreation mit KI im Marketing</h1>
+    <p>Wie du mit dem Anchor-Frame-Workflow konsistente Clips erstellst, KI-Fehler versteckst und rechtlich sicher bleibst.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📖 <span>~15 Min Lesezeit</span></div>
+      <div class="hero-meta-item">🛠 <span>4 interaktive Tools</span></div>
+      <div class="hero-meta-item">🧠 <span>10 Quiz-Fragen</span></div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">🤔</div>
+    <div class="callout-text">
+      <strong>Worum geht es hier?</strong>
+      <p>Wir übertragen das System der Bild-Generierung auf Bewegtbild. Video ist exponentiell komplexer, weil zur Optik die Dimensionen Bewegung und Ton hinzukommen.</p>
+    </div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-icon">🚀</div>
+    <div class="callout-text">
+      <strong>Was wirst du am Ende können?</strong>
+      <p>Du verstehst, warum "Text-to-Video" oft scheitert und wie du mit dem Anchor-Frame-Workflow (Image-to-Video) konsistente, markentaugliche Clips erstellst. Du lernst die Sprache der Kameraführung und wie du KI-Fehler verhinderst oder versteckst.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Das Problem -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>Die Physik des Unmöglichen</h2>
+        <p>Warum KI-Video so viel schwieriger ist als KI-Bild</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Bei einem Bild muss die KI nur <em>einen</em> Moment stimmig darstellen. Bei einem 4-Sekunden-Video muss sie <strong>96 bis 120 Frames</strong> generieren, die alle logisch aufeinanderfolgen und denselben Kontext teilen.</p>
+
+      <p>Das Hauptproblem heißt <span class="tooltip-word">Temporale Inkonsistenz<span class="tooltip-popup">Die KI "vergisst" zwischen einzelnen Frames, wie der vorherige aussah. Ergebnis: Gesichter verändern sich beim Drehen des Kopfs, Hintergründe "wabern", Objekte verschmelzen mit Händen. Die KI träumt jeden Frame ein klein wenig neu.</span></span>. Schlechte KI-Videos erkennst du sofort: Das Gesicht der Person verändert sich minimal, während sie den Kopf dreht. Der Hintergrund pulsiert leicht. Die Kaffeetasse löst sich in der Hand auf.</p>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Das ist kein Bug, das ist das System</strong>
+          <p>Temporale Inkonsistenz ist kein Fehler einzelner Tools. Es ist ein grundlegendes Merkmal heutiger Diffusionsmodelle im Zeitraum. Dein Job ist nicht, perfekte Videos zu generieren, sondern Workflows zu entwickeln, die die Fehler minimieren und das Ergebnis professionell wirken lassen.</p>
+        </div>
+      </div>
+
+      <p>Dafür nutzen wir das <strong>3-Rollen-Modell</strong> aus dem Bild-Modul, diesmal erweitert für Video: Du bist <strong>Drehbuchautor</strong> (modulares Denken in Shots), <strong>Regisseur</strong> (Kameraführung und Anchor-Frame) und <strong>Video-Editor</strong> (Sound, Schnitt, Implied Action).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Modulares Drehbuch -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Phase 1: Das modulare Drehbuch</h2>
+        <p>Nie einen ganzen Film in einem Prompt — immer in Bausteinen denken</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Der häufigste Anfängerfehler ist, die ganze Idee in einen Prompt zu packen: "Erstelle einen 30-Sekunden-Werbespot für Limonade." Das Ergebnis ist unbrauchbar, weil KI-Modelle heute keine langen, konsistenten Handlungsbögen halten können.</p>
+
+      <p>Die Lösung: <strong>Denke in Bausteinen.</strong> Ein professionelles KI-Video besteht nicht aus einem langen Prompt, sondern aus vielen kleinen, perfekten 3 bis 5 Sekunden Clips (Shots), die danach montiert werden. Beschreibe nicht die <em>Story</em>, sondern den <em>Shot</em>.</p>
+
+      <div class="callout orange">
+        <div class="callout-icon">🎬</div>
+        <div class="callout-text">
+          <strong>Die richtige Denkweise: Shot, nicht Story</strong>
+          <p>Stell dir vor, du bist Regisseur und rufst deinem Kameramann zu. Du sagst nicht "Film jetzt die ganze Szene", du sagst "Nahaufnahme auf die Flasche, Kondenswasser soll ablaufen, 4 Sekunden." Genau so kommunizierst du mit der KI.</p>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Probiere es selbst: Beschreibe eine Produkt- oder Marketing-Idee und sieh, wie sie in sinnvolle Einzelshots zerlegt werden sollte:</p>
+
+      <div class="shot-planner" id="shot-planner">
+        <div class="shot-planner-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">SHOT-PLANER</span>
+          <span style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;">Idee → 3 modulare Shots</span>
+        </div>
+        <div class="shot-planner-body">
+          <div class="sp-input-row">
+            <textarea class="sp-textarea" id="sp-input" placeholder="Beschreibe deine Werbe-Idee... z.B. 'Eine Frau trinkt am Strand Limonade, lacht, dann sieht man die Flasche im Sand und die Sonne geht unter.'"></textarea>
+          </div>
+          <div class="sp-bad-example" id="sp-bad">
+            <div class="sp-bad-label">⛔ So nicht — zu viel Handlung für einen Prompt</div>
+            <span id="sp-bad-text"></span>
+          </div>
+          <div class="sp-shots-grid" id="sp-shots">
+            <div class="sp-shot-card">
+              <div class="sp-shot-header">Shot A <span class="sp-shot-type" id="sp-type-a">Produkt</span></div>
+              <div class="sp-shot-body">
+                <div class="sp-shot-desc" id="sp-desc-a"></div>
+                <div class="sp-shot-prompt" id="sp-prompt-a"></div>
+              </div>
+            </div>
+            <div class="sp-shot-card">
+              <div class="sp-shot-header" style="background:var(--green);">Shot B <span class="sp-shot-type" id="sp-type-b">Emotion</span></div>
+              <div class="sp-shot-body">
+                <div class="sp-shot-desc" id="sp-desc-b"></div>
+                <div class="sp-shot-prompt" id="sp-prompt-b"></div>
+              </div>
+            </div>
+            <div class="sp-shot-card">
+              <div class="sp-shot-header" style="background:var(--purple);">Shot C <span class="sp-shot-type" id="sp-type-c">Atmosphäre</span></div>
+              <div class="sp-shot-body">
+                <div class="sp-shot-desc" id="sp-desc-c"></div>
+                <div class="sp-shot-prompt" id="sp-prompt-c"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sp-footer">
+          <button class="sp-run-btn" onclick="spGenerate()">✦ Beispiel laden</button>
+          <span class="sp-hint" id="sp-hint">Klicke auf "Beispiel laden" um zu sehen, wie ein langer Prompt in Shots zerlegt wird.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Regie -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Phase 2: Die Regie</h2>
+        <p>Wie ein Regisseur sprechen und Kamerabewegungen kontrollieren</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <h3>Der Anchor-Frame-Workflow</h3>
+      <p>Das größte Konsistenzproblem bei KI-Video: Wenn du direkt mit Text startest, hat die KI zu viel Freiheit. Das Gesicht, das sie in Frame 1 erfindet, sieht in Frame 60 schon etwas anders aus. Die Lösung: <strong>Starte immer mit einem Bild.</strong></p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Sieh dir an, wie der Anchor-Frame-Prozess Schritt für Schritt funktioniert:</p>
+
+      <div class="anchor-workflow">
+        <div class="anchor-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">ANCHOR-FRAME WORKFLOW</span>
+          <span style="font-size:11px;color:var(--text-subtle);font-family:'JetBrains Mono',monospace;margin-left:auto;" id="anchor-step-label">Schritt 1 von 3</span>
+        </div>
+        <div class="anchor-body">
+          <div class="anchor-steps">
+            <div class="anchor-step active" id="astep-1" onclick="anchorAdvance(1)">
+              <div class="anchor-step-num" id="anum-1">1</div>
+              <div class="anchor-step-text">
+                <strong>Bild-KI: Anchor Frame erstellen</strong>
+                <p>Erstelle zuerst mit einer Bild-KI (z.B. Midjourney, Firefly) den perfekten Standframe. Das ist dein visueller "Anker": Aussehen, Lichtstimmung, Stil sind hier definitiv festgelegt.</p>
+              </div>
+            </div>
+            <div class="anchor-step" id="astep-2" onclick="anchorAdvance(2)">
+              <div class="anchor-step-num" id="anum-2">2</div>
+              <div class="anchor-step-text">
+                <strong>Video-KI: Image-to-Video</strong>
+                <p>Lade das Bild in ein Video-Tool hoch (Kling, Runway, Google Veo). Du nutzt den "Image-to-Video"-Modus, nicht "Text-to-Video". Das Bild ist jetzt Frame 1.</p>
+              </div>
+            </div>
+            <div class="anchor-step" id="astep-3" onclick="anchorAdvance(3)">
+              <div class="anchor-step-num" id="anum-3">3</div>
+              <div class="anchor-step-text">
+                <strong>Prompt: Nur noch die Bewegung beschreiben</strong>
+                <p>Da Aussehen und Stil bereits durch das Bild fixiert sind, beschreibt der Prompt jetzt nur noch die <em>Bewegung</em>. Kurz und präzise: "The woman smiles, hair blowing in the wind. Static camera."</p>
+              </div>
+            </div>
+          </div>
+          <div class="anchor-preview">
+            <div class="anchor-preview-label">VORSCHAU</div>
+            <div class="anchor-canvas" id="anchor-canvas">
+              <span id="anchor-canvas-emoji">🖼️</span>
+              <div class="anchor-canvas-overlay">
+                <span class="anchor-motion-indicator" id="anchor-motion">💨</span>
+              </div>
+            </div>
+            <div class="anchor-preview-label" style="margin-top:8px;">AKTUELLER PROMPT</div>
+            <div class="anchor-prompt-display" id="anchor-prompt">
+              <span style="color:rgba(255,255,255,0.2);">Warte auf Schritt 3...</span>
+            </div>
+          </div>
+        </div>
+        <div class="anchor-footer">
+          <span class="anchor-status" id="anchor-status">Klicke auf Schritt 1 um zu starten.</span>
+          <button class="anchor-next-btn" id="anchor-next" onclick="anchorNext()">Weiter →</button>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-icon">💡</div>
+        <div class="callout-text">
+          <strong>Das Ergebnis: 95% Konsistenz</strong>
+          <p>Da das Ausgangsbild fixiert ist, bleibt das Gesicht, der Stil und die Lichtstimmung in fast allen Frames konstant. Das ist der wichtigste Workflow-Hack für professionelle KI-Video-Ergebnisse.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Kamerabewegungen: Die Sprache des Regisseurs</h3>
+      <p>Da wir Bewegung im Prompt beschreiben, müssen wir die Sprache der Kameraführung kennen. Die KI versteht Fachbegriffe und das macht die Anweisungen präziser. Ein wichtiger Grundsatz: Kombiniere nie zu viele Bewegungen in einem Shot. "Pan right + Zoom in + Tilt up" in einem Prompt führt fast immer zu Bildfehlern.</p>
+
+      <table class="cam-table">
+        <thead>
+          <tr>
+            <th>Bewegung</th>
+            <th>Prompt-Befehl</th>
+            <th>Wirkung &amp; Marketing-Einsatz</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Hineinfahren</td>
+            <td>Slow dolly in / Push in</td>
+            <td>Erzeugt Intimität oder Fokus. Gut für Produktdetails oder emotionale Gesichter.</td>
+          </tr>
+          <tr>
+            <td>Rausfahren</td>
+            <td>Pull back / Dolly out</td>
+            <td>Enthüllung. Zeigt den Kontext. Gut für "Big Reveal" Momente.</td>
+          </tr>
+          <tr>
+            <td>Schwenk</td>
+            <td>Pan right / Pan left</td>
+            <td>Verfolgt ein Objekt oder zeigt eine Landschaft. Panoramawirkung.</td>
+          </tr>
+          <tr>
+            <td>Seitwärtsfahrt</td>
+            <td>Truck left / Tracking shot</td>
+            <td>Dynamik. Die Kamera fährt neben einer Person her. Tempo suggerieren.</td>
+          </tr>
+          <tr>
+            <td>Orbit</td>
+            <td>Orbit around object</td>
+            <td>360-Grad-Ansicht. Perfekt für Produkt-Launches (z.B. Sneaker, Schmuck).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Teste dein Wissen: Welche Kamerabewegung passt am besten zum beschriebenen Marketingziel?</p>
+
+      <div class="cam-game" id="cam-game">
+        <div class="cam-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">KAMERA-CHECK</span>
+          <span class="cam-score" id="cam-score">0 / 5 richtig</span>
+        </div>
+        <div class="cam-body">
+          <div id="cam-main">
+            <div class="cam-scenario">
+              <div class="cam-scenario-label">SZENARIO</div>
+              <div class="cam-scenario-text" id="cam-scenario-text"></div>
+            </div>
+            <div class="cam-options" id="cam-options"></div>
+            <div class="cam-feedback" id="cam-feedback"></div>
+          </div>
+          <div class="cam-result" id="cam-result">
+            <div class="cam-result-badge" id="cam-result-badge"></div>
+            <div class="cam-result-title" id="cam-result-title"></div>
+            <div class="cam-result-sub" id="cam-result-sub"></div>
+            <button class="cam-restart-btn" onclick="camRestart()">Nochmal spielen</button>
+          </div>
+        </div>
+        <div class="cam-footer">
+          <span class="cam-score" id="cam-round">Runde 1 von 5</span>
+          <button class="cam-next-btn" id="cam-next" onclick="camNext()">Weiter →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Editor -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Phase 3: Der Video-Editor</h2>
+        <p>Sound, Schnitt und den "Implied Action" Trick</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <h3>Sound Design: Der unsichtbare Qualitätsboost</h3>
+      <p>Ein KI-Video kommt meistens stumm aus der Maschine. Ein stummes Video wirkt "tot" und künstlich. Das Auge verzeiht kleine Bildfehler. Das Ohr verzeiht nichts.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;" id="sound-grid">
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:22px;">🎵</div>
+          <div>
+            <strong style="font-size:13px;">SFX (Sound Effects)</strong>
+            <p style="font-size:12px;margin-top:3px;">Wenn Limonade eingegossen wird, muss es sprudeln. Wenn ein Wald zu sehen ist, müssen Vögel zu hören sein. Passende SFX machen Bilder real.</p>
+          </div>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:22px;">🎸</div>
+          <div>
+            <strong style="font-size:13px;">Musik</strong>
+            <p style="font-size:12px;margin-top:3px;">Setzt den emotionalen Rahmen: schnell und laut für Sport, ruhig und akustisch für Wellness. Musik ist Kontext, bevor der Zuschauer nachdenkt.</p>
+          </div>
+        </div>
+        <div class="callout gray" style="margin:0;flex-direction:column;gap:6px;">
+          <div style="font-size:22px;">🎤</div>
+          <div>
+            <strong style="font-size:13px;">Voiceover</strong>
+            <p style="font-size:12px;margin-top:3px;">Nutze KI-Stimmen (z.B. ElevenLabs), um die Story zu erzählen. Direkte Ansprache ohne teures Studio-Budget.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">
+          <strong>Audio-Generierung: Noch nicht verlässlich</strong>
+          <p>Einige neuere Versionen von Kling oder Google Veo können Audio direkt mitgenerieren. Allerdings ist das noch nicht konsistent gut. Oft ist es derzeit einfacher und zuverlässiger, den Ton selbst über das Video zu legen.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <h3>KI-Schwächen verstecken: Der "Implied Action" Trick</h3>
+      <p>KI ist schlecht in Physik: Hände verschmelzen mit Objekten, Flüssigkeiten fließen bergauf. Die Lösung ist eleganter als du denkst: <strong>Zeig es nicht.</strong> Zeig davor und danach. Das Gehirn des Zuschauers ergänzt die fehlende Aktion automatisch. Das nennt man "Implied Action" (Implizierte Handlung).</p>
+
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Entscheide: Bei welchem Schnittmoment funktioniert "Implied Action" am besten?</p>
+
+      <div class="ia-game" id="ia-game">
+        <div class="ia-toolbar">
+          <span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">IMPLIED ACTION</span>
+          <span class="ia-score" id="ia-score">0 / 3 richtig</span>
+        </div>
+        <div class="ia-body">
+          <div id="ia-main">
+            <div class="ia-scenario-label">SZENARIO <span id="ia-round-label">1 / 3</span></div>
+            <div class="ia-problem" id="ia-problem"></div>
+            <div class="ia-clips" id="ia-clips"></div>
+            <div class="ia-feedback" id="ia-feedback"></div>
+          </div>
+          <div class="ia-result" id="ia-result">
+            <div class="cam-result-badge" id="ia-result-badge"></div>
+            <div class="cam-result-title" id="ia-result-title"></div>
+            <div class="cam-result-sub" id="ia-result-sub"></div>
+            <button class="cam-restart-btn" onclick="iaRestart()">Nochmal spielen</button>
+          </div>
+        </div>
+        <div class="ia-footer">
+          <span class="ia-score" id="ia-round">Runde 1 von 3</span>
+          <button class="ia-next-btn" id="ia-next" onclick="iaNext()">Weiter →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Recht & Deepfakes -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Recht und Deepfakes</h2>
+        <p>Was erlaubt ist und wo echte Risiken beginnen</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>KI-Videos können ein heikles Thema sein. Ein gefälschtes Bild ist ein Problem. Ein gefälschtes Video, in dem der CEO Dinge sagt, die er nie gesagt hat, ist ein Skandal. Drei Regeln, die du kennen musst:</p>
+
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Deepfake-Verbot: Absolute rote Linie</strong>
+          <p>Erstelle niemals Videos von echten Personen (Politikern, Promis, Kollegen) ohne deren schriftliche Einwilligung. Das ist rechtlich explosiv und ethisch nicht vertretbar.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Kennzeichnungspflicht: Vertrauen schützen</strong>
+          <p>Videos wirken extrem überzeugend. Kennzeichne KI-generierte Szenen, besonders fotorealistische Personendarstellungen, transparent. Frage dich vor der Veröffentlichung: Könnten sich Zuschauer hinters Licht geführt fühlen, wenn sie erfahren, dass es ein KI-Video ist?</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Lizenzierte Avatare für Personendarstellungen</strong>
+          <p>Bei spezifischen Personen-Darstellungen nutze KI-Avatare, die dafür lizenziert sind (z.B. HeyGen), statt "zufällige" Personen zu generieren, die echten Menschen ähnlich sehen könnten. Bei generischen Szenen wie Sonnenuntergang oder Büro-Atmosphäre ist das Risiko gering.</p>
+        </div>
+      </div>
+
+      <div class="legal-ok-no">
+        <div class="callout green" style="margin:0;flex-direction:column;gap:8px;">
+          <strong style="font-size:13px;">✅ Völlig ok</strong>
+          <ul style="font-size:12px;padding-left:16px;margin:0;">
+            <li>Produkt-Shots und B-Roll-Material</li>
+            <li>Video-Ads für ein Produkt oder einen Service</li>
+            <li>Explainer-Videos und Animationen</li>
+            <li>Atmosphären und Landschaftsaufnahmen</li>
+          </ul>
+        </div>
+        <div class="callout" style="margin:0;flex-direction:column;gap:8px;background:#FEF2F2;border:1px solid #FECACA;">
+          <strong style="font-size:13px;">⛔ Niemals</strong>
+          <ul style="font-size:12px;padding-left:16px;margin:0;color:#991B1B;">
+            <li>Deepfakes von echten Menschen oder Ereignissen</li>
+            <li>Inhalte, die als reale Ereignisse missverstanden werden könnten</li>
+            <li>Massen-Content ohne Mehrwert (AI-Slop) für Social-Media-Flooding</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY LEARNINGS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">★</div>
+      <div>
+        <h2>Die wichtigsten Erkenntnisse</h2>
+        <p>Was du mitnehmen solltest</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="chain-step">
+        <div class="chain-num">1</div>
+        <div class="chain-content">
+          <strong>Video ist exponentiell komplexer als Bild.</strong>
+          <p>96 bis 120 konsistente Frames statt einem einzigen. Temporale Inkonsistenz ist ein systemimmanentes Merkmal heutiger Tools, kein Fehler einzelner Anbieter.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">2</div>
+        <div class="chain-content">
+          <strong>Denke in 3-5 Sekunden Shots, nie in "ganzen Videos".</strong>
+          <p>Jeder Shot ist ein eigenständiger Prompt für eine eigenständige Szene. Die Montage am Ende ergibt das "Video".</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">3</div>
+        <div class="chain-content">
+          <strong>Anchor-Frame-Workflow: Immer Bild zuerst, dann animieren.</strong>
+          <p>Image-to-Video statt Text-to-Video. Das Ausgangsbild fixiert Aussehen und Stil. Der Prompt beschreibt nur noch die Bewegung.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">4</div>
+        <div class="chain-content">
+          <strong>Kamerasprache macht Prompts präziser.</strong>
+          <p>Dolly in, Pull back, Pan, Tracking shot, Orbit. Ein Fachbegriff pro Shot. Nie Kamerabewegungen kombinieren.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">5</div>
+        <div class="chain-content">
+          <strong>Sound macht stumme Videos lebendig.</strong>
+          <p>SFX, Musik und Voiceover sind keine optionalen Extras. Ein stummes Video ist ein unfertiges Video.</p>
+        </div>
+      </div>
+      <div class="chain-step">
+        <div class="chain-num">6</div>
+        <div class="chain-content">
+          <strong>Implied Action versteckt, was KI nicht kann.</strong>
+          <p>Zeig den Moment vor und nach der problematischen Aktion. Das Gehirn ergänzt den Rest. Niemals erzwingen, was die KI schlecht beherrscht.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-section">
+    <h2>Wissens-Check</h2>
+    <p>10 Fragen zu diesem Modul</p>
+    <div id="quiz-game">
+      <div class="quiz-progress">
+        <span class="quiz-progress-text" id="quiz-progress-text">Frage 1 von 10</span>
+        <div class="quiz-streak">🔥 <span id="streak-count">0</span></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-q-num" id="q-num">FRAGE 01</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <button class="quiz-next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-score-label">von 10 Fragen richtig</div>
+      <button class="result-restart-btn" onclick="restartQuiz()">Nochmal versuchen</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// PROGRESS BAR
+(function() {
+  var fill = document.getElementById('progress-bar-fill');
+  var label = document.getElementById('progress-label');
+  function update() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = pct + '% gelesen';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+// TOOLTIP POSITIONING
+document.querySelectorAll('.tooltip-word').forEach(function(el) {
+  var popup = el.querySelector('.tooltip-popup');
+  if (!popup) return;
+  el.addEventListener('mouseenter', function() {
+    popup.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var pw = popup.offsetWidth, ph = popup.offsetHeight;
+    var cx = r.left + r.width / 2;
+    var rawL = cx - pw / 2;
+    var L = Math.max(8, Math.min(rawL, vw - pw - 8));
+    popup.style.left = L + 'px';
+    popup.style.top = (r.top - ph - 6) + 'px';
+    popup.style.setProperty('--arrow-offset', (cx - L) + 'px');
+  });
+  el.addEventListener('mouseleave', function() { popup.style.display = 'none'; });
+});
+
+// SHOT PLANNER
+var spExamples = {
+  bad: 'Eine Frau trinkt am Strand Limonade, lacht, dann sieht man die Flasche im Sand und die Sonne geht unter.',
+  shots: [
+    {
+      type: 'Produkt',
+      desc: 'Produktfokus ohne Ablenkung. Zeigt Qualitaet und Frische.',
+      prompt: '<span class="kw-blue">Close-up</span> glass bottle in ice, <span class="kw-green">condensation drops rolling down</span>. <span class="kw-orange">Static camera. Macro lens.</span>'
+    },
+    {
+      type: 'Emotion',
+      desc: 'Eine Person als emotionaler Ankerpunkt. Kein Kontext, nur Gefühl.',
+      prompt: '<span class="kw-blue">Woman smiling</span>, <span class="kw-green">backlit, hair in the wind</span>. <span class="kw-orange">Slow motion. Static camera.</span>'
+    },
+    {
+      type: 'Atmosphaere',
+      desc: 'Kontext und Setting. Gibt dem Zuschauer ein Gefühl für Ort und Zeit.',
+      prompt: '<span class="kw-blue">Wide shot of beach</span>, <span class="kw-green">golden hour, sun setting over ocean</span>. <span class="kw-orange">Slow pull back.</span>'
+    }
+  ]
+};
+
+function spGenerate() {
+  var input = document.getElementById('sp-input');
+  if (!input.value.trim()) {
+    input.value = spExamples.bad;
+  }
+  document.getElementById('sp-bad-text').textContent = input.value.trim() || spExamples.bad;
+  document.getElementById('sp-bad').style.display = 'block';
+  var shots = spExamples.shots;
+  for (var i = 0; i < 3; i++) {
+    var letter = ['a','b','c'][i];
+    document.getElementById('sp-type-' + letter).textContent = shots[i].type;
+    document.getElementById('sp-desc-' + letter).textContent = shots[i].desc;
+    document.getElementById('sp-prompt-' + letter).innerHTML = shots[i].prompt;
+  }
+  document.getElementById('sp-shots').style.display = 'grid';
+  document.getElementById('sp-hint').textContent = '3 eigenstaendige Shots aus einer Idee. Jeder Shot = ein eigener Prompt.';
+}
+
+// ANCHOR FRAME WORKFLOW
+var anchorPhase = 0;
+var anchorStates = [
+  { emoji: '🖼️', prompt: null, status: 'Klicke auf Schritt 1 um zu starten.', label: 'Schritt 1 von 3', motion: null },
+  { emoji: '🎨', prompt: null, status: 'Anchor Frame erstellt. Weiter zu Schritt 2.', label: 'Schritt 1 von 3' },
+  { emoji: '📤', prompt: null, status: 'Bild hochgeladen. Weiter zu Schritt 3.', label: 'Schritt 2 von 3' },
+  { emoji: '🎬', prompt: '<span style="color:#3FB950;">The woman smiles,</span> <span style="color:#58A6FF;">hair blowing in the wind.</span> <span style="color:#FFA657;">Static camera.</span>', status: '\u2713 Fertig. Nur die Bewegung beschreiben, da Stil und Aussehen fixiert sind.', label: 'Schritt 3 von 3', playing: true }
+];
+
+function anchorAdvance(step) {
+  if (anchorPhase >= step) return;
+  anchorPhase = step;
+  updateAnchorUI();
+}
+
+function anchorNext() {
+  if (anchorPhase < 3) {
+    anchorPhase++;
+    updateAnchorUI();
+  }
+}
+
+function updateAnchorUI() {
+  var state = anchorStates[anchorPhase];
+  document.getElementById('anchor-canvas-emoji').textContent = state.emoji;
+  document.getElementById('anchor-status').textContent = state.status;
+  document.getElementById('anchor-step-label').textContent = state.label;
+
+  if (state.prompt) {
+    document.getElementById('anchor-prompt').innerHTML = state.prompt;
+  }
+
+  var canvas = document.getElementById('anchor-canvas');
+  if (anchorPhase === 3) {
+    canvas.classList.add('playing');
+  } else {
+    canvas.classList.remove('playing');
+  }
+
+  for (var i = 1; i <= 3; i++) {
+    var step = document.getElementById('astep-' + i);
+    var num = document.getElementById('anum-' + i);
+    step.className = 'anchor-step';
+    if (i < anchorPhase) {
+      step.className = 'anchor-step done';
+      num.textContent = '\u2713';
+    } else if (i === anchorPhase) {
+      step.className = 'anchor-step active';
+      num.textContent = i;
+    } else {
+      num.textContent = i;
+    }
+  }
+
+  var nextBtn = document.getElementById('anchor-next');
+  if (anchorPhase === 0) {
+    nextBtn.style.display = 'none';
+  } else if (anchorPhase < 3) {
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = 'Weiter \u2192';
+  } else {
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = 'Neu starten';
+    nextBtn.onclick = function() {
+      anchorPhase = 0;
+      document.getElementById('anchor-canvas').classList.remove('playing');
+      document.getElementById('anchor-canvas-emoji').textContent = '\uD83D\uDDBC\uFE0F';
+      document.getElementById('anchor-prompt').innerHTML = '<span style="color:rgba(255,255,255,0.2);">Warte auf Schritt 3...</span>';
+      document.getElementById('anchor-status').textContent = 'Klicke auf Schritt 1 um zu starten.';
+      document.getElementById('anchor-step-label').textContent = 'Schritt 1 von 3';
+      for (var i = 1; i <= 3; i++) {
+        document.getElementById('astep-' + i).className = 'anchor-step';
+        document.getElementById('anum-' + i).textContent = i;
+      }
+      document.getElementById('anchor-next').style.display = 'none';
+      document.getElementById('anchor-next').onclick = anchorNext;
+    };
+  }
+}
+
+// CAMERA MATCHING GAME
+var camData = [
+  {
+    scenario: 'Du willst einen neuen Sneaker vorstellen. Die Zuschauer sollen das Produkt von allen Seiten sehen, wie in einem Premium-Produktvideo.',
+    options: [
+      { move: 'Orbit around object', label: 'Orbit', why: 'Zeigt das Produkt von 360 Grad.' },
+      { move: 'Slow dolly in', label: 'Dolly in', why: 'Faehrt nur von einer Seite hinein.' },
+      { move: 'Pan left', label: 'Pan left', why: 'Schwenkt nur horizontal, kein 360 Grad.' },
+      { move: 'Pull back', label: 'Pull back', why: 'Entfernt sich vom Produkt, zeigt es kleiner.' }
+    ],
+    correct: 0,
+    feedback: '"Orbit around object" ist der klassische Produkt-360-Grad-Shot. Er zeigt das Objekt komplett von allen Seiten und vermittelt Premium-Qualitaet. Standard bei Sneaker-, Schmuck- und Elektronik-Launches.'
+  },
+  {
+    scenario: 'Eine emotionale Szene: Eine Frau liest eine Karte und beginnt zu laecheln. Du willst Naehe und Intimiaet betonen.',
+    options: [
+      { move: 'Tracking shot', label: 'Tracking Shot', why: 'Bewegt sich seitlich, erzeugt eher Dynamik.' },
+      { move: 'Slow dolly in', label: 'Slow Dolly In', why: 'Faehrt langsam naeher heran. Erzeugt Intimiaet und Fokus.' },
+      { move: 'Pull back', label: 'Pull Back', why: 'Entfernt sich, verliert die Naehe.' },
+      { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt zur Seite, bricht den emotionalen Moment.' }
+    ],
+    correct: 1,
+    feedback: '"Slow dolly in" erzeugt Intimiaet und Fokus. Es zieht den Zuschauer langsam in den emotionalen Moment hinein, ohne abrupt zu wirken. Der klassische Shot fuer gefuehlvolle Momente in Werbung und Film.'
+  },
+  {
+    scenario: 'Dein Client hat ein Wellness-Resort in den Bergen. Du willst die Weitlaeuftigkeit und das Panorama zeigen.',
+    options: [
+      { move: 'Dolly in', label: 'Dolly In', why: 'Faehrt naeher, zeigt Details statt Panorama.' },
+      { move: 'Orbit', label: 'Orbit', why: 'Dreht um ein Objekt, nicht flaechig genug fuer Landschaft.' },
+      { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt horizontal ueber die Berglandschaft. Zeigt Weitlaeuftigkeit.' },
+      { move: 'Tracking shot', label: 'Tracking Shot', why: 'Bewegt sich seitlich, braucht ein Subjekt zum Verfolgen.' }
+    ],
+    correct: 2,
+    feedback: '"Pan right" oder "Pan left" eignet sich ideal fuer Panoramaaufnahmen. Die Kamera bleibt statisch und schwenkt horizontal, was Weite und Landschaft perfekt einfaengt. Standard bei Natur- und Reise-Content.'
+  },
+  {
+    scenario: 'Eine Enthuellung: Das fertige Produkt steht auf einem Tisch. Du willst zunaechst nur die Verpackung sehen, dann soll der Blick den Kontext zeigen.',
+    options: [
+      { move: 'Dolly in', label: 'Dolly In', why: 'Faehrt naeher ran, zeigt mehr Detail statt Kontext.' },
+      { move: 'Pull back', label: 'Pull Back', why: 'Enthuellt den Kontext durch Rausfahren. Ideal fuer Reveal-Momente.' },
+      { move: 'Pan left', label: 'Pan Left', why: 'Schwenkt seitlich, enthuellung geht verloren.' },
+      { move: 'Orbit', label: 'Orbit', why: 'Dreht um das Objekt, zeigt nicht den breiteren Kontext.' }
+    ],
+    correct: 1,
+    feedback: '"Pull back" ist der klassische Enthuellung-Shot. Das Bild beginnt eng auf dem Produkt und zieht sich dann zurueck, um den Raum, die Umgebung oder den Kontext zu zeigen. Einer der wirkungsvollsten Shots im Marketing.'
+  },
+  {
+    scenario: 'Ein Sportgeraet-Brand will Dynamik zeigen: Ein Laeufer joggt durch die Stadt. Du willst, dass sich die Kamera mit ihm bewegt.',
+    options: [
+      { move: 'Dolly in', label: 'Dolly In', why: 'Faehrt auf ihn zu, bewegt sich nicht mit ihm.' },
+      { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt horizontal, aber die Kamera bewegt sich nicht seitlich mit.' },
+      { move: 'Tracking shot', label: 'Tracking Shot', why: 'Die Kamera faehrt neben dem Laeufer her. Erzeugt Dynamik und Mitbewegung.' },
+      { move: 'Orbit', label: 'Orbit', why: 'Dreht um den Laeufer, waehrend er sich bewegt, schwer konsistent zu generieren.' }
+    ],
+    correct: 2,
+    feedback: '"Tracking shot" oder "Truck left/right" bedeutet, die Kamera bewegt sich parallel neben einem sich bewegenden Objekt. Das erzeugt das Gefuehl von Dynamik und Energie und ist der Standard-Shot fuer Sportbewerbung.'
+  }
+];
+
+var camCurrent = 0, camScore = 0, camAnswered = false;
+
+function camRender() {
+  if (camCurrent >= camData.length) {
+    document.getElementById('cam-main').style.display = 'none';
+    var resultEl = document.getElementById('cam-result');
+    resultEl.style.display = 'block';
+    var pct = camScore / camData.length;
+    document.getElementById('cam-result-badge').textContent = pct >= 0.8 ? '\uD83C\uDFC6' : pct >= 0.6 ? '\uD83E\uDD47' : '\uD83D\uDCDA';
+    document.getElementById('cam-result-title').textContent = pct >= 0.8 ? 'Starkes Kamera-Gefuehl!' : pct >= 0.6 ? 'Guter Ansatz.' : 'Die Tabelle nochmal anschauen.';
+    document.getElementById('cam-result-sub').textContent = camScore + ' von ' + camData.length + ' Szenarien richtig erkannt.';
+    return;
+  }
+  var d = camData[camCurrent];
+  document.getElementById('cam-scenario-text').textContent = d.scenario;
+  document.getElementById('cam-round').textContent = 'Runde ' + (camCurrent + 1) + ' von ' + camData.length;
+  document.getElementById('cam-score').textContent = camScore + ' / ' + camData.length + ' richtig';
+  var optsEl = document.getElementById('cam-options');
+  optsEl.innerHTML = '';
+  d.options.forEach(function(opt, i) {
+    var div = document.createElement('div');
+    div.className = 'cam-option';
+    div.innerHTML = '<strong>' + opt.label + '</strong><span>' + opt.move + '</span>';
+    div.onclick = function() { camSelect(i); };
+    optsEl.appendChild(div);
+  });
+  document.getElementById('cam-feedback').style.display = 'none';
+  document.getElementById('cam-feedback').className = 'cam-feedback';
+  document.getElementById('cam-next').style.display = 'none';
+  camAnswered = false;
+}
+
+function camSelect(idx) {
+  if (camAnswered) return;
+  camAnswered = true;
+  var d = camData[camCurrent];
+  var opts = document.querySelectorAll('.cam-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  var fb = document.getElementById('cam-feedback');
+  if (idx === d.correct) {
+    opts[idx].classList.add('correct');
+    camScore++;
+    fb.className = 'cam-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!</strong> ' + d.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[d.correct].classList.add('reveal');
+    fb.className = 'cam-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Nicht ganz.</strong> ' + d.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('cam-score').textContent = camScore + ' / ' + camData.length + ' richtig';
+  document.getElementById('cam-next').style.display = 'block';
+}
+
+function camNext() { camCurrent++; camRender(); }
+function camRestart() {
+  camCurrent = 0; camScore = 0; camAnswered = false;
+  document.getElementById('cam-main').style.display = 'block';
+  document.getElementById('cam-result').style.display = 'none';
+  camRender();
+}
+camRender();
+
+// IMPLIED ACTION GAME
+var iaData = [
+  {
+    problem: 'Problem: Du willst zeigen, wie jemand einen Proteinriegel isst. Die KI laesst den Riegel oft im Mund verschwinden oder die Hand verformen sich dabei. Welcher Schnittmoment nutzt "Implied Action"?',
+    clips: [
+      { emoji: '🫳', label: 'Clip: Riegel bewegt sich zum Mund (Kamera laeuft weiter, Aktion vollstaendig zeigen)' },
+      { emoji: '✂️', label: 'Schnitt direkt bevor der Riegel den Mund beruehrt. Naechster Clip: zufriedenes Kauen.' },
+      { emoji: '😖', label: 'Clip: KI generiert das Essen komplett inkl. Bissen und Kauen.' }
+    ],
+    correct: 1,
+    feedback: 'Genau: Schneide kurz bevor die physikalisch schwierige Aktion beginnt. Der naechste Clip zeigt das Ergebnis der Aktion. Das Gehirn des Zuschauers ergaenzt den Bissen automatisch. Niemand bemerkt den Schnitt.'
+  },
+  {
+    problem: 'Problem: Ein KI-Video soll zeigen, wie Limonade in ein Glas gegossen wird. Flüssigkeiten sind einer der schwierigsten Bereiche fuer Bild-KIs. Was ist der beste Ansatz?',
+    clips: [
+      { emoji: '🍋', label: 'Clip: Volle Flasche im Bild. Schnitt. Naechster Clip: Volles, sprudelndes Glas mit Eis.' },
+      { emoji: '🫗', label: 'Clip: Die KI generiert den kompletten Giessvorgang von Anfang bis Ende.' },
+      { emoji: '🔁', label: 'Clip: Giessprozess in Slow-Motion generieren, damit er laenger dauert und natuerlicher wirkt.' }
+    ],
+    correct: 0,
+    feedback: 'Die Flasche und das volle Glas als zwei eigenstaendige Shots mit einem Schnitt dazwischen ist der klassische Implied-Action-Schnitt. Niemand muss sehen, wie das Giessen passiert. Der Kontext reicht dem Gehirn vollstaendig.'
+  },
+  {
+    problem: 'Problem: Du willst einen dramatischen Sprung zeigen (Athlet springt ueber ein Hindernis). KI ist schlecht bei Sprungsimulation, Landungen verzerren oft. Was ist die clevere Loesung?',
+    clips: [
+      { emoji: '🏃', label: 'Clip: Anlauf und Absprungmoment. Schnitt. Naechster Clip: Athletin landet sicher.' },
+      { emoji: '🦘', label: 'Clip: Die KI generiert den kompletten Sprung von Anlauf bis Landung.' },
+      { emoji: '🎥', label: 'Clip: Kamera von unten, zeigt den Absprung von der Schuhsohle her.' }
+    ],
+    correct: 0,
+    feedback: 'Anlauf und Absprung, dann Schnitt, dann Landung. Die physikalisch schwierige Luft-Phase wird komplett uebersprungen. Der Zuschauer weiss, was dazwischen passiert ist. Implied Action auf Hoechstleistung.'
+  }
+];
+
+var iaCurrent = 0, iaScore = 0, iaAnswered = false;
+
+function iaRender() {
+  if (iaCurrent >= iaData.length) {
+    document.getElementById('ia-main').style.display = 'none';
+    var resultEl = document.getElementById('ia-result');
+    resultEl.style.display = 'block';
+    var pct = iaScore / iaData.length;
+    document.getElementById('ia-result-badge').textContent = pct >= 0.8 ? '\uD83C\uDFC6' : pct >= 0.6 ? '\uD83E\uDD47' : '\uD83D\uDCDA';
+    document.getElementById('ia-result-title').textContent = pct === 1 ? 'Perfektes Schnittgefuehl!' : 'Guter Ansatz.';
+    document.getElementById('ia-result-sub').textContent = iaScore + ' von ' + iaData.length + ' Schnittmomente richtig erkannt.';
+    return;
+  }
+  var d = iaData[iaCurrent];
+  document.getElementById('ia-problem').textContent = d.problem;
+  document.getElementById('ia-round-label').textContent = (iaCurrent + 1) + ' / ' + iaData.length;
+  document.getElementById('ia-round').textContent = 'Runde ' + (iaCurrent + 1) + ' von ' + iaData.length;
+  document.getElementById('ia-score').textContent = iaScore + ' / ' + iaData.length + ' richtig';
+  var clipsEl = document.getElementById('ia-clips');
+  clipsEl.innerHTML = '';
+  d.clips.forEach(function(clip, i) {
+    var div = document.createElement('div');
+    div.className = 'ia-clip';
+    div.innerHTML = '<div class="ia-clip-visual">' + clip.emoji + '</div><div class="ia-clip-label">' + clip.label + '</div>';
+    div.onclick = function() { iaSelect(i); };
+    clipsEl.appendChild(div);
+  });
+  document.getElementById('ia-feedback').style.display = 'none';
+  document.getElementById('ia-feedback').className = 'ia-feedback';
+  document.getElementById('ia-next').style.display = 'none';
+  iaAnswered = false;
+}
+
+function iaSelect(idx) {
+  if (iaAnswered) return;
+  iaAnswered = true;
+  var d = iaData[iaCurrent];
+  var clips = document.querySelectorAll('.ia-clip');
+  clips.forEach(function(c) { c.classList.add('answered'); });
+  var fb = document.getElementById('ia-feedback');
+  if (idx === d.correct) {
+    clips[idx].classList.add('correct');
+    iaScore++;
+    fb.className = 'ia-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!</strong> ' + d.feedback;
+  } else {
+    clips[idx].classList.add('wrong');
+    clips[d.correct].classList.add('correct');
+    fb.className = 'ia-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Nicht ganz.</strong> ' + d.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('ia-score').textContent = iaScore + ' / ' + iaData.length + ' richtig';
+  document.getElementById('ia-next').style.display = 'block';
+}
+
+function iaNext() { iaCurrent++; iaRender(); }
+function iaRestart() {
+  iaCurrent = 0; iaScore = 0; iaAnswered = false;
+  document.getElementById('ia-main').style.display = 'block';
+  document.getElementById('ia-result').style.display = 'none';
+  iaRender();
+}
+iaRender();
+
+// QUIZ
+const questions = [
+  {
+    q: 'Was bedeutet "Temporale Inkonsistenz" bei KI-Videos?',
+    options: [
+      'Das Video wird zu langsam generiert und braucht mehr als 10 Minuten.',
+      'Die KI vergisst zwischen Frames, wie der vorherige aussah, was zu Veraenderungen in Gesichtern und Hintergruenden fuehrt.',
+      'Das Video hat keine konsistente Framerate und ruckelt beim Abspielen.',
+      'Die KI kann keine laengeren Videos als 10 Sekunden konsistent generieren.'
+    ],
+    correct: 1,
+    feedback: 'Temporale Inkonsistenz beschreibt das Problem, dass die KI jeden Frame leicht neu "traumt" ohne vollstaendige Erinnerung an den vorherigen. Ergebnis: Gesichter, die sich minimal veraendern, wabernde Hintergruende, verschmelzende Objekte.'
+  },
+  {
+    q: 'Warum scheitert der Prompt "Erstelle einen 30-Sekunden-Werbespot fuer Limonade" fast immer?',
+    options: [
+      'Weil KI-Video-Tools keine Texte lesen koennen, die laenger als 10 Woerter sind.',
+      'Weil KI-Modelle heute keine langen, konsistenten Handlungsboegen halten koennen.',
+      'Weil 30 Sekunden zu kurz sind und die KI mindestens 2 Minuten benoetigt.',
+      'Weil Lebensmittel rechtlich nicht in KI-Werbung dargestellt werden duerfen.'
+    ],
+    correct: 1,
+    feedback: 'Heutige KI-Modelle koennen keine langen Geschichten konsistent umsetzen. Je laenger und komplexer der Handlungsbogen, desto mehr Halluzinationen und Inkonsistenzen entstehen. Die Loesung: In kurze, eigenstaendige Shots (3-5 Sek.) denken.'
+  },
+  {
+    q: 'Was ist der Kern-Vorteil des "Anchor-Frame-Workflows"?',
+    options: [
+      'Er ist kostenguenstiger als reine Text-to-Video-Generierung.',
+      'Das fixierte Ausgangsbild sorgt dafuer, dass Aussehen, Stil und Lichtstimmung ueber alle Frames hinweg konsistent bleiben.',
+      'Er erlaubt die Generierung von Videos laenger als 10 Sekunden.',
+      'Er umgeht rechtliche Einschraenkungen bei der Darstellung von echten Personen.'
+    ],
+    correct: 1,
+    feedback: 'Da das Ausgangsbild in Image-to-Video den ersten Frame definiert, hat die KI deutlich weniger Freiheit, das Aussehen zu veraendern. Gesicht, Stil und Licht bleiben zu ca. 95% konsistent. Das ist der entscheidende Unterschied zu Text-to-Video.'
+  },
+  {
+    q: 'Welchen Prompt-Befehl verwendest du, um einen klassischen Produkt-Launch-Shot zu erstellen, bei dem das Produkt von allen Seiten zu sehen ist?',
+    options: [
+      'Slow dolly in',
+      'Pan right',
+      'Orbit around object',
+      'Tracking shot'
+    ],
+    correct: 2,
+    feedback: '"Orbit around object" erzeugt eine 360-Grad-Ansicht um ein Objekt herum. Das ist der Standard-Shot fuer Produkt-Launches (Sneaker, Schmuck, Elektronik), weil er das Produkt vollstaendig zeigt und Premium-Qualitaet vermittelt.'
+  },
+  {
+    q: 'Was ist die Wirkung von "Slow dolly in" im Marketing-Kontext?',
+    options: [
+      'Zeigt den breiteren Kontext einer Szene durch Rausfahren.',
+      'Erzeugt eine 360-Grad-Ansicht des Produkts.',
+      'Erzeugt Naehe und Intimitaet. Gut fuer Produktdetails oder emotionale Gesichter.',
+      'Schwenkt horizontal ueber eine Landschaft oder Szene.'
+    ],
+    correct: 2,
+    feedback: '"Slow dolly in" faehrt langsam naeher an das Subjekt heran. Das erzeugt das Gefuehl von Naehe, Fokus und Intimiaet, ideal fuer emotionale Momente in Werbeclips oder Nahaufnahmen von Produktdetails.'
+  },
+  {
+    q: 'Warum ist Sound bei KI-Videos besonders wichtig?',
+    options: [
+      'Weil KI-Videos ohne Sound gegen den EU AI Act verstossen.',
+      'Weil das Gehirn kleine Bildfehler verzeiht, aber Ton-Fehler oder fehlendes Audio sofort als unecht wahrnimmt.',
+      'Weil KI-Videos von Natur aus zu schnell abgespielt werden und Ton das verlangsamt.',
+      'Weil alle Video-Plattformen seit 2025 Sound als Pflichtfeld verlangen.'
+    ],
+    correct: 1,
+    feedback: 'Das Auge verzeiht kleine Bildfehler, das Ohr verzeiht nichts. Ein stummes Video wirkt sofort "tot" und kuenstlich, selbst wenn die Bilder gut sind. SFX, Musik und Voiceover sind keine Extras, sondern Pflichtbestandteile.'
+  },
+  {
+    q: 'Was beschreibt die "Implied Action" Technik im Video-Schnitt?',
+    options: [
+      'Eine KI-Technik, bei der die Bewegung automatisch zwischen zwei Frames berechnet wird.',
+      'Man zeigt den Moment vor und nach einer schwierigen Aktion. Der Zuschauer ergaenzt die Aktion im Kopf.',
+      'Ein Prompt-Format, das der KI eine implizite Bewegungsanweisung gibt.',
+      'Eine rechtliche Kennzeichnungsmethode fuer KI-generierte Handlungen in Videos.'
+    ],
+    correct: 1,
+    feedback: 'Implied Action bedeutet: Zeige, was davor passiert, dann schneide. Zeige, was danach passiert. Das Gehirn des Zuschauers verbindet automatisch und ergaenzt die fehlende Aktion. Dadurch koennen physikalisch schwierige Szenen (Trinken, Springen, Giessen) elegant vermieden werden.'
+  },
+  {
+    q: 'Wann ist die Erstellung von KI-Videos mit echten Personen ohne Einwilligung erlaubt?',
+    options: [
+      'Wenn das Video als Satire oder Kunstprojekt deklariert wird.',
+      'Wenn die Person nicht namentlich erwaehnt wird.',
+      'Niemals. Deepfakes echter Personen ohne schriftliche Einwilligung sind rechtlich und ethisch nicht akzeptabel.',
+      'Wenn das Gesicht durch Filter leicht veraendert wird, sodass es nicht eindeutig erkennbar ist.'
+    ],
+    correct: 2,
+    feedback: 'Deepfakes echter Personen ohne Einwilligung sind eine absolute rote Linie. Das gilt unabhaengig vom Zweck (Satire, Kunst, Werbung) und unabhaengig davon, wie erkennbar die Person ist. Das Risiko ist rechtlich und reputatorisch zu hoch.'
+  },
+  {
+    q: 'Was ist der empfohlene Ansatz fuer KI-generierte Personendarstellungen in kommerziellen Videos?',
+    options: [
+      'Immer "zufaellige" Gesichter generieren, die keiner echten Person aehneln.',
+      'Lizenzierte KI-Avatare verwenden (z.B. HeyGen), die explizit fuer kommerzielle Nutzung freigegeben sind.',
+      'Echte Personen per Deepfake verwenden, solange das Video als KI gekennzeichnet ist.',
+      'Generisch bleiben und keine Personen in KI-Videos zeigen.'
+    ],
+    correct: 1,
+    feedback: 'Lizenzierte KI-Avatar-Dienste wie HeyGen stellen Avatare bereit, fuer die alle notwendigen Rechte und Einwilligungen vorliegen. Das ist der rechtssichere Weg fuer kommerzielle Personendarstellungen in KI-Videos.'
+  },
+  {
+    q: 'Wie viele Frames muss eine KI bei einem 4-Sekunden-Video konsistent halten?',
+    options: [
+      '4 bis 8 Frames (ein Frame pro Sekunde)',
+      '24 Frames (Kinostandard)',
+      '96 bis 120 Frames',
+      'Unbegrenzt, da KI keine Speicherbeschraenkung hat'
+    ],
+    correct: 2,
+    feedback: 'Bei typischen 24 bis 30 Frames pro Sekunde und 4 Sekunden Laenge muss die KI 96 bis 120 einzelne Frames generieren, die alle konsistent zueinander sein muessen. Das ist exponentiell komplexer als ein einzelnes Bild.'
+  }
+];
+
+let currentQ = 0, score = 0, streak = 0, answered = false;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'FRAGE ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-progress-text').textContent = 'Frage ' + (currentQ + 1) + ' von ' + questions.length;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach(function(lbl, i) {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<div class="opt-indicator">' + lbl + '</div><span>' + q.options[i] + '</span>';
+    btn.onclick = function() { selectAnswer(i); };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.correct) {
+    opts[idx].classList.add('correct');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2713';
+    score++; streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fb.className = 'quiz-feedback correct';
+    fb.innerHTML = '<strong>\u2713 Richtig!' + (streak >= 3 ? ' \uD83D\uDD25 ' + streak + 'er-Streak!' : '') + '</strong>' + q.feedback;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.opt-indicator').textContent = '\u2717';
+    opts[q.correct].classList.add('correct');
+    opts[q.correct].querySelector('.opt-indicator').textContent = '\u2713';
+    streak = 0;
+    document.getElementById('streak-count').textContent = 0;
+    fb.className = 'quiz-feedback wrong';
+    fb.innerHTML = '<strong>\u2717 Leider falsch.</strong>' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').style.display = 'none';
+  document.getElementById('result-card').style.display = 'block';
+  const pct = score / questions.length;
+  let badge, title, sub;
+  if (pct === 1)       { badge = '\uD83C\uDFC6'; title = 'Perfekt!';       sub = 'Du hast alle Konzepte verstanden.'; }
+  else if (pct >= 0.8) { badge = '\uD83E\uDD47'; title = 'Sehr stark!';    sub = 'Fast perfekt. Du beherrschst dieses Modul.'; }
+  else if (pct >= 0.6) { badge = '\uD83E\uDD48'; title = 'Guter Ansatz.';  sub = 'Einige Konzepte nochmal vertiefen.'; }
+  else                 { badge = '\uD83D\uDCDA'; title = 'Weiter lernen.'; sub = 'Das Modul nochmal durchgehen lohnt sich.'; }
+  document.getElementById('result-badge').textContent = badge;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score + '/' + questions.length;
+}
+
+function restartQuiz() {
+  currentQ = 0; score = 0; streak = 0;
+  document.getElementById('streak-count').textContent = 0;
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('quiz-game').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
