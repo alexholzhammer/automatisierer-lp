@@ -12,8 +12,17 @@
 var COURSE = {
   topics: [
     {
-      id:       "prompting",
+      id:       "einleitung",
       num:      "01",
+      title:    "Einleitung",
+      overview: "index.html",
+      modules: [
+        { id: "einleitung-01", file: "01.html", num: "1.1", title: "Einleitung", time: 15, tools: 0, quiz: 10 }
+      ]
+    },
+    {
+      id:       "prompting",
+      num:      "02",
       title:    "Prompting",
       overview: "index.html",
       modules: [
@@ -22,6 +31,24 @@ var COURSE = {
         { id: "prompting-03", file: "03.html", num: "2.3", title: "Logik-Ebene",           time: 15, tools: 4, quiz: 10 },
         { id: "prompting-04", file: "04.html", num: "2.4", title: "Meta-Prompting",        time: 15, tools: 2, quiz: 10 },
         { id: "prompting-05", file: "05.html", num: "2.5", title: "Testing & Optimierung", time: 15, tools: 3, quiz: 10 }
+      ]
+    },
+    {
+      id:       "videokreation",
+      num:      "05",
+      title:    "Videokreation",
+      overview: "index.html",
+      modules: [
+        { id: "videokreation-01", file: "01.html", num: "5.1", title: "Videokreation mit KI im Marketing", time: 15, tools: 4, quiz: 10 }
+      ]
+    },
+    {
+      id:       "bildkreation",
+      num:      "04",
+      title:    "Bildkreation",
+      overview: "index.html",
+      modules: [
+        { id: "bildkreation-01", file: "01.html", num: "4.1", title: "Bild-KIs: Vom Zufallstreffer zur visuellen Strategie", time: 15, tools: 3, quiz: 10 }
       ]
     },
     {

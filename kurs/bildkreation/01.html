@@ -6,7 +6,7 @@
 <title>Bild-KIs: Vom Zufallstreffer zur visuellen Strategie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="../shared.css">
 <style>
 /* Tool comparison cards */
 .tool-grid {
@@ -320,14 +320,6 @@
 </style>
 </head>
 <body>
-
-<div id="progress-bar-wrap">
-  <a href="topic-bilder.html" class="mod-nav-back">← Übersicht</a>
-  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
-  <div id="progress-label">0% gelesen</div>
-  <span class="mod-nav-indicator">4.1 / 4.3</span>
-  <a href="module-4-2.html" class="mod-nav-next">Weiter →</a>
-</div>
 
 <div class="container">
 
@@ -853,21 +845,6 @@
 </div>
 
 <script>
-// PROGRESS BAR
-(function() {
-  var fill = document.getElementById('progress-bar-fill');
-  var label = document.getElementById('progress-label');
-  function update() {
-    var scrollTop = window.scrollY || document.documentElement.scrollTop;
-    var docH = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
-    fill.style.width = pct + '%';
-    label.textContent = pct + '% gelesen';
-  }
-  window.addEventListener('scroll', update, { passive: true });
-  update();
-})();
-
 // TOOLTIP POSITIONING
 document.querySelectorAll('.tooltip-word').forEach(function(el) {
   var popup = el.querySelector('.tooltip-popup');
@@ -1337,5 +1314,8 @@ function restartQuiz() {
 
 renderQuestion();
 </script>
+<script>var MODULE_ID = "bildkreation-01";</script>
+<script src="../data/course.js"></script>
+<script src="../js/module-nav.js"></script>
 </body>
 </html>
