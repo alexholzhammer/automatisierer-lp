@@ -836,7 +836,7 @@ var spExamples = {
   shots: [
     {
       type: 'Produkt',
-      desc: 'Produktfokus ohne Ablenkung. Zeigt Qualitaet und Frische.',
+      desc: 'Produktfokus ohne Ablenkung. Zeigt Qualität und Frische.',
       prompt: '<span class="kw-blue">Close-up</span> glass bottle in ice, <span class="kw-green">condensation drops rolling down</span>. <span class="kw-orange">Static camera. Macro lens.</span>'
     },
     {
@@ -845,7 +845,7 @@ var spExamples = {
       prompt: '<span class="kw-blue">Woman smiling</span>, <span class="kw-green">backlit, hair in the wind</span>. <span class="kw-orange">Slow motion. Static camera.</span>'
     },
     {
-      type: 'Atmosphaere',
+      type: 'Atmosphäre',
       desc: 'Kontext und Setting. Gibt dem Zuschauer ein Gefühl für Ort und Zeit.',
       prompt: '<span class="kw-blue">Wide shot of beach</span>, <span class="kw-green">golden hour, sun setting over ocean</span>. <span class="kw-orange">Slow pull back.</span>'
     }
@@ -867,7 +867,7 @@ function spGenerate() {
     document.getElementById('sp-prompt-' + letter).innerHTML = shots[i].prompt;
   }
   document.getElementById('sp-shots').style.display = 'grid';
-  document.getElementById('sp-hint').textContent = '3 eigenstaendige Shots aus einer Idee. Jeder Shot = ein eigener Prompt.';
+  document.getElementById('sp-hint').textContent = '3 eigenständige Shots aus einer Idee. Jeder Shot = ein eigener Prompt.';
 }
 
 // ANCHOR FRAME WORKFLOW
@@ -956,40 +956,40 @@ var camData = [
     scenario: 'Du willst einen neuen Sneaker vorstellen. Die Zuschauer sollen das Produkt von allen Seiten sehen, wie in einem Premium-Produktvideo.',
     options: [
       { move: 'Orbit around object', label: 'Orbit', why: 'Zeigt das Produkt von 360 Grad.' },
-      { move: 'Slow dolly in', label: 'Dolly in', why: 'Faehrt nur von einer Seite hinein.' },
+      { move: 'Slow dolly in', label: 'Dolly in', why: 'Fährt nur von einer Seite hinein.' },
       { move: 'Pan left', label: 'Pan left', why: 'Schwenkt nur horizontal, kein 360 Grad.' },
       { move: 'Pull back', label: 'Pull back', why: 'Entfernt sich vom Produkt, zeigt es kleiner.' }
     ],
     correct: 0,
-    feedback: '"Orbit around object" ist der klassische Produkt-360-Grad-Shot. Er zeigt das Objekt komplett von allen Seiten und vermittelt Premium-Qualitaet. Standard bei Sneaker-, Schmuck- und Elektronik-Launches.'
+    feedback: '"Orbit around object" ist der klassische Produkt-360-Grad-Shot. Er zeigt das Objekt komplett von allen Seiten und vermittelt Premium-Qualität. Standard bei Sneaker-, Schmuck- und Elektronik-Launches.'
   },
   {
-    scenario: 'Eine emotionale Szene: Eine Frau liest eine Karte und beginnt zu laecheln. Du willst Naehe und Intimiaet betonen.',
+    scenario: 'Eine emotionale Szene: Eine Frau liest eine Karte und beginnt zu lächeln. Du willst Nähe und Intimität betonen.',
     options: [
       { move: 'Tracking shot', label: 'Tracking Shot', why: 'Bewegt sich seitlich, erzeugt eher Dynamik.' },
-      { move: 'Slow dolly in', label: 'Slow Dolly In', why: 'Faehrt langsam naeher heran. Erzeugt Intimiaet und Fokus.' },
-      { move: 'Pull back', label: 'Pull Back', why: 'Entfernt sich, verliert die Naehe.' },
+      { move: 'Slow dolly in', label: 'Slow Dolly In', why: 'Fährt langsam näher heran. Erzeugt Intimiät und Fokus.' },
+      { move: 'Pull back', label: 'Pull Back', why: 'Entfernt sich, verliert die Nähe.' },
       { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt zur Seite, bricht den emotionalen Moment.' }
     ],
     correct: 1,
-    feedback: '"Slow dolly in" erzeugt Intimiaet und Fokus. Es zieht den Zuschauer langsam in den emotionalen Moment hinein, ohne abrupt zu wirken. Der klassische Shot fuer gefuehlvolle Momente in Werbung und Film.'
+    feedback: '"Slow dolly in" erzeugt Intimiät und Fokus. Es zieht den Zuschauer langsam in den emotionalen Moment hinein, ohne abrupt zu wirken. Der klassische Shot für gefuehlvolle Momente in Werbung und Film.'
   },
   {
-    scenario: 'Dein Client hat ein Wellness-Resort in den Bergen. Du willst die Weitlaeuftigkeit und das Panorama zeigen.',
+    scenario: 'Dein Client hat ein Wellness-Resort in den Bergen. Du willst die Weitläuftigkeit und das Panorama zeigen.',
     options: [
-      { move: 'Dolly in', label: 'Dolly In', why: 'Faehrt naeher, zeigt Details statt Panorama.' },
-      { move: 'Orbit', label: 'Orbit', why: 'Dreht um ein Objekt, nicht flaechig genug fuer Landschaft.' },
-      { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt horizontal ueber die Berglandschaft. Zeigt Weitlaeuftigkeit.' },
+      { move: 'Dolly in', label: 'Dolly In', why: 'Fährt näher, zeigt Details statt Panorama.' },
+      { move: 'Orbit', label: 'Orbit', why: 'Dreht um ein Objekt, nicht flächig genug für Landschaft.' },
+      { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt horizontal ueber die Berglandschaft. Zeigt Weitläuftigkeit.' },
       { move: 'Tracking shot', label: 'Tracking Shot', why: 'Bewegt sich seitlich, braucht ein Subjekt zum Verfolgen.' }
     ],
     correct: 2,
-    feedback: '"Pan right" oder "Pan left" eignet sich ideal fuer Panoramaaufnahmen. Die Kamera bleibt statisch und schwenkt horizontal, was Weite und Landschaft perfekt einfaengt. Standard bei Natur- und Reise-Content.'
+    feedback: '"Pan right" oder "Pan left" eignet sich ideal für Panoramaaufnahmen. Die Kamera bleibt statisch und schwenkt horizontal, was Weite und Landschaft perfekt einfängt. Standard bei Natur- und Reise-Content.'
   },
   {
-    scenario: 'Eine Enthuellung: Das fertige Produkt steht auf einem Tisch. Du willst zunaechst nur die Verpackung sehen, dann soll der Blick den Kontext zeigen.',
+    scenario: 'Eine Enthuellung: Das fertige Produkt steht auf einem Tisch. Du willst zunächst nur die Verpackung sehen, dann soll der Blick den Kontext zeigen.',
     options: [
-      { move: 'Dolly in', label: 'Dolly In', why: 'Faehrt naeher ran, zeigt mehr Detail statt Kontext.' },
-      { move: 'Pull back', label: 'Pull Back', why: 'Enthuellt den Kontext durch Rausfahren. Ideal fuer Reveal-Momente.' },
+      { move: 'Dolly in', label: 'Dolly In', why: 'Fährt näher ran, zeigt mehr Detail statt Kontext.' },
+      { move: 'Pull back', label: 'Pull Back', why: 'Enthuellt den Kontext durch Rausfahren. Ideal für Reveal-Momente.' },
       { move: 'Pan left', label: 'Pan Left', why: 'Schwenkt seitlich, enthuellung geht verloren.' },
       { move: 'Orbit', label: 'Orbit', why: 'Dreht um das Objekt, zeigt nicht den breiteren Kontext.' }
     ],
@@ -997,15 +997,15 @@ var camData = [
     feedback: '"Pull back" ist der klassische Enthuellung-Shot. Das Bild beginnt eng auf dem Produkt und zieht sich dann zurueck, um den Raum, die Umgebung oder den Kontext zu zeigen. Einer der wirkungsvollsten Shots im Marketing.'
   },
   {
-    scenario: 'Ein Sportgeraet-Brand will Dynamik zeigen: Ein Laeufer joggt durch die Stadt. Du willst, dass sich die Kamera mit ihm bewegt.',
+    scenario: 'Ein Sportgerät-Brand will Dynamik zeigen: Ein Läufer joggt durch die Stadt. Du willst, dass sich die Kamera mit ihm bewegt.',
     options: [
-      { move: 'Dolly in', label: 'Dolly In', why: 'Faehrt auf ihn zu, bewegt sich nicht mit ihm.' },
+      { move: 'Dolly in', label: 'Dolly In', why: 'Fährt auf ihn zu, bewegt sich nicht mit ihm.' },
       { move: 'Pan right', label: 'Pan Right', why: 'Schwenkt horizontal, aber die Kamera bewegt sich nicht seitlich mit.' },
-      { move: 'Tracking shot', label: 'Tracking Shot', why: 'Die Kamera faehrt neben dem Laeufer her. Erzeugt Dynamik und Mitbewegung.' },
-      { move: 'Orbit', label: 'Orbit', why: 'Dreht um den Laeufer, waehrend er sich bewegt, schwer konsistent zu generieren.' }
+      { move: 'Tracking shot', label: 'Tracking Shot', why: 'Die Kamera fährt neben dem Läufer her. Erzeugt Dynamik und Mitbewegung.' },
+      { move: 'Orbit', label: 'Orbit', why: 'Dreht um den Läufer, während er sich bewegt, schwer konsistent zu generieren.' }
     ],
     correct: 2,
-    feedback: '"Tracking shot" oder "Truck left/right" bedeutet, die Kamera bewegt sich parallel neben einem sich bewegenden Objekt. Das erzeugt das Gefuehl von Dynamik und Energie und ist der Standard-Shot fuer Sportbewerbung.'
+    feedback: '"Tracking shot" oder "Truck left/right" bedeutet, die Kamera bewegt sich parallel neben einem sich bewegenden Objekt. Das erzeugt das Gefuehl von Dynamik und Energie und ist der Standard-Shot für Sportbewerbung.'
   }
 ];
 
@@ -1076,34 +1076,34 @@ camRender();
 // IMPLIED ACTION GAME
 var iaData = [
   {
-    problem: 'Problem: Du willst zeigen, wie jemand einen Proteinriegel isst. Die KI laesst den Riegel oft im Mund verschwinden oder die Hand verformen sich dabei. Welcher Schnittmoment nutzt "Implied Action"?',
+    problem: 'Problem: Du willst zeigen, wie jemand einen Proteinriegel isst. Die KI lässt den Riegel oft im Mund verschwinden oder die Hand verformen sich dabei. Welcher Schnittmoment nutzt "Implied Action"?',
     clips: [
-      { emoji: '🫳', label: 'Clip: Riegel bewegt sich zum Mund (Kamera laeuft weiter, Aktion vollstaendig zeigen)' },
-      { emoji: '✂️', label: 'Schnitt direkt bevor der Riegel den Mund beruehrt. Naechster Clip: zufriedenes Kauen.' },
+      { emoji: '🫳', label: 'Clip: Riegel bewegt sich zum Mund (Kamera läuft weiter, Aktion vollständig zeigen)' },
+      { emoji: '✂️', label: 'Schnitt direkt bevor der Riegel den Mund beruehrt. Nächster Clip: zufriedenes Kauen.' },
       { emoji: '😖', label: 'Clip: KI generiert das Essen komplett inkl. Bissen und Kauen.' }
     ],
     correct: 1,
-    feedback: 'Genau: Schneide kurz bevor die physikalisch schwierige Aktion beginnt. Der naechste Clip zeigt das Ergebnis der Aktion. Das Gehirn des Zuschauers ergaenzt den Bissen automatisch. Niemand bemerkt den Schnitt.'
+    feedback: 'Genau: Schneide kurz bevor die physikalisch schwierige Aktion beginnt. Der nächste Clip zeigt das Ergebnis der Aktion. Das Gehirn des Zuschauers ergänzt den Bissen automatisch. Niemand bemerkt den Schnitt.'
   },
   {
-    problem: 'Problem: Ein KI-Video soll zeigen, wie Limonade in ein Glas gegossen wird. Flüssigkeiten sind einer der schwierigsten Bereiche fuer Bild-KIs. Was ist der beste Ansatz?',
+    problem: 'Problem: Ein KI-Video soll zeigen, wie Limonade in ein Glas gegossen wird. Flüssigkeiten sind einer der schwierigsten Bereiche für Bild-KIs. Was ist der beste Ansatz?',
     clips: [
-      { emoji: '🍋', label: 'Clip: Volle Flasche im Bild. Schnitt. Naechster Clip: Volles, sprudelndes Glas mit Eis.' },
+      { emoji: '🍋', label: 'Clip: Volle Flasche im Bild. Schnitt. Nächster Clip: Volles, sprudelndes Glas mit Eis.' },
       { emoji: '🫗', label: 'Clip: Die KI generiert den kompletten Giessvorgang von Anfang bis Ende.' },
-      { emoji: '🔁', label: 'Clip: Giessprozess in Slow-Motion generieren, damit er laenger dauert und natuerlicher wirkt.' }
+      { emoji: '🔁', label: 'Clip: Giessprozess in Slow-Motion generieren, damit er länger dauert und natuerlicher wirkt.' }
     ],
     correct: 0,
-    feedback: 'Die Flasche und das volle Glas als zwei eigenstaendige Shots mit einem Schnitt dazwischen ist der klassische Implied-Action-Schnitt. Niemand muss sehen, wie das Giessen passiert. Der Kontext reicht dem Gehirn vollstaendig.'
+    feedback: 'Die Flasche und das volle Glas als zwei eigenständige Shots mit einem Schnitt dazwischen ist der klassische Implied-Action-Schnitt. Niemand muss sehen, wie das Giessen passiert. Der Kontext reicht dem Gehirn vollständig.'
   },
   {
-    problem: 'Problem: Du willst einen dramatischen Sprung zeigen (Athlet springt ueber ein Hindernis). KI ist schlecht bei Sprungsimulation, Landungen verzerren oft. Was ist die clevere Loesung?',
+    problem: 'Problem: Du willst einen dramatischen Sprung zeigen (Athlet springt ueber ein Hindernis). KI ist schlecht bei Sprungsimulation, Landungen verzerren oft. Was ist die clevere Lösung?',
     clips: [
-      { emoji: '🏃', label: 'Clip: Anlauf und Absprungmoment. Schnitt. Naechster Clip: Athletin landet sicher.' },
+      { emoji: '🏃', label: 'Clip: Anlauf und Absprungmoment. Schnitt. Nächster Clip: Athletin landet sicher.' },
       { emoji: '🦘', label: 'Clip: Die KI generiert den kompletten Sprung von Anlauf bis Landung.' },
       { emoji: '🎥', label: 'Clip: Kamera von unten, zeigt den Absprung von der Schuhsohle her.' }
     ],
     correct: 0,
-    feedback: 'Anlauf und Absprung, dann Schnitt, dann Landung. Die physikalisch schwierige Luft-Phase wird komplett uebersprungen. Der Zuschauer weiss, was dazwischen passiert ist. Implied Action auf Hoechstleistung.'
+    feedback: 'Anlauf und Absprung, dann Schnitt, dann Landung. Die physikalisch schwierige Luft-Phase wird komplett uebersprungen. Der Zuschauer weiss, was dazwischen passiert ist. Implied Action auf Höchstleistung.'
   }
 ];
 
@@ -1178,34 +1178,34 @@ const questions = [
     q: 'Was bedeutet "Temporale Inkonsistenz" bei KI-Videos?',
     options: [
       'Das Video wird zu langsam generiert und braucht mehr als 10 Minuten.',
-      'Die KI vergisst zwischen Frames, wie der vorherige aussah, was zu Veraenderungen in Gesichtern und Hintergruenden fuehrt.',
+      'Die KI vergisst zwischen Frames, wie der vorherige aussah, was zu Veränderungen in Gesichtern und Hintergruenden fuehrt.',
       'Das Video hat keine konsistente Framerate und ruckelt beim Abspielen.',
-      'Die KI kann keine laengeren Videos als 10 Sekunden konsistent generieren.'
+      'Die KI kann keine längeren Videos als 10 Sekunden konsistent generieren.'
     ],
     correct: 1,
-    feedback: 'Temporale Inkonsistenz beschreibt das Problem, dass die KI jeden Frame leicht neu "traumt" ohne vollstaendige Erinnerung an den vorherigen. Ergebnis: Gesichter, die sich minimal veraendern, wabernde Hintergruende, verschmelzende Objekte.'
+    feedback: 'Temporale Inkonsistenz beschreibt das Problem, dass die KI jeden Frame leicht neu "traumt" ohne vollständige Erinnerung an den vorherigen. Ergebnis: Gesichter, die sich minimal verändern, wabernde Hintergruende, verschmelzende Objekte.'
   },
   {
-    q: 'Warum scheitert der Prompt "Erstelle einen 30-Sekunden-Werbespot fuer Limonade" fast immer?',
+    q: 'Warum scheitert der Prompt "Erstelle einen 30-Sekunden-Werbespot für Limonade" fast immer?',
     options: [
-      'Weil KI-Video-Tools keine Texte lesen koennen, die laenger als 10 Woerter sind.',
-      'Weil KI-Modelle heute keine langen, konsistenten Handlungsboegen halten koennen.',
-      'Weil 30 Sekunden zu kurz sind und die KI mindestens 2 Minuten benoetigt.',
+      'Weil KI-Video-Tools keine Texte lesen können, die länger als 10 Wörter sind.',
+      'Weil KI-Modelle heute keine langen, konsistenten Handlungsbögen halten können.',
+      'Weil 30 Sekunden zu kurz sind und die KI mindestens 2 Minuten benötigt.',
       'Weil Lebensmittel rechtlich nicht in KI-Werbung dargestellt werden duerfen.'
     ],
     correct: 1,
-    feedback: 'Heutige KI-Modelle koennen keine langen Geschichten konsistent umsetzen. Je laenger und komplexer der Handlungsbogen, desto mehr Halluzinationen und Inkonsistenzen entstehen. Die Loesung: In kurze, eigenstaendige Shots (3-5 Sek.) denken.'
+    feedback: 'Heutige KI-Modelle können keine langen Geschichten konsistent umsetzen. Je länger und komplexer der Handlungsbogen, desto mehr Halluzinationen und Inkonsistenzen entstehen. Die Lösung: In kurze, eigenständige Shots (3-5 Sek.) denken.'
   },
   {
     q: 'Was ist der Kern-Vorteil des "Anchor-Frame-Workflows"?',
     options: [
       'Er ist kostenguenstiger als reine Text-to-Video-Generierung.',
-      'Das fixierte Ausgangsbild sorgt dafuer, dass Aussehen, Stil und Lichtstimmung ueber alle Frames hinweg konsistent bleiben.',
-      'Er erlaubt die Generierung von Videos laenger als 10 Sekunden.',
-      'Er umgeht rechtliche Einschraenkungen bei der Darstellung von echten Personen.'
+      'Das fixierte Ausgangsbild sorgt dafür, dass Aussehen, Stil und Lichtstimmung ueber alle Frames hinweg konsistent bleiben.',
+      'Er erlaubt die Generierung von Videos länger als 10 Sekunden.',
+      'Er umgeht rechtliche Einschränkungen bei der Darstellung von echten Personen.'
     ],
     correct: 1,
-    feedback: 'Da das Ausgangsbild in Image-to-Video den ersten Frame definiert, hat die KI deutlich weniger Freiheit, das Aussehen zu veraendern. Gesicht, Stil und Licht bleiben zu ca. 95% konsistent. Das ist der entscheidende Unterschied zu Text-to-Video.'
+    feedback: 'Da das Ausgangsbild in Image-to-Video den ersten Frame definiert, hat die KI deutlich weniger Freiheit, das Aussehen zu verändern. Gesicht, Stil und Licht bleiben zu ca. 95% konsistent. Das ist der entscheidende Unterschied zu Text-to-Video.'
   },
   {
     q: 'Welchen Prompt-Befehl verwendest du, um einen klassischen Produkt-Launch-Shot zu erstellen, bei dem das Produkt von allen Seiten zu sehen ist?',
@@ -1216,18 +1216,18 @@ const questions = [
       'Tracking shot'
     ],
     correct: 2,
-    feedback: '"Orbit around object" erzeugt eine 360-Grad-Ansicht um ein Objekt herum. Das ist der Standard-Shot fuer Produkt-Launches (Sneaker, Schmuck, Elektronik), weil er das Produkt vollstaendig zeigt und Premium-Qualitaet vermittelt.'
+    feedback: '"Orbit around object" erzeugt eine 360-Grad-Ansicht um ein Objekt herum. Das ist der Standard-Shot für Produkt-Launches (Sneaker, Schmuck, Elektronik), weil er das Produkt vollständig zeigt und Premium-Qualität vermittelt.'
   },
   {
     q: 'Was ist die Wirkung von "Slow dolly in" im Marketing-Kontext?',
     options: [
       'Zeigt den breiteren Kontext einer Szene durch Rausfahren.',
       'Erzeugt eine 360-Grad-Ansicht des Produkts.',
-      'Erzeugt Naehe und Intimitaet. Gut fuer Produktdetails oder emotionale Gesichter.',
+      'Erzeugt Nähe und Intimität. Gut für Produktdetails oder emotionale Gesichter.',
       'Schwenkt horizontal ueber eine Landschaft oder Szene.'
     ],
     correct: 2,
-    feedback: '"Slow dolly in" faehrt langsam naeher an das Subjekt heran. Das erzeugt das Gefuehl von Naehe, Fokus und Intimiaet, ideal fuer emotionale Momente in Werbeclips oder Nahaufnahmen von Produktdetails.'
+    feedback: '"Slow dolly in" fährt langsam näher an das Subjekt heran. Das erzeugt das Gefuehl von Nähe, Fokus und Intimiät, ideal für emotionale Momente in Werbeclips oder Nahaufnahmen von Produktdetails.'
   },
   {
     q: 'Warum ist Sound bei KI-Videos besonders wichtig?',
@@ -1244,34 +1244,34 @@ const questions = [
     q: 'Was beschreibt die "Implied Action" Technik im Video-Schnitt?',
     options: [
       'Eine KI-Technik, bei der die Bewegung automatisch zwischen zwei Frames berechnet wird.',
-      'Man zeigt den Moment vor und nach einer schwierigen Aktion. Der Zuschauer ergaenzt die Aktion im Kopf.',
+      'Man zeigt den Moment vor und nach einer schwierigen Aktion. Der Zuschauer ergänzt die Aktion im Kopf.',
       'Ein Prompt-Format, das der KI eine implizite Bewegungsanweisung gibt.',
-      'Eine rechtliche Kennzeichnungsmethode fuer KI-generierte Handlungen in Videos.'
+      'Eine rechtliche Kennzeichnungsmethode für KI-generierte Handlungen in Videos.'
     ],
     correct: 1,
-    feedback: 'Implied Action bedeutet: Zeige, was davor passiert, dann schneide. Zeige, was danach passiert. Das Gehirn des Zuschauers verbindet automatisch und ergaenzt die fehlende Aktion. Dadurch koennen physikalisch schwierige Szenen (Trinken, Springen, Giessen) elegant vermieden werden.'
+    feedback: 'Implied Action bedeutet: Zeige, was davor passiert, dann schneide. Zeige, was danach passiert. Das Gehirn des Zuschauers verbindet automatisch und ergänzt die fehlende Aktion. Dadurch können physikalisch schwierige Szenen (Trinken, Springen, Giessen) elegant vermieden werden.'
   },
   {
     q: 'Wann ist die Erstellung von KI-Videos mit echten Personen ohne Einwilligung erlaubt?',
     options: [
       'Wenn das Video als Satire oder Kunstprojekt deklariert wird.',
-      'Wenn die Person nicht namentlich erwaehnt wird.',
+      'Wenn die Person nicht namentlich erwähnt wird.',
       'Niemals. Deepfakes echter Personen ohne schriftliche Einwilligung sind rechtlich und ethisch nicht akzeptabel.',
-      'Wenn das Gesicht durch Filter leicht veraendert wird, sodass es nicht eindeutig erkennbar ist.'
+      'Wenn das Gesicht durch Filter leicht verändert wird, sodass es nicht eindeutig erkennbar ist.'
     ],
     correct: 2,
-    feedback: 'Deepfakes echter Personen ohne Einwilligung sind eine absolute rote Linie. Das gilt unabhaengig vom Zweck (Satire, Kunst, Werbung) und unabhaengig davon, wie erkennbar die Person ist. Das Risiko ist rechtlich und reputatorisch zu hoch.'
+    feedback: 'Deepfakes echter Personen ohne Einwilligung sind eine absolute rote Linie. Das gilt unabhängig vom Zweck (Satire, Kunst, Werbung) und unabhängig davon, wie erkennbar die Person ist. Das Risiko ist rechtlich und reputatorisch zu hoch.'
   },
   {
-    q: 'Was ist der empfohlene Ansatz fuer KI-generierte Personendarstellungen in kommerziellen Videos?',
+    q: 'Was ist der empfohlene Ansatz für KI-generierte Personendarstellungen in kommerziellen Videos?',
     options: [
-      'Immer "zufaellige" Gesichter generieren, die keiner echten Person aehneln.',
-      'Lizenzierte KI-Avatare verwenden (z.B. HeyGen), die explizit fuer kommerzielle Nutzung freigegeben sind.',
+      'Immer "zufällige" Gesichter generieren, die keiner echten Person ähneln.',
+      'Lizenzierte KI-Avatare verwenden (z.B. HeyGen), die explizit für kommerzielle Nutzung freigegeben sind.',
       'Echte Personen per Deepfake verwenden, solange das Video als KI gekennzeichnet ist.',
       'Generisch bleiben und keine Personen in KI-Videos zeigen.'
     ],
     correct: 1,
-    feedback: 'Lizenzierte KI-Avatar-Dienste wie HeyGen stellen Avatare bereit, fuer die alle notwendigen Rechte und Einwilligungen vorliegen. Das ist der rechtssichere Weg fuer kommerzielle Personendarstellungen in KI-Videos.'
+    feedback: 'Lizenzierte KI-Avatar-Dienste wie HeyGen stellen Avatare bereit, für die alle notwendigen Rechte und Einwilligungen vorliegen. Das ist der rechtssichere Weg für kommerzielle Personendarstellungen in KI-Videos.'
   },
   {
     q: 'Wie viele Frames muss eine KI bei einem 4-Sekunden-Video konsistent halten?',
@@ -1279,10 +1279,10 @@ const questions = [
       '4 bis 8 Frames (ein Frame pro Sekunde)',
       '24 Frames (Kinostandard)',
       '96 bis 120 Frames',
-      'Unbegrenzt, da KI keine Speicherbeschraenkung hat'
+      'Unbegrenzt, da KI keine Speicherbeschränkung hat'
     ],
     correct: 2,
-    feedback: 'Bei typischen 24 bis 30 Frames pro Sekunde und 4 Sekunden Laenge muss die KI 96 bis 120 einzelne Frames generieren, die alle konsistent zueinander sein muessen. Das ist exponentiell komplexer als ein einzelnes Bild.'
+    feedback: 'Bei typischen 24 bis 30 Frames pro Sekunde und 4 Sekunden Länge muss die KI 96 bis 120 einzelne Frames generieren, die alle konsistent zueinander sein müssen. Das ist exponentiell komplexer als ein einzelnes Bild.'
   }
 ];
 
