@@ -1,11 +1,7 @@
 (function () {
   var topic = COURSE.topics.find(function (t) { return t.id === TOPIC_ID; });
-  if (!topic) {
-    document.body.innerHTML = '<p style="padding:2rem;font-family:sans-serif">Topic not found: ' + TOPIC_ID + '</p>';
-    return;
-  }
 
-  // Inject fonts + shared CSS
+  // Inject fonts + shared CSS into <head> immediately (prevents FOUC)
   var head = document.head;
   function addLink(attrs) {
     var el = document.createElement('link');
@@ -15,6 +11,13 @@
   addLink({ rel: 'preconnect', href: 'https://fonts.googleapis.com' });
   addLink({ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap' });
   addLink({ rel: 'stylesheet', href: '../shared.css' });
+
+  if (!topic) {
+    document.addEventListener('DOMContentLoaded', function () {
+      document.body.innerHTML = '<p style="padding:2rem;font-family:sans-serif">Topic not found: ' + TOPIC_ID + '</p>';
+    });
+    return;
+  }
 
   document.title = topic.title + ' · KI Marketing Bootcamp';
 
@@ -53,6 +56,9 @@
         }).join('')
       + '</div></div></div>';
   }
+
+  // Render body once DOM is ready (<body> doesn't exist yet when scripts run in <head>)
+  function render() {
 
   // Module cards
   var cardsHtml = topic.modules.map(function (m) {
@@ -100,4 +106,11 @@
     + '<div class="section-label">Module</div>'
     + '<div class="modules-list">' + cardsHtml + '</div>'
     + '</div>';
+  } // end render
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
 }());
