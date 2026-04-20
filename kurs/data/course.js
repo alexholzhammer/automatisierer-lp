@@ -6,6 +6,8 @@
 //   2. Create the HTML file at <topic-id>/<file>.
 //
 // topic.overview  — path to topic overview, relative to the topic folder
+// topic.icon      — emoji shown on course home cards
+// topic.tagline   — one-line description shown on course home cards
 // module.id       — unique ID set as MODULE_ID in each module HTML file
 // module.file     — filename within the topic folder (e.g. "01.html")
 
@@ -15,6 +17,8 @@ var COURSE = {
       id:       "einleitung",
       num:      "01",
       title:    "Einleitung",
+      icon:     "✍️",
+      tagline:  "KI-Einsatz im Marketing",
       overview: "index.html",
       modules: [
         { id: "einleitung-01", file: "01.html", num: "1.1", title: "Einleitung", time: 15, tools: 0, quiz: 10 }
@@ -24,6 +28,8 @@ var COURSE = {
       id:       "prompting",
       num:      "02",
       title:    "Prompting",
+      icon:     "🎯",
+      tagline:  "Die Kernkompetenz, die du beherrschen musst",
       overview: "index.html",
       heroDesc: "Lerne, KI-Modelle präzise zu steuern — von den technischen Grundlagen bis hin zu fortgeschrittenen Techniken wie Meta-Prompting und Testing-Strategien.",
       desc: [
@@ -47,27 +53,11 @@ var COURSE = {
       ]
     },
     {
-      id:       "videokreation",
-      num:      "05",
-      title:    "Videokreation",
-      overview: "index.html",
-      modules: [
-        { id: "videokreation-01", file: "01.html", num: "5.1", title: "Videokreation mit KI im Marketing", time: 15, tools: 4, quiz: 10 }
-      ]
-    },
-    {
-      id:       "bildkreation",
-      num:      "04",
-      title:    "Bildkreation",
-      overview: "index.html",
-      modules: [
-        { id: "bildkreation-01", file: "01.html", num: "4.1", title: "Bild-KIs: Vom Zufallstreffer zur visuellen Strategie", time: 15, tools: 3, quiz: 10 }
-      ]
-    },
-    {
       id:       "content",
       num:      "03",
       title:    "Content-Produktion",
+      icon:     "✍️",
+      tagline:  "Wie du mit KI gehaltvolle Inhalte erstellst",
       overview: "index.html",
       heroDesc: "Lerne, wie du mit KI wirklich guten Content produzierst — von der richtigen Rollenverteilung zwischen Mensch und Maschine bis hin zu Brand Voice, SEO, Prüfprozessen und einer wiederholbaren Content-Engine.",
       desc: [
@@ -94,9 +84,33 @@ var COURSE = {
       ]
     },
     {
+      id:       "bildkreation",
+      num:      "04",
+      title:    "Bildkreation",
+      icon:     "🔍",
+      tagline:  "Erstelle visuelle Inhalte für dein Marketing",
+      overview: "index.html",
+      modules: [
+        { id: "bildkreation-01", file: "01.html", num: "4.1", title: "Bild-KIs: Vom Zufallstreffer zur visuellen Strategie", time: 15, tools: 3, quiz: 10 }
+      ]
+    },
+    {
+      id:       "videokreation",
+      num:      "05",
+      title:    "Videokreation",
+      icon:     "📣",
+      tagline:  "Bewegtbildinhalte, schwierig, aber wertvoll",
+      overview: "index.html",
+      modules: [
+        { id: "videokreation-01", file: "01.html", num: "5.1", title: "Videokreation mit KI im Marketing", time: 15, tools: 4, quiz: 10 }
+      ]
+    },
+    {
       id:       "recherche",
       num:      "06",
       title:    "Recherche & Analyse",
+      icon:     "📧",
+      tagline:  "Interpretiere schnell und sinnvoll große Daten und Fakten",
       overview: "index.html",
       modules: [
         { id: "recherche-01", file: "01.html", num: "6.1", title: "Dein neuer 24/7-Analyst",           time: 10, tools: 2, quiz: 10 },
@@ -109,6 +123,8 @@ var COURSE = {
       id:       "daten",
       num:      "07",
       title:    "Daten-Management",
+      icon:     "📊",
+      tagline:  "So stellst du deine Daten der KI richtig bereit",
       overview: "index.html",
       modules: [
         { id: "daten-01", file: "01.html", num: "7.1", title: "Deine Daten als Wettbewerbsvorteil", time: 10, tools: 2, quiz: 10 },
@@ -120,6 +136,8 @@ var COURSE = {
       id:       "agenten",
       num:      "08",
       title:    "Agenten & Automatisierung",
+      icon:     "🛒",
+      tagline:  "Stell deine Marketing-Prozesse auf Autopilot",
       overview: "index.html",
       modules: [
         { id: "agenten-01", file: "01.html", num: "8.1", title: "Agenten & Workflows: KI auf Steroiden",   time: 20, tools: 3, quiz: 10 },
@@ -130,6 +148,8 @@ var COURSE = {
       id:       "vibe-coding",
       num:      "09",
       title:    "Vibe Coding",
+      icon:     "🤝",
+      tagline:  "Erstelle deine eigenen Landing Pages und interaktiven Inhalte",
       overview: "index.html",
       modules: [
         { id: "vibe-coding-01", file: "01.html", num: "9.1", title: "Vibe Coding: Einleitung", time: 15, tools: 3, quiz: 10 },
@@ -140,6 +160,8 @@ var COURSE = {
       id:       "tools",
       num:      "10",
       title:    "Tools",
+      icon:     "🎥",
+      tagline:  "Die wichtigsten KI-Werkzeuge, die du als Marketer kennen musst",
       overview: "index.html",
       modules: [
         { id: "tools-01", file: "01.html", num: "10.1", title: "Die wichtigsten KI-Tools für Marketer", time: 15, tools: 3, quiz: 10 }
@@ -149,6 +171,8 @@ var COURSE = {
       id:       "rechtliches",
       num:      "11",
       title:    "Rechtliches",
+      icon:     "⚙️",
+      tagline:  "KI rechtssicher einsetzen, vor allem in Deutschland",
       overview: "index.html",
       modules: [
         { id: "rechtliches-01", file: "01.html", num: "11.1", title: "DSGVO & Datenschutz",              time: 20, tools: 3, quiz: 10 },
@@ -160,6 +184,8 @@ var COURSE = {
       id:       "updates",
       num:      "12",
       title:    "Up-to-date bleiben",
+      icon:     "🔒",
+      tagline:  "So bleibst du über KI im Job auf dem Laufenden",
       overview: "index.html",
       modules: [
         { id: "updates-01", file: "01.html", num: "12.1", title: "Signal vs. Rauschen", time: 15, tools: 0, quiz: 10 }
@@ -169,6 +195,8 @@ var COURSE = {
       id:       "zukunft",
       num:      "13",
       title:    "Zukunftsausblick",
+      icon:     "🚀",
+      tagline:  "Die neue Ära des Marketing hat begonnen, wie geht es weiter?",
       overview: "index.html",
       modules: [
         { id: "zukunft-01", file: "01.html", num: "13.1", title: "Die Ära der agentischen Intelligenz", time: 15, tools: 0, quiz: 10 }
