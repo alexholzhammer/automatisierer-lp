@@ -144,6 +144,7 @@
       var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       client.auth.getSession().then(function (res) {
         var session = res.data && res.data.session;
+        console.log('[topic-overview] session:', session ? 'found (user: ' + session.user.id + ')' : 'null');
         if (!session) { onDenied(); return; }
         return client
           .from('purchases')
@@ -151,9 +152,11 @@
           .eq('user_id', session.user.id)
           .maybeSingle()
           .then(function (result) {
+            console.log('[topic-overview] purchases result:', result.data, 'error:', result.error);
             if (!result.data) { onDenied(); } else { onGranted(); }
           });
-      }).catch(function () {
+      }).catch(function (err) {
+        console.error('[topic-overview] unexpected error:', err);
         onGranted(); // fail open
       });
     };
