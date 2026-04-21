@@ -24,7 +24,7 @@
     <h1>Einloggen</h1>
     <p>Gib deine E-Mail ein — wir schicken dir einen Login-Link.</p>
 
-    <!-- Step 1: email form -->
+    <!-- State: email form (default) -->
     <form id="login-form" novalidate>
       <div class="login-field">
         <label for="email">E-Mail</label>
@@ -34,11 +34,27 @@
       <button type="submit" class="login-submit" id="login-btn">Magic Link senden</button>
     </form>
 
-    <!-- Step 2: confirmation (hidden until link is sent) -->
+    <!-- State: magic link sent -->
     <div id="login-sent" style="display:none; text-align:center; padding: 8px 0;">
       <div style="font-size:32px; margin-bottom:12px;">📬</div>
       <p style="font-weight:600; margin-bottom:6px;">Schau in dein Postfach!</p>
       <p style="color:var(--text-muted); font-size:13px;">Wir haben dir einen Login-Link geschickt. Klick darauf, um dich anzumelden.</p>
+    </div>
+
+    <!-- State: already logged in (session exists on page load, no code in URL) -->
+    <div id="login-already" style="display:none; text-align:center; padding: 8px 0;">
+      <div style="font-size:32px; margin-bottom:12px;">✅</div>
+      <p style="font-weight:600; margin-bottom:6px;">Du bist bereits eingeloggt.</p>
+      <p id="login-already-email" style="color:var(--text-muted); font-size:13px; margin-bottom:20px;"></p>
+      <a href="./" class="login-submit" style="display:block; text-align:center; text-decoration:none; margin-bottom:12px;">Zum Kurs →</a>
+      <button id="signout-btn" style="background:none; border:none; color:var(--text-muted); font-size:13px; cursor:pointer; text-decoration:underline;">Abmelden &amp; neu einloggen</button>
+    </div>
+
+    <!-- State: magic link processing -->
+    <div id="login-processing" style="display:none; text-align:center; padding: 8px 0;">
+      <div style="font-size:32px; margin-bottom:12px;">⏳</div>
+      <p style="font-weight:600; margin-bottom:6px;">Einloggen…</p>
+      <p style="color:var(--text-muted); font-size:13px;">Bitte warten.</p>
     </div>
 
     <div class="login-footer">
@@ -54,39 +70,12 @@
   var DEFAULT_REDIRECT = './';
   var STORAGE_KEY      = 'auth_redirect';
 
+  // Detect magic link return: Supabase PKCE puts a ?code= in the URL
+  var isMagicLinkReturn = new URLSearchParams(window.location.search).has('code');
+
   var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function getRedirectTarget() {
-    // Prefer the ?redirect= param from the current URL, fall back to stored value
-    var params = new URLSearchParams(window.location.search);
-    var target = params.get('redirect') || localStorage.getItem(STORAGE_KEY) || DEFAULT_REDIRECT;
-    localStorage.removeItem(STORAGE_KEY);
-    // Only allow same-origin redirects
-    try {
-      var url = new URL(target);
-      if (url.origin === window.location.origin) return target;
-    } catch (e) { /* ignore */ }
-    return DEFAULT_REDIRECT;
-  }
-
-  function redirectAfterLogin() {
-    window.location.href = getRedirectTarget();
-  }
-
-  function checkSessionAndRedirect(session) {
-    if (!session) return;
-    client
-      .from('purchases')
-      .select('user_id')
-      .eq('user_id', session.user.id)
-      .maybeSingle()
-      .then(function (result) {
-        if (result.data) redirectAfterLogin();
-        // No purchase row: stay on login page (rare — magic link was sent to a non-customer)
-      });
-  }
-
-  // DEBUG: log all storage keys
+  // --- DEBUG helpers ---
   function debugStorage(label) {
     var lsKeys = Object.keys(localStorage);
     var ssKeys = Object.keys(sessionStorage);
@@ -99,25 +88,92 @@
     });
   }
 
-  // Handle magic link return: Supabase JS automatically exchanges the token
-  // in the URL hash/query and fires SIGNED_IN via onAuthStateChange.
+  // --- UI state helpers ---
+  function showState(id) {
+    ['login-form', 'login-sent', 'login-already', 'login-processing'].forEach(function (s) {
+      document.getElementById(s).style.display = s === id ? '' : 'none';
+    });
+  }
+
+  function getRedirectTarget() {
+    var params = new URLSearchParams(window.location.search);
+    var target = params.get('redirect') || localStorage.getItem(STORAGE_KEY) || DEFAULT_REDIRECT;
+    localStorage.removeItem(STORAGE_KEY);
+    try {
+      var url = new URL(target);
+      if (url.origin === window.location.origin) return target;
+    } catch (e) { /* ignore */ }
+    return DEFAULT_REDIRECT;
+  }
+
+  function redirectAfterLogin() {
+    window.location.href = getRedirectTarget();
+  }
+
+  function checkPurchaseAndRedirect(session) {
+    client
+      .from('purchases')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+      .then(function (result) {
+        console.log('[login] purchases result:', result.data, 'error:', result.error);
+        if (result.data) {
+          redirectAfterLogin();
+        } else {
+          // Logged in but no purchase — stay on page so they can buy
+          showState('login-form');
+          document.getElementById('login-error').textContent = 'Kein Zugang gefunden. Bitte kaufe den Kurs zuerst.';
+          document.getElementById('login-error').style.display = 'block';
+        }
+      });
+  }
+
+  // --- Magic link return flow ---
+  // onAuthStateChange fires SIGNED_IN when the code in the URL is exchanged
   client.auth.onAuthStateChange(function (event, session) {
-    console.log('[login] onAuthStateChange event:', event, 'session:', session ? 'found uid=' + session.user.id : 'null');
+    console.log('[login] onAuthStateChange event:', event, 'isMagicLinkReturn:', isMagicLinkReturn, 'session:', session ? 'found uid=' + session.user.id : 'null');
     debugStorage('after-' + event);
-    if (event === 'SIGNED_IN') {
-      checkSessionAndRedirect(session);
+    if (event === 'SIGNED_IN' && isMagicLinkReturn) {
+      // Genuine magic link sign-in: check purchase and redirect
+      checkPurchaseAndRedirect(session);
     }
   });
 
-  // Also check for an existing session on page load (e.g. already logged in)
+  // --- Page load: check for existing session ---
   debugStorage('page-load');
-  client.auth.getSession().then(function (res) {
-    var session = res.data && res.data.session;
-    console.log('[login] getSession result:', session ? 'found uid=' + session.user.id + ' expires=' + session.expires_at : 'null', 'error:', res.error);
-    debugStorage('after-getSession');
-    checkSessionAndRedirect(session);
+
+  if (isMagicLinkReturn) {
+    // Show "processing" while Supabase exchanges the code
+    showState('login-processing');
+    console.log('[login] magic link return detected, waiting for SIGNED_IN event');
+  } else {
+    // Regular page load — check if already logged in
+    client.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      console.log('[login] getSession result:', session ? 'found uid=' + session.user.id + ' expires=' + session.expires_at : 'null', 'error:', res.error);
+      debugStorage('after-getSession');
+
+      if (session) {
+        // Show "already logged in" state — don't auto-redirect
+        // (the session may be stale; let the user decide what to do)
+        showState('login-already');
+        var emailEl = document.getElementById('login-already-email');
+        emailEl.textContent = session.user.email ? 'Eingeloggt als: ' + session.user.email : '';
+      }
+      // else: show default form (already visible)
+    });
+  }
+
+  // Sign-out button
+  document.getElementById('signout-btn').addEventListener('click', function () {
+    client.auth.signOut().then(function () {
+      console.log('[login] signed out');
+      showState('login-form');
+    });
   });
 
+  // --- Form submit ---
   var form    = document.getElementById('login-form');
   var btn     = document.getElementById('login-btn');
   var errorEl = document.getElementById('login-error');
@@ -145,7 +201,7 @@
     btn.disabled    = true;
     btn.textContent = 'Wird gesendet…';
 
-    // Store the redirect target now so it survives the email-link round-trip
+    // Store redirect target so it survives the email-link round-trip
     var params = new URLSearchParams(window.location.search);
     var target = params.get('redirect');
     if (target) localStorage.setItem(STORAGE_KEY, target);
@@ -153,8 +209,6 @@
     client.auth.signInWithOtp({
       email: email,
       options: {
-        // After clicking the magic link, Supabase redirects here so the
-        // client can exchange the token and fire onAuthStateChange.
         emailRedirectTo: window.location.origin + '/kurs/login.html'
       }
     }).then(function (res) {
@@ -164,9 +218,7 @@
         btn.textContent = 'Magic Link senden';
         return;
       }
-      // Show confirmation, hide form
-      form.style.display = 'none';
-      document.getElementById('login-sent').style.display = 'block';
+      showState('login-sent');
     }).catch(function () {
       showError('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.');
       btn.disabled    = false;
