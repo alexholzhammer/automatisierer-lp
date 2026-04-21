@@ -68,6 +68,7 @@
 
     client.auth.getSession().then(function (res) {
       var session = res.data && res.data.session;
+      console.log('[auth-gate] session:', session ? 'found (user: ' + session.user.id + ')' : 'null');
       if (!session) {
         showBuyOverlay();
         return;
@@ -78,13 +79,15 @@
         .eq('user_id', session.user.id)
         .maybeSingle()
         .then(function (result) {
+          console.log('[auth-gate] purchases result:', result.data, 'error:', result.error);
           if (!result.data) {
             showBuyOverlay();
           } else {
             revealContent();
           }
         });
-    }).catch(function () {
+    }).catch(function (err) {
+      console.error('[auth-gate] unexpected error:', err);
       revealContent(); // fail open on unexpected errors
     });
   }
