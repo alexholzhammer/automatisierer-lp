@@ -141,10 +141,18 @@
     var sbScript = document.createElement('script');
     sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
     sbScript.onload = function () {
+      // DEBUG: dump all storage keys before creating client
+      var allLS = Object.keys(localStorage);
+      console.log('[topic-overview] ALL localStorage keys:', allLS);
+      allLS.forEach(function (k) {
+        try { console.log('[topic-overview]   LS[' + k + ']:', localStorage.getItem(k).substring(0, 120)); } catch(e) {}
+      });
       var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       client.auth.getSession().then(function (res) {
         var session = res.data && res.data.session;
-        console.log('[topic-overview] session:', session ? 'found (user: ' + session.user.id + ')' : 'null');
+        console.log('[topic-overview] session:', session ? 'found (user: ' + session.user.id + ')' : 'null', 'error:', res.error);
+        // DEBUG: dump storage again after getSession (Supabase may have cleared it)
+        console.log('[topic-overview] localStorage keys after getSession:', Object.keys(localStorage));
         if (!session) { onDenied(); return; }
         return client
           .from('purchases')

@@ -86,17 +86,36 @@
       });
   }
 
+  // DEBUG: log all storage keys
+  function debugStorage(label) {
+    var lsKeys = Object.keys(localStorage);
+    var ssKeys = Object.keys(sessionStorage);
+    console.log('[login] ' + label + ' | localStorage keys:', lsKeys);
+    console.log('[login] ' + label + ' | sessionStorage keys:', ssKeys);
+    lsKeys.forEach(function (k) {
+      if (k.includes('sb') || k.includes('supabase') || k.includes('auth')) {
+        try { console.log('[login]   LS[' + k + ']:', localStorage.getItem(k).substring(0, 120)); } catch(e) {}
+      }
+    });
+  }
+
   // Handle magic link return: Supabase JS automatically exchanges the token
   // in the URL hash/query and fires SIGNED_IN via onAuthStateChange.
   client.auth.onAuthStateChange(function (event, session) {
+    console.log('[login] onAuthStateChange event:', event, 'session:', session ? 'found uid=' + session.user.id : 'null');
+    debugStorage('after-' + event);
     if (event === 'SIGNED_IN') {
       checkSessionAndRedirect(session);
     }
   });
 
   // Also check for an existing session on page load (e.g. already logged in)
+  debugStorage('page-load');
   client.auth.getSession().then(function (res) {
-    checkSessionAndRedirect(res.data && res.data.session);
+    var session = res.data && res.data.session;
+    console.log('[login] getSession result:', session ? 'found uid=' + session.user.id + ' expires=' + session.expires_at : 'null', 'error:', res.error);
+    debugStorage('after-getSession');
+    checkSessionAndRedirect(session);
   });
 
   var form    = document.getElementById('login-form');
