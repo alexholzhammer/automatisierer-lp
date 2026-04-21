@@ -1,4 +1,8 @@
 (function () {
+  var SUPABASE_URL = 'https://awayfgpspoewjkwavvan.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_zn0xfUDgSQ65cZ7Nw540yw_F9trUA_T';
+  var STRIPE_URL   = 'https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000';
+
   var topic = COURSE.topics.find(function (t) { return t.id === TOPIC_ID; });
 
   // Inject fonts + shared CSS into <head> immediately (prevents FOUC)
@@ -57,10 +61,7 @@
       + '</div></div></div>';
   }
 
-  // Render body once DOM is ready (<body> doesn't exist yet when scripts run in <head>)
-  function render() {
-
-  // Module cards
+  // Module cards HTML
   var cardsHtml = topic.modules.map(function (m) {
     var descHtml  = m.desc   ? '<div class="module-card-desc">' + m.desc + '</div>' : '';
     var toolsMeta = m.tools > 0 ? '<div class="module-card-meta-item">🎯 ' + m.tools + ' Tools</div>' : '';
@@ -79,38 +80,100 @@
       + '</a>';
   }).join('');
 
-  document.body.innerHTML =
-    '<nav class="topnav">'
-    + '<a href="../" class="topnav-logo"><div class="topnav-logo-dot"></div><span>KI Marketing Bootcamp</span></a>'
-    + '<div class="topnav-spacer"></div>'
-    + '<a href="../" class="topnav-link">← Alle Themen</a>'
-    + '</nav>'
-    + '<div class="container">'
-    + '<div class="breadcrumb">'
-    + '<a href="../">KI Marketing Bootcamp</a>'
-    + '<span class="breadcrumb-sep">/</span>'
-    + '<span>' + topic.title + '</span>'
-    + '</div>'
-    + '<div class="hero">'
-    + '<div class="module-tag">Thema ' + topic.num + ' · ' + topic.title + '</div>'
-    + '<h1>' + topic.title + '</h1>'
-    + heroDescHtml
-    + '<div class="hero-meta">'
-    + '<div class="hero-meta-item">📚 <span>' + topic.modules.length + ' ' + moduleWord + '</span></div>'
-    + '<div class="hero-meta-item">⏱ <span>~' + totalTime + ' Min Lesezeit</span></div>'
-    + toolsItem
-    + '<div class="hero-meta-item">🧠 <span>' + totalQuiz + ' Quiz-Fragen</span></div>'
-    + '</div></div>'
-    + introHtml
-    + goalsHtml
-    + '<div class="section-label">Module</div>'
-    + '<div class="modules-list">' + cardsHtml + '</div>'
-    + '</div>';
-  } // end render
+  function topicPageHtml() {
+    return '<nav class="topnav">'
+      + '<a href="../" class="topnav-logo"><div class="topnav-logo-dot"></div><span>KI Marketing Bootcamp</span></a>'
+      + '<div class="topnav-spacer"></div>'
+      + '<a href="../" class="topnav-link">← Alle Themen</a>'
+      + '</nav>'
+      + '<div class="container">'
+      + '<div class="breadcrumb">'
+      + '<a href="../">KI Marketing Bootcamp</a>'
+      + '<span class="breadcrumb-sep">/</span>'
+      + '<span>' + topic.title + '</span>'
+      + '</div>'
+      + '<div class="hero">'
+      + '<div class="module-tag">Thema ' + topic.num + ' · ' + topic.title + '</div>'
+      + '<h1>' + topic.title + '</h1>'
+      + heroDescHtml
+      + '<div class="hero-meta">'
+      + '<div class="hero-meta-item">📚 <span>' + topic.modules.length + ' ' + moduleWord + '</span></div>'
+      + '<div class="hero-meta-item">⏱ <span>~' + totalTime + ' Min Lesezeit</span></div>'
+      + toolsItem
+      + '<div class="hero-meta-item">🧠 <span>' + totalQuiz + ' Quiz-Fragen</span></div>'
+      + '</div></div>'
+      + introHtml
+      + goalsHtml
+      + '<div class="section-label">Module</div>'
+      + '<div class="modules-list">' + cardsHtml + '</div>'
+      + '</div>';
+  }
+
+  function render() {
+    document.body.innerHTML = topicPageHtml();
+  }
+
+  function renderBuyOverlay() {
+    var loginHref = '../login.html?redirect=' + encodeURIComponent(window.location.href);
+    document.body.innerHTML =
+      '<nav class="topnav">'
+      + '<a href="../" class="topnav-logo"><div class="topnav-logo-dot"></div><span>KI Marketing Bootcamp</span></a>'
+      + '<div class="topnav-spacer"></div>'
+      + '</nav>'
+      + '<div id="auth-overlay">'
+      + '<div class="auth-overlay-inner">'
+      + '<div class="auth-overlay-card">'
+      + '<div class="auth-overlay-tag">KI Marketing Bootcamp</div>'
+      + '<h2 class="auth-overlay-title">Dieser Inhalt ist nur für Kurs-Teilnehmer</h2>'
+      + '<p class="auth-overlay-desc">Lerne in über 50 Modulen, wie du KI gewinnbringend im Marketing einsetzt — von Prompting-Grundlagen bis hin zu vollständigen Automatisierungssystemen.</p>'
+      + '<div class="auth-overlay-features">'
+      + '<div class="auth-feature-item"><span class="auth-feature-check">✓</span>13 Themen, 50+ Module</div>'
+      + '<div class="auth-feature-item"><span class="auth-feature-check">✓</span>Interaktive Tools & Quiz</div>'
+      + '<div class="auth-feature-item"><span class="auth-feature-check">✓</span>Lebenslanger Zugang</div>'
+      + '<div class="auth-feature-item"><span class="auth-feature-check">✓</span>Inkl. aller zukünftigen Updates</div>'
+      + '</div>'
+      + '<a href="' + STRIPE_URL + '" class="auth-buy-btn">Jetzt für €99 kaufen →</a>'
+      + '<div class="auth-overlay-login">Bereits gekauft? <a href="' + loginHref + '">Einloggen</a></div>'
+      + '</div></div></div>';
+  }
+
+  function loadSupabaseAndCheck(onGranted, onDenied) {
+    var sbScript = document.createElement('script');
+    sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    sbScript.onload = function () {
+      var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      client.auth.getSession().then(function (res) {
+        var session = res.data && res.data.session;
+        if (!session) { onDenied(); return; }
+        return client
+          .from('purchases')
+          .select('user_id')
+          .eq('user_id', session.user.id)
+          .maybeSingle()
+          .then(function (result) {
+            if (!result.data) { onDenied(); } else { onGranted(); }
+          });
+      }).catch(function () {
+        onGranted(); // fail open
+      });
+    };
+    sbScript.onerror = function () {
+      onGranted(); // fail open if CDN fails
+    };
+    document.head.appendChild(sbScript);
+  }
+
+  function init() {
+    if (TOPIC_ID === 'prompting') {
+      render();
+    } else {
+      loadSupabaseAndCheck(render, renderBuyOverlay);
+    }
+  }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', render);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    render();
+    init();
   }
 }());

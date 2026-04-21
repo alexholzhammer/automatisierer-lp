@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einloggen · KI Marketing Bootcamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="./" class="topnav-logo">
+    <div class="topnav-logo-dot"></div>
+    <span>KI Marketing Bootcamp</span>
+  </a>
+  <div class="topnav-spacer"></div>
+</nav>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <h1>Einloggen</h1>
+    <p>Melde dich an, um auf deinen Kurs zuzugreifen.</p>
+
+    <form id="login-form" novalidate>
+      <div class="login-field">
+        <label for="email">E-Mail</label>
+        <input type="email" id="email" placeholder="deine@email.de" autocomplete="email" required>
+      </div>
+      <div class="login-field">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button type="submit" class="login-submit" id="login-btn">Anmelden</button>
+    </form>
+
+    <div class="login-footer">
+      Noch kein Zugang? <a href="https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000">Jetzt für €99 kaufen →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SUPABASE_URL  = 'https://awayfgpspoewjkwavvan.supabase.co';
+  var SUPABASE_KEY  = 'sb_publishable_zn0xfUDgSQ65cZ7Nw540yw_F9trUA_T';
+  var DEFAULT_REDIRECT = './';
+
+  var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // If already logged in with a purchase, redirect immediately
+  client.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+    if (!session) return;
+    return client
+      .from('purchases')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+      .then(function (result) {
+        if (result.data) redirectAfterLogin();
+      });
+  });
+
+  function redirectAfterLogin() {
+    var params  = new URLSearchParams(window.location.search);
+    var target  = params.get('redirect');
+    // Only allow same-origin redirects
+    if (target) {
+      try {
+        var url = new URL(target);
+        if (url.origin === window.location.origin) {
+          window.location.href = target;
+          return;
+        }
+      } catch (e) { /* ignore */ }
+    }
+    window.location.href = DEFAULT_REDIRECT;
+  }
+
+  var form    = document.getElementById('login-form');
+  var btn     = document.getElementById('login-btn');
+  var errorEl = document.getElementById('login-error');
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
+  }
+
+  function clearError() {
+    errorEl.textContent = '';
+    errorEl.style.display = 'none';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearError();
+
+    var email    = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      showError('Bitte E-Mail und Passwort eingeben.');
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Wird angemeldet…';
+
+    client.auth.signInWithPassword({ email: email, password: password })
+      .then(function (res) {
+        if (res.error) {
+          showError('Anmeldung fehlgeschlagen: ' + res.error.message);
+          btn.disabled    = false;
+          btn.textContent = 'Anmelden';
+          return;
+        }
+        // Check for purchase
+        return client
+          .from('purchases')
+          .select('user_id')
+          .eq('user_id', res.data.user.id)
+          .maybeSingle()
+          .then(function (result) {
+            if (!result.data) {
+              showError('Kein aktiver Kurs-Zugang gefunden. Hast du bereits gekauft? Wende dich an unseren Support.');
+              btn.disabled    = false;
+              btn.textContent = 'Anmelden';
+              client.auth.signOut();
+              return;
+            }
+            redirectAfterLogin();
+          });
+      })
+      .catch(function () {
+        showError('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.');
+        btn.disabled    = false;
+        btn.textContent = 'Anmelden';
+      });
+  });
+}());
+</script>
+</body>
+</html>
