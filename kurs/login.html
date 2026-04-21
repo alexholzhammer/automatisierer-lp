@@ -22,20 +22,24 @@
 <div class="login-wrap">
   <div class="login-card">
     <h1>Einloggen</h1>
-    <p>Melde dich an, um auf deinen Kurs zuzugreifen.</p>
+    <p>Gib deine E-Mail ein — wir schicken dir einen Login-Link.</p>
 
+    <!-- Step 1: email form -->
     <form id="login-form" novalidate>
       <div class="login-field">
         <label for="email">E-Mail</label>
         <input type="email" id="email" placeholder="deine@email.de" autocomplete="email" required>
       </div>
-      <div class="login-field">
-        <label for="password">Passwort</label>
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
-      </div>
       <div class="login-error" id="login-error"></div>
-      <button type="submit" class="login-submit" id="login-btn">Anmelden</button>
+      <button type="submit" class="login-submit" id="login-btn">Magic Link senden</button>
     </form>
+
+    <!-- Step 2: confirmation (hidden until link is sent) -->
+    <div id="login-sent" style="display:none; text-align:center; padding: 8px 0;">
+      <div style="font-size:32px; margin-bottom:12px;">📬</div>
+      <p style="font-weight:600; margin-bottom:6px;">Schau in dein Postfach!</p>
+      <p style="color:var(--text-muted); font-size:13px;">Wir haben dir einen Login-Link geschickt. Klick darauf, um dich anzumelden.</p>
+    </div>
 
     <div class="login-footer">
       Noch kein Zugang? <a href="https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000">Jetzt für €99 kaufen →</a>
@@ -45,41 +49,55 @@
 
 <script>
 (function () {
-  var SUPABASE_URL  = 'https://awayfgpspoewjkwavvan.supabase.co';
-  var SUPABASE_KEY  = 'sb_publishable_zn0xfUDgSQ65cZ7Nw540yw_F9trUA_T';
+  var SUPABASE_URL     = 'https://awayfgpspoewjkwavvan.supabase.co';
+  var SUPABASE_KEY     = 'sb_publishable_zn0xfUDgSQ65cZ7Nw540yw_F9trUA_T';
   var DEFAULT_REDIRECT = './';
+  var STORAGE_KEY      = 'auth_redirect';
 
   var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // If already logged in with a purchase, redirect immediately
-  client.auth.getSession().then(function (res) {
-    var session = res.data && res.data.session;
+  function getRedirectTarget() {
+    // Prefer the ?redirect= param from the current URL, fall back to stored value
+    var params = new URLSearchParams(window.location.search);
+    var target = params.get('redirect') || localStorage.getItem(STORAGE_KEY) || DEFAULT_REDIRECT;
+    localStorage.removeItem(STORAGE_KEY);
+    // Only allow same-origin redirects
+    try {
+      var url = new URL(target);
+      if (url.origin === window.location.origin) return target;
+    } catch (e) { /* ignore */ }
+    return DEFAULT_REDIRECT;
+  }
+
+  function redirectAfterLogin() {
+    window.location.href = getRedirectTarget();
+  }
+
+  function checkSessionAndRedirect(session) {
     if (!session) return;
-    return client
+    client
       .from('purchases')
       .select('user_id')
       .eq('user_id', session.user.id)
       .maybeSingle()
       .then(function (result) {
         if (result.data) redirectAfterLogin();
+        // No purchase row: stay on login page (rare — magic link was sent to a non-customer)
       });
+  }
+
+  // Handle magic link return: Supabase JS automatically exchanges the token
+  // in the URL hash/query and fires SIGNED_IN via onAuthStateChange.
+  client.auth.onAuthStateChange(function (event, session) {
+    if (event === 'SIGNED_IN') {
+      checkSessionAndRedirect(session);
+    }
   });
 
-  function redirectAfterLogin() {
-    var params  = new URLSearchParams(window.location.search);
-    var target  = params.get('redirect');
-    // Only allow same-origin redirects
-    if (target) {
-      try {
-        var url = new URL(target);
-        if (url.origin === window.location.origin) {
-          window.location.href = target;
-          return;
-        }
-      } catch (e) { /* ignore */ }
-    }
-    window.location.href = DEFAULT_REDIRECT;
-  }
+  // Also check for an existing session on page load (e.g. already logged in)
+  client.auth.getSession().then(function (res) {
+    checkSessionAndRedirect(res.data && res.data.session);
+  });
 
   var form    = document.getElementById('login-form');
   var btn     = document.getElementById('login-btn');
@@ -99,47 +117,42 @@
     e.preventDefault();
     clearError();
 
-    var email    = document.getElementById('email').value.trim();
-    var password = document.getElementById('password').value;
-
-    if (!email || !password) {
-      showError('Bitte E-Mail und Passwort eingeben.');
+    var email = document.getElementById('email').value.trim();
+    if (!email) {
+      showError('Bitte gib deine E-Mail-Adresse ein.');
       return;
     }
 
     btn.disabled    = true;
-    btn.textContent = 'Wird angemeldet…';
+    btn.textContent = 'Wird gesendet…';
 
-    client.auth.signInWithPassword({ email: email, password: password })
-      .then(function (res) {
-        if (res.error) {
-          showError('Anmeldung fehlgeschlagen: ' + res.error.message);
-          btn.disabled    = false;
-          btn.textContent = 'Anmelden';
-          return;
-        }
-        // Check for purchase
-        return client
-          .from('purchases')
-          .select('user_id')
-          .eq('user_id', res.data.user.id)
-          .maybeSingle()
-          .then(function (result) {
-            if (!result.data) {
-              showError('Kein aktiver Kurs-Zugang gefunden. Hast du bereits gekauft? Wende dich an unseren Support.');
-              btn.disabled    = false;
-              btn.textContent = 'Anmelden';
-              client.auth.signOut();
-              return;
-            }
-            redirectAfterLogin();
-          });
-      })
-      .catch(function () {
-        showError('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.');
+    // Store the redirect target now so it survives the email-link round-trip
+    var params = new URLSearchParams(window.location.search);
+    var target = params.get('redirect');
+    if (target) localStorage.setItem(STORAGE_KEY, target);
+
+    client.auth.signInWithOtp({
+      email: email,
+      options: {
+        // After clicking the magic link, Supabase redirects here so the
+        // client can exchange the token and fire onAuthStateChange.
+        emailRedirectTo: window.location.origin + '/kurs/login.html'
+      }
+    }).then(function (res) {
+      if (res.error) {
+        showError('Fehler: ' + res.error.message);
         btn.disabled    = false;
-        btn.textContent = 'Anmelden';
-      });
+        btn.textContent = 'Magic Link senden';
+        return;
+      }
+      // Show confirmation, hide form
+      form.style.display = 'none';
+      document.getElementById('login-sent').style.display = 'block';
+    }).catch(function () {
+      showError('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.');
+      btn.disabled    = false;
+      btn.textContent = 'Magic Link senden';
+    });
   });
 }());
 </script>
