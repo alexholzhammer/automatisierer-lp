@@ -85,6 +85,12 @@ h1, h2, h3, h4 {
   padding: 5px 16px;
 }
 .topnav-link.primary:hover { background: var(--accent-hover); color: white; }
+button.topnav-link {
+  cursor: pointer;
+  font-family: inherit;
+  background: none;
+  border: none;
+}
 
 /* ─── PROGRESS BAR ─── */
 #progress-bar-wrap {

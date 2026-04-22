@@ -3,6 +3,8 @@
   var SUPABASE_KEY = 'sb_publishable_zn0xfUDgSQ65cZ7Nw540yw_F9trUA_T';
   var STRIPE_URL   = 'https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000';
 
+  var _supabaseClient = null;
+
   var topic = COURSE.topics.find(function (t) { return t.id === TOPIC_ID; });
 
   // Inject fonts + shared CSS into <head> immediately (prevents FOUC)
@@ -137,6 +139,45 @@
       + '</div></div></div>';
   }
 
+  function addTopnavAuth(client) {
+    function inject(c) {
+      var nav = document.querySelector('.topnav');
+      if (!nav) return;
+      c.auth.getSession().then(function (res) {
+        var session = res.data && res.data.session;
+        var existing = nav.querySelector('.topnav-auth-btn');
+        if (existing) existing.remove();
+        if (session) {
+          var btn = document.createElement('button');
+          btn.className = 'topnav-link topnav-auth-btn';
+          btn.textContent = 'Log out';
+          btn.addEventListener('click', function () {
+            c.auth.signOut().then(function () { window.location.reload(); });
+          });
+          nav.appendChild(btn);
+        } else {
+          var a = document.createElement('a');
+          a.className = 'topnav-link topnav-auth-btn';
+          a.href = '../login.html';
+          a.textContent = 'Log in';
+          nav.appendChild(a);
+        }
+      });
+    }
+
+    if (client) {
+      inject(client);
+    } else {
+      // Prompting topic: Supabase not yet loaded — load it just for the auth button
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.onload = function () {
+        inject(window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
+      };
+      document.head.appendChild(s);
+    }
+  }
+
   function loadSupabaseAndCheck(onGranted, onDenied) {
     var sbScript = document.createElement('script');
     sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -148,6 +189,7 @@
         try { console.log('[topic-overview]   LS[' + k + ']:', localStorage.getItem(k).substring(0, 120)); } catch(e) {}
       });
       var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      _supabaseClient = client;
       // Watch for SIGNED_OUT which fires if Supabase clears the session (e.g. failed token refresh)
       client.auth.onAuthStateChange(function (event, session) {
         console.log('[topic-overview] onAuthStateChange:', event, session ? 'uid=' + session.user.id : 'no session');
@@ -181,8 +223,12 @@
   function init() {
     if (TOPIC_ID === 'prompting') {
       render();
+      addTopnavAuth(null);
     } else {
-      loadSupabaseAndCheck(render, renderBuyOverlay);
+      loadSupabaseAndCheck(
+        function () { render(); addTopnavAuth(_supabaseClient); },
+        function () { renderBuyOverlay(); addTopnavAuth(_supabaseClient); }
+      );
     }
   }
 
