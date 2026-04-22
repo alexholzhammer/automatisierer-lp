@@ -148,6 +148,10 @@
         try { console.log('[topic-overview]   LS[' + k + ']:', localStorage.getItem(k).substring(0, 120)); } catch(e) {}
       });
       var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      // Watch for SIGNED_OUT which fires if Supabase clears the session (e.g. failed token refresh)
+      client.auth.onAuthStateChange(function (event, session) {
+        console.log('[topic-overview] onAuthStateChange:', event, session ? 'uid=' + session.user.id : 'no session');
+      });
       client.auth.getSession().then(function (res) {
         var session = res.data && res.data.session;
         console.log('[topic-overview] session:', session ? 'found (user: ' + session.user.id + ')' : 'null', 'error:', res.error);
