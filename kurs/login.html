@@ -70,8 +70,9 @@
   var DEFAULT_REDIRECT = './';
   var STORAGE_KEY      = 'auth_redirect';
 
-  // Detect magic link return: Supabase PKCE puts a ?code= in the URL
-  var isMagicLinkReturn = new URLSearchParams(window.location.search).has('code');
+  // Detect magic link return: PKCE flow uses ?code=, implicit flow uses #access_token=
+  var isMagicLinkReturn = new URLSearchParams(window.location.search).has('code') ||
+                          window.location.hash.includes('access_token=');
 
   var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
