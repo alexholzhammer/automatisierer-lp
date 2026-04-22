@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ─── COURSE HERO ─── */
 .course-hero {
@@ -161,7 +162,7 @@
   <div class="bento-grid">
 
     <!-- Topic 01 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('einleitung/')">
       <div class="topic-card-num">01</div>
       <div class="topic-card-icon">✍️</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -182,7 +183,7 @@
     </a>
 
     <!-- Topic 03 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('content/')">
       <div class="topic-card-num">03</div>
       <div class="topic-card-icon">✍️</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -192,7 +193,7 @@
     </div>
 
     <!-- Topic 04 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('bildkreation/')">
       <div class="topic-card-num">04</div>
       <div class="topic-card-icon">🔍</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -202,7 +203,7 @@
     </div>
 
     <!-- Topic 05 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('videokreation/')">
       <div class="topic-card-num">05</div>
       <div class="topic-card-icon">📣</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -212,7 +213,7 @@
     </div>
 
     <!-- Topic 06 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('recherche/')">
       <div class="topic-card-num">06</div>
       <div class="topic-card-icon">📧</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -222,7 +223,7 @@
     </div>
 
     <!-- Topic 07 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('daten/')">
       <div class="topic-card-num">07</div>
       <div class="topic-card-icon">📊</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -232,7 +233,7 @@
     </div>
 
     <!-- Topic 08 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('agenten/')">
       <div class="topic-card-num">08</div>
       <div class="topic-card-icon">🛒</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -242,7 +243,7 @@
     </div>
 
     <!-- Topic 09 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('vibe-coding/')">
       <div class="topic-card-num">09</div>
       <div class="topic-card-icon">🤝</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -252,7 +253,7 @@
     </div>
 
     <!-- Topic 10 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('tools/')">
       <div class="topic-card-num">10</div>
       <div class="topic-card-icon">🎥</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -262,7 +263,7 @@
     </div>
 
     <!-- Topic 11 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('rechtliches/')">
       <div class="topic-card-num">11</div>
       <div class="topic-card-icon">⚙️</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -272,7 +273,7 @@
     </div>
 
     <!-- Topic 12 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('updates/')">
       <div class="topic-card-num">12</div>
       <div class="topic-card-icon">🔒</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -282,7 +283,7 @@
     </div>
 
     <!-- Topic 13 -->
-    <div class="topic-card gated" onclick="openBuyModal()">
+    <div class="topic-card gated" onclick="handleTopicClick('zukunft/')">
       <div class="topic-card-num">13</div>
       <div class="topic-card-icon">🚀</div>
       <div class="topic-card-label">Jetzt verfügbar</div>
@@ -313,6 +314,36 @@
 </div>
 
 <script>
+(function () {
+  var SUPABASE_URL = 'https://awayfgpspoewjkwavvan.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_zn0xfUDgSQ65cZ7Nw540yw_F9trUA_T';
+
+  // Check auth eagerly on page load so the result is ready when user clicks
+  var _accessPromise = new Promise(function (resolve) {
+    try {
+      var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      client.auth.getSession().then(function (res) {
+        var session = res.data && res.data.session;
+        if (!session) { resolve(false); return; }
+        client.from('purchases').select('user_id')
+          .eq('user_id', session.user.id).maybeSingle()
+          .then(function (result) { resolve(!!result.data); })
+          .catch(function () { resolve(false); });
+      }).catch(function () { resolve(false); });
+    } catch (e) { resolve(false); }
+  });
+
+  window.handleTopicClick = function (path) {
+    _accessPromise.then(function (hasAccess) {
+      if (hasAccess) {
+        window.location.href = path;
+      } else {
+        openBuyModal();
+      }
+    });
+  };
+}());
+
 function openBuyModal() {
   document.getElementById('buy-modal').classList.add('is-open');
   document.body.style.overflow = 'hidden';
