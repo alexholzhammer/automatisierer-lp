@@ -117,6 +117,16 @@
       box-shadow: 0 6px 24px rgba(14,165,233,.45);
     }
     .btn--primary:active { transform: translateY(0); }
+    .btn--outline {
+      background: transparent;
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,.55);
+      border-radius: 100px;
+    }
+    .btn--outline:hover {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.8);
+    }
     .btn--lg { padding: 17px 36px; font-size: 1.1rem; border-radius: 12px; }
     .btn--full { width: 100%; }
 
@@ -193,6 +203,7 @@
       color: #fff;
       max-width: 760px;
       margin-bottom: 24px;
+      text-align: center;
     }
     .hero h1 em {
       font-style: normal;
@@ -204,17 +215,25 @@
       max-width: 580px;
       font-size: 1.1rem;
       line-height: 1.7;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .hero__cta-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
     }
 
     /* ─── Hero Layout ───────────────────────── */
     .hero__layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 56px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      text-align: center;
     }
-    .hero__copy { display: flex; flex-direction: column; }
+    .hero__copy { display: flex; flex-direction: column; align-items: center; }
 
     /* ─── Signup Form ──────────────────────────────────────── */
     .signup-box {
@@ -694,7 +713,7 @@
     @media (max-width: 768px) {
       .section { padding-block: 56px; }
       .nav__cta { display: none; }
-      .hero__layout { grid-template-columns: 1fr; gap: 40px; }
+      .hero__layout { gap: 0; }
       .pain__grid { grid-template-columns: 1fr; }
       .promise__grid { grid-template-columns: 1fr; }
       .module-topics { grid-template-columns: 1fr 1fr; }
@@ -723,7 +742,7 @@
   <header style="position:relative; background: var(--clr-bg-dark);">
     <nav class="nav">
       <div class="nav__logo">Marketing <span>KI-Bootcamp</span></div>
-      <a href="https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000" class="btn btn--primary nav__cta">Jetzt Kurs kaufen</a>
+      <a href="https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000" class="btn btn--outline nav__cta">Jetzt Kurs kaufen →</a>
     </nav>
   </header>
 
@@ -732,24 +751,21 @@
     <div class="container container--wide">
       <div class="hero__layout">
         <div class="hero__copy">
+          <div class="hero__badge">13 Module · Sofort verfügbar · € 99</div>
+
           <h1>
-            KI verdrängt Marketer. Nur nicht die, <em>die sie beherrschen</em>.
+            Der KI-Kurs für Marketer.<br /><em>Direkt anwendbar.</em>
           </h1>
 
           <p class="hero__sub">
-            Wir haben den KI-Kurs gebaut, den wir als Online-Marketer und Selbstständige gerne gehabt hätten. Kein Hype, sondern pures, erprobtes Praxiswissen aus >100 Projekten.
+            Kein Hype, kein amerikanisches Bla-Bla — pures, erprobtes Praxiswissen aus &gt;100 Projekten, speziell für den deutschen Markt.
           </p>
 
-        </div>
-
-        <div class="hero__form">
-          <div class="signup-box" id="hero-signup">
-            <p class="signup-box__title">Jetzt den vollständigen Kurs sichern</p>
-            <p class="signup-box__sub">13 Module, einmaliger Preis, alle Updates inklusive. <strong>Sofortiger Zugang</strong> nach dem Kauf.</p>
-            <a href="https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000" class="btn btn--primary btn--full btn--lg" style="margin-top: 8px;">
-              Jetzt kaufen — € 99 →
+          <div class="hero__cta-wrap">
+            <a href="https://buy.stripe.com/4gM9AU1De9Cu6sS6irak000" class="btn btn--primary btn--lg">
+              Jetzt Kurs kaufen — € 99 →
             </a>
-            <p class="form-note">Einmaliger Preis · Kein Abo · Sofortiger Zugang</p>
+            <p class="form-note">Einmaliger Preis · Kein Abo · Sofortiger Zugang · Alle Updates inklusive</p>
           </div>
         </div>
       </div>
